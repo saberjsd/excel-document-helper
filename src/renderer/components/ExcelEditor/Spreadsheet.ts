@@ -6,6 +6,9 @@ import Spreadsheet from 'x-data-spreadsheet';
 // import './row_mixin.js';
 // import "x-data-spreadsheet/src/index.less";
 import XLSX from 'xlsx';
+import 'x-data-spreadsheet/dist/locale/zh-cn';
+// 漢化
+Spreadsheet.locale('zh-cn');
 
 export default class FTSpreadsheet extends Spreadsheet {
   targetEl;
