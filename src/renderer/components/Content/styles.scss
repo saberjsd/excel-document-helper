@@ -1,0 +1,12 @@
+.page_content {
+  height: 100%;
+  background: #edf0f2;
+  overflow: auto;
+  flex-grow: 1;
+  .page_content_inner {
+    margin: 24px;
+    background: #ffffff;
+    padding: 24px;
+    min-height: 360px;
+  }
+}
