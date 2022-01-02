@@ -1,14 +1,14 @@
-
-.layout_page{
+.layout_page {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  .layout_main{
+  .layout_main {
     flex-grow: 1;
     width: 100%;
+    max-height: calc(100% - 64px);
     display: flex;
     justify-content: center;
     align-items: center;

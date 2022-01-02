@@ -9,7 +9,7 @@ export default function Layout(props: any) {
       <Header>{props.header}</Header>
       <div className="layout_main">
         <Sidebar></Sidebar>
-        <Content>{props.children}</Content>
+        <Content className={props.className}>{props.children}</Content>
       </div>
     </div>
   );

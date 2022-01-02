@@ -1,6 +1,7 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 // import icon from '../../assets/icon.svg';
 import './App.css';
+import ExcelCompare from './pages/ExcelCompare';
 import Home from './pages/Home';
 
 const Hello = () => {
@@ -44,7 +45,8 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
+        <Route path="/" element={<ExcelCompare />} />
       </Routes>
     </Router>
   );

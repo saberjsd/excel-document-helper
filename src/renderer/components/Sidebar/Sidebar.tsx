@@ -29,19 +29,22 @@ export default function Sidebar(props: any) {
         className="sidebar_menu"
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={['4']}
+        defaultSelectedKeys={['1']}
       >
         <Menu.Item key="1" icon={<UserOutlined />}>
-          nav 1
+          三表勾稽
         </Menu.Item>
         <Menu.Item key="2" icon={<VideoCameraOutlined />}>
-          nav 2
+          科目筛选
         </Menu.Item>
         <Menu.Item key="3" icon={<UploadOutlined />}>
-          nav 3
+          风险提示
         </Menu.Item>
         <Menu.Item key="4" icon={<UserOutlined />}>
-          nav 4
+          word模板导出
+        </Menu.Item>
+        <Menu.Item key="5" icon={<UserOutlined />}>
+          汇总导出
         </Menu.Item>
       </Menu>
     </Sider>

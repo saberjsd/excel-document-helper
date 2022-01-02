@@ -12,7 +12,7 @@ import './styles.scss';
 // } from '@ant-design/icons';
 // import { Content, Footer, Header } from 'antd/lib/layout/layout';
 // import Sider from 'antd/lib/layout/Sider';
-import FTSpreadsheet from 'renderer/components/ExcelEditor/Spreadsheet';
+// import FTSpreadsheet from 'renderer/components/ExcelEditor/Spreadsheet';
 import Layout from 'renderer/components/Layout';
 
 export default function Home(props: any) {
