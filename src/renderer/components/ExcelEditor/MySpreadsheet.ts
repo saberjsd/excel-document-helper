@@ -6,8 +6,8 @@ import Spreadsheet, { Options } from 'x-data-spreadsheet';
 import 'x-data-spreadsheet/src/index.less';
 import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
-import { clamp, cloneDeep } from 'lodash';
-import { stox, xtos } from './sheetConvert';
+import { clamp, cloneDeep, uniqBy } from 'lodash';
+// import { stox, xtos } from './sheetConvert';
 // @ts-ignore 汉化
 Spreadsheet.locale('zh-cn');
 
@@ -18,7 +18,10 @@ const defaultOptions = (container: string, opts: any) => {
       height: () => dom.clientHeight,
       width: () => dom.clientWidth,
     },
-    showToolbar: false,
+    // showToolbar: false,
+    // row:{
+    //   len: 10000
+    // },
     ...opts,
   };
 };
@@ -31,8 +34,6 @@ export default class MySpreadsheet extends Spreadsheet {
   constructor(container: string, opts?: Options | undefined) {
     super(container, defaultOptions(container, opts));
     this.targetEl = document.querySelector(container);
-    // @ts-ignore
-    window['FTExcel'] = this;
   }
 
   // 设置数据
@@ -101,27 +102,27 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   downExcel() {
-    // function xtos(sdata: any) {
-    //   var out = XLSX.utils.book_new();
-    //   sdata.forEach(function (xws: any) {
-    //     var aoa = [[]];
-    //     var rowobj = xws.rows;
-    //     for (var ri = 0; ri < rowobj.len; ++ri) {
-    //       var row = rowobj[ri];
-    //       if (!row) continue;
-    //       aoa[ri] = [];
-    //       Object.keys(row.cells).forEach(function (k) {
-    //         var idx = +k;
-    //         if (isNaN(idx)) return;
-    //         // @ts-ignore
-    //         aoa[ri][idx] = row.cells[k].text;
-    //       });
-    //     }
-    //     var ws = XLSX.utils.aoa_to_sheet(aoa);
-    //     XLSX.utils.book_append_sheet(out, ws, xws.name);
-    //   });
-    //   return out;
-    // }
+    function xtos(sdata: any) {
+      var out = XLSX.utils.book_new();
+      sdata.forEach(function (xws: any) {
+        var aoa = [[]];
+        var rowobj = xws.rows;
+        for (var ri = 0; ri < rowobj.len; ++ri) {
+          var row = rowobj[ri];
+          if (!row) continue;
+          aoa[ri] = [];
+          Object.keys(row.cells).forEach(function (k) {
+            var idx = +k;
+            if (isNaN(idx)) return;
+            // @ts-ignore
+            aoa[ri][idx] = row.cells[k].text;
+          });
+        }
+        var ws = XLSX.utils.aoa_to_sheet(aoa);
+        XLSX.utils.book_append_sheet(out, ws, xws.name);
+      });
+      return out;
+    }
 
     /* build workbook from the grid data */
     // @ts-ignore
@@ -153,32 +154,125 @@ export default class MySpreadsheet extends Spreadsheet {
       reader.readAsBinaryString(file);
     });
 
-    // function stox(wb: any) {
-    //   var out: any[] = [];
+    function stox(wb: any) {
+      var out: any[] = [];
 
-    //   wb.SheetNames.forEach(function (name: string) {
-    //     var o = { name: name, rows: {} };
-    //     var ws = wb.Sheets[name];
-    //     var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
-    //       raw: false,
-    //       header: 1,
-    //     });
-    //     aoa.forEach(function (r, i) {
-    //       var cells: any = {};
-    //       r.forEach(function (c: any, j: string) {
-    //         cells[j] = { text: c };
-    //       });
-    //       // @ts-ignore
-    //       o.rows[i] = { cells: cells };
-    //     });
-    //     out.push(o);
-    //   });
-    //   return out;
-    // }
+      wb.SheetNames.forEach(function (name: string) {
+        var o = { name: name, rows: {} };
+        var ws = wb.Sheets[name];
+        var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
+          raw: false,
+          header: 1,
+        });
+        aoa.forEach(function (r, i) {
+          var cells: any = {};
+          r.forEach(function (c: any, j: string) {
+            cells[j] = { text: c };
+          });
+          // @ts-ignore
+          o.rows[i] = { cells: cells };
+        });
+        // @ts-ignore  根据数据行数显示多少行
+        o.rows.len = aoa.length;
+        out.push(o);
+      });
+      return out;
+    }
 
     /* load data */
     // @ts-ignore
     this.loadData(stox(workbook_object));
+  }
+
+  /**
+   * 遍历单元格
+   * @param sheetIndex
+   * @param cb
+   */
+  forEachCells(
+    sheetIndex: number = 0,
+    cb: {
+      ({ ri, ci, cell, row }: { ri: any; ci: any; cell: any; row: any }): void;
+    }
+  ) {
+    const { rows } = this.datas[sheetIndex];
+    Object.entries(rows._).forEach(([ri, row]) => {
+      // @ts-ignore
+      if (row && row.cells) {
+        // @ts-ignore
+        Object.entries(row.cells).forEach(([ci, cell]) => {
+          // @ts-ignore
+          cb({ ri, ci, row, cell });
+        });
+      }
+    });
+  }
+
+  forEachRows(
+    sheetIndex: number = 0,
+    cb: (arg0: { ri: string; row: any }) => void
+  ) {
+    const { rows } = this.datas[sheetIndex];
+    Object.entries(rows._).forEach(([ri, row]) => {
+      cb({ ri, row });
+    });
+  }
+
+  // getCellByText(text: string, sheetIndex = 0) {
+  //   const out: any[] = [];
+  //   this.forEachCells(sheetIndex, ({ ri, ci, row, cell }) => {
+  //     if (String(cell.text).includes(text)) {
+  //       out.push({ ri, ci, row, cell });
+  //     }
+  //   });
+  //   return out;
+  // }
+
+  getCellInfoByText(text: string, sheetIndex: number = 0, col?: number) {
+    const out: any = [];
+    this.forEachCells(sheetIndex, ({ ri, ci, cell, row }) => {
+      const filterCol = col === undefined || col == ci;
+      if (filterCol && String(cell.text).includes(text)) {
+        out.push({ ri, ci, row, cell });
+      }
+    });
+    return out;
+  }
+
+  /**
+   * 获取findCol列的值等于text的行，然后以groupCol列的值分组
+   * @param param0
+   * @returns
+   */
+  getGroupRows({
+    text,
+    sheetIndex,
+    findCol,
+    groupCol,
+  }: {
+    text: string;
+    sheetIndex: number;
+    findCol: number;
+    groupCol: number;
+  }) {
+    const findRows: any[] = this.getCellInfoByText(text, sheetIndex, findCol);
+    let groupKeys: any[] = findRows.map((m) => m.row.cells[groupCol].text);
+    groupKeys = Array.from(new Set(groupKeys));
+    const rows: any = [];
+    groupKeys.forEach((n) => {
+      this.forEachRows(sheetIndex, ({ ri, row }) => {
+        if (
+          row &&
+          row.cells &&
+          row.cells[groupCol] &&
+          row.cells[groupCol].text &&
+          row.cells[groupCol].text == n
+        ) {
+          rows.push(cloneDeep(row));
+        }
+      });
+    });
+    return rows;
   }
 
   // excel数据转二维数组

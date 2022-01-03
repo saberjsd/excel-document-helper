@@ -3,6 +3,7 @@ import { Button } from 'antd';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import Layout from 'renderer/components/Layout';
+import ResultDailog from 'renderer/components/ResultDailog';
 import StoreExcelCompare from 'renderer/store/StoreExcelCompare';
 import './styles.scss';
 
@@ -28,11 +29,21 @@ export default function Header(props: any) {
   const setStyles = () => {
     if (StoreExcelCompare.excelInstance) {
       // StoreExcelCompare.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
-      StoreExcelCompare.excelInstance.setCellStyle(2,2,"bgcolor","#ff0000",0)
+      StoreExcelCompare.excelInstance.setCellStyle(
+        2,
+        2,
+        'bgcolor',
+        '#ff0000',
+        0
+      );
       // StoreExcelCompare.excelInstance.setCellStyle(2,2,"color","#ff0000",0)
       // @ts-ignore
       StoreExcelCompare.excelInstance.reRender();
     }
+  };
+
+  const showReultDailog = () => {
+    StoreExcelCompare.toggleDailog(true);
   };
 
   return (
@@ -53,10 +64,15 @@ export default function Header(props: any) {
           <Button icon={<DownloadOutlined />} onClick={setStyles}>
             设置样式
           </Button>
+          <Button icon={<DownloadOutlined />} onClick={showReultDailog}>
+            查询勾稽结果
+          </Button>
         </div>
       }
     >
       <div id={StoreExcelCompare.excelId} className="content_excel"></div>
+
+      <ResultDailog></ResultDailog>
     </Layout>
   );
 }

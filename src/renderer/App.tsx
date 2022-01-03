@@ -3,6 +3,8 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import ExcelCompare from './pages/ExcelCompare';
 import Home from './pages/Home';
+import zhCN from 'antd/lib/locale/zh_CN';
+import { ConfigProvider } from 'antd';
 
 const Hello = () => {
   return (
@@ -43,11 +45,13 @@ const Hello = () => {
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* <Route path="/" element={<Home />} /> */}
-        <Route path="/" element={<ExcelCompare />} />
-      </Routes>
-    </Router>
+    <ConfigProvider locale={zhCN}>
+      <Router>
+        <Routes>
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/" element={<ExcelCompare />} />
+        </Routes>
+      </Router>
+    </ConfigProvider>
   );
 }
