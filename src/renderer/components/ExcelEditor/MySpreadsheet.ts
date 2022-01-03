@@ -7,8 +7,21 @@ import 'x-data-spreadsheet/src/index.less';
 import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep } from 'lodash';
+import { stox, xtos } from './sheetConvert';
 // @ts-ignore 汉化
 Spreadsheet.locale('zh-cn');
+
+const defaultOptions = (container: string, opts: any) => {
+  const dom = document.querySelector(container)!;
+  return {
+    view: {
+      height: () => dom.clientHeight,
+      width: () => dom.clientWidth,
+    },
+    showToolbar: false,
+    ...opts,
+  };
+};
 
 export default class MySpreadsheet extends Spreadsheet {
   targetEl;
@@ -16,133 +29,11 @@ export default class MySpreadsheet extends Spreadsheet {
   // sheet: any;
 
   constructor(container: string, opts?: Options | undefined) {
-    super(container, opts);
+    super(container, defaultOptions(container, opts));
     this.targetEl = document.querySelector(container);
     // @ts-ignore
     window['FTExcel'] = this;
   }
-
-  // loadData(excelDatas) {
-  //   super.loadData(excelDatas);
-  //   const { data } = this.sheet;
-
-  //   data.settings.view = {
-  //     width: () => this.targetEl.clientWidth,
-  //     height: () => this.targetEl.clientHeight + 40,
-  //   };
-
-  //   data.settings.style.align = 'center';
-  //   data.rows.height = 32;
-  //   data.scrollx(0, () => {});
-  //   data.scrolly(0, () => {});
-  //   this.sheet.reload();
-
-  //   this.sheet.verticalScrollbar.el.el.scrollTop = 0;
-
-  //   this.sheet.horizontalScrollbar.el.el.scrollLeft = 0;
-
-  //   this.sheet.trigger('change', this.getData());
-  // }
-
-  // // 裁剪数据
-  // clipData(row, col) {
-  //   const [DataProxy] = this.datas;
-
-  //   DataProxy.rows.len = _.clamp(row, 1, 50);
-  //   DataProxy.cols.len = _.clamp(col, 1, 50);
-
-  //   // 减去多余的行数据
-  //   for (let i in DataProxy.rows._) {
-  //     if (i >= row) {
-  //       delete DataProxy.rows._[i];
-  //     }
-  //   }
-
-  //   // 减去多余的列数据
-  //   for (let i in DataProxy.rows._) {
-  //     for (let ii in DataProxy.rows._[i]['cells']) {
-  //       if (ii >= col) {
-  //         delete DataProxy.rows._[i]['cells'][ii];
-  //       }
-  //     }
-  //   }
-
-  //   this.sheet.reload();
-  //   this.reRender();
-  //   this.sheet.trigger('change', this.getData());
-
-  //   this.recordUndo();
-  // }
-
-  // // 更具当前的数据计算最大非空行数
-  // getMaxRow() {
-  //   for (let r = 49; r > 0; r--) {
-  //     for (let c = 0; c <= 49; c++) {
-  //       let { text } = this.cell(r, c) || {};
-  //       if (text) {
-  //         return r + 1;
-  //       }
-  //     }
-  //   }
-
-  //   // 最小保留4行
-  //   return 1;
-  // }
-
-  // // 更具当前的数据计算最大非空列数
-  // getMaxCol() {
-  //   let rowTatol = this.getMaxRow();
-
-  //   for (let c = 49; c > 0; c--) {
-  //     for (let r = 0; r <= rowTatol; r++) {
-  //       let { text } = this.cell(r, c) || {};
-  //       if (text) {
-  //         return c + 1;
-  //       }
-  //     }
-  //   }
-
-  //   // 最小保留4列
-  //   return 1;
-  // }
-
-  // // 获取行
-  // getRow() {
-  //   const [data] = this.datas;
-  //   return data.rows.len;
-  // }
-
-  // // 设置行
-  // setRow(rowLength) {
-  //   const [data] = this.datas;
-  //   data.history.add(this.getData());
-  //   this.clipData(rowLength, this.getCol());
-  //   this.recordUndo();
-
-  //   //如果横向滚动条消失了, sheet就需要滚动到最前面去
-  //   if (this.sheet.verticalScrollbar.el.computedStyle().display === 'none') {
-  //     this.sheet.data.scrolly(0, () => {});
-  //   }
-  // }
-
-  // // 获取行
-  // getCol() {
-  //   const [data] = this.datas;
-  //   return data.cols.len;
-  // }
-
-  // // 设置列
-  // setCol(colLength) {
-  //   const [data] = this.datas;
-  //   data.history.add(this.getData());
-  //   this.clipData(this.getRow(), colLength);
-  //   this.recordUndo();
-
-  //   //如果横向滚动条消失了, sheet就需要滚动到最前面去
-  //   if (this.sheet.horizontalScrollbar.el.computedStyle().display === 'none') {
-  //     this.sheet.data.scrollx(0, () => {});
-  //   }
-  // }
 
   // 设置数据
   cellText(ri: any, ci: any, text: any) {
@@ -158,34 +49,86 @@ export default class MySpreadsheet extends Spreadsheet {
     return this;
   }
 
-  downExcel() {
-    function xtos(sdata: any) {
-      var out = XLSX.utils.book_new();
-      sdata.forEach(function (xws: any) {
-        var aoa = [[]];
-        var rowobj = xws.rows;
-        for (var ri = 0; ri < rowobj.len; ++ri) {
-          var row = rowobj[ri];
-          if (!row) continue;
-          aoa[ri] = [];
-          Object.keys(row.cells).forEach(function (k) {
-            var idx = +k;
-            if (isNaN(idx)) return;
-            // @ts-ignore
-            aoa[ri][idx] = row.cells[k].text;
-          });
-        }
-        var ws = XLSX.utils.aoa_to_sheet(aoa);
-        XLSX.utils.book_append_sheet(out, ws, xws.name);
-      });
-      return out;
+  /**
+   * 设置单元格样式
+   * @param ri
+   * @param ci
+   * @param property
+   * @param value
+   * @param sheetIndex
+   */
+  setCellStyle(
+    ri: any,
+    ci: any,
+    property: string,
+    value: any,
+    sheetIndex: number = 0
+  ) {
+    const dataProxy = this.datas[sheetIndex];
+    const { styles, rows } = dataProxy;
+    const cell = rows.getCellOrNew(ri, ci);
+    let cstyle: any = {};
+    if (cell.style !== undefined) {
+      cstyle = cloneDeep(styles[cell.style]);
     }
+    if (property === 'format') {
+      cstyle.format = value;
+      cell.style = dataProxy.addStyle(cstyle);
+    } else if (
+      property === 'font-bold' ||
+      property === 'font-italic' ||
+      property === 'font-name' ||
+      property === 'font-size'
+    ) {
+      const nfont: any = {};
+      nfont[property.split('-')[1]] = value;
+      cstyle.font = Object.assign(cstyle.font || {}, nfont);
+      cell.style = dataProxy.addStyle(cstyle);
+    } else if (
+      property === 'strike' ||
+      property === 'textwrap' ||
+      property === 'underline' ||
+      property === 'align' ||
+      property === 'valign' ||
+      property === 'color' ||
+      property === 'bgcolor'
+    ) {
+      cstyle[property] = value;
+      cell.style = dataProxy.addStyle(cstyle);
+    } else {
+      cell[property] = value;
+    }
+  }
+
+  downExcel() {
+    // function xtos(sdata: any) {
+    //   var out = XLSX.utils.book_new();
+    //   sdata.forEach(function (xws: any) {
+    //     var aoa = [[]];
+    //     var rowobj = xws.rows;
+    //     for (var ri = 0; ri < rowobj.len; ++ri) {
+    //       var row = rowobj[ri];
+    //       if (!row) continue;
+    //       aoa[ri] = [];
+    //       Object.keys(row.cells).forEach(function (k) {
+    //         var idx = +k;
+    //         if (isNaN(idx)) return;
+    //         // @ts-ignore
+    //         aoa[ri][idx] = row.cells[k].text;
+    //       });
+    //     }
+    //     var ws = XLSX.utils.aoa_to_sheet(aoa);
+    //     XLSX.utils.book_append_sheet(out, ws, xws.name);
+    //   });
+    //   return out;
+    // }
 
     /* build workbook from the grid data */
-    var new_wb = xtos(this.getData());
+    // @ts-ignore
+    var new_wb: any = xtos(this.getData());
 
     /* generate download */
-    XLSX.writeFile(new_wb, 'fotorTable.xlsx');
+    XLSX.writeFile(new_wb, '表格导出.xlsx');
   }
 
   async importExcel() {
@@ -210,30 +153,31 @@ export default class MySpreadsheet extends Spreadsheet {
       reader.readAsBinaryString(file);
     });
 
-    function stox(wb: any) {
-      var out: any[] = [];
+    // function stox(wb: any) {
+    //   var out: any[] = [];
 
-      wb.SheetNames.forEach(function (name: string) {
-        var o = { name: name, rows: {} };
-        var ws = wb.Sheets[name];
-        var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
-          raw: false,
-          header: 1,
-        });
-        aoa.forEach(function (r, i) {
-          var cells: any = {};
-          r.forEach(function (c: any, j: string) {
-            cells[j] = { text: c };
-          });
-          // @ts-ignore
-          o.rows[i] = { cells: cells };
-        });
-        out.push(o);
-      });
-      return out;
-    }
+    //   wb.SheetNames.forEach(function (name: string) {
+    //     var o = { name: name, rows: {} };
+    //     var ws = wb.Sheets[name];
+    //     var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
+    //       raw: false,
+    //       header: 1,
+    //     });
+    //     aoa.forEach(function (r, i) {
+    //       var cells: any = {};
+    //       r.forEach(function (c: any, j: string) {
+    //         cells[j] = { text: c };
+    //       });
+    //       // @ts-ignore
+    //       o.rows[i] = { cells: cells };
+    //     });
+    //     out.push(o);
+    //   });
+    //   return out;
+    // }
 
     /* load data */
+    // @ts-ignore
     this.loadData(stox(workbook_object));
   }
 
@@ -264,7 +208,6 @@ export default class MySpreadsheet extends Spreadsheet {
     }
     return arrayData;
   }
-
 
   // 二维数组转excel数据
   arrayDataToExcelData(arrayData: Array<Array<any>> = []) {

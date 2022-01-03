@@ -25,6 +25,15 @@ export default function Header(props: any) {
       StoreExcelCompare.excelInstance.downExcel();
     }
   };
+  const setStyles = () => {
+    if (StoreExcelCompare.excelInstance) {
+      // StoreExcelCompare.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
+      StoreExcelCompare.excelInstance.setCellStyle(2,2,"bgcolor","#ff0000",0)
+      // StoreExcelCompare.excelInstance.setCellStyle(2,2,"color","#ff0000",0)
+      // @ts-ignore
+      StoreExcelCompare.excelInstance.reRender();
+    }
+  };
 
   return (
     <Layout
@@ -40,6 +49,9 @@ export default function Header(props: any) {
           </Button>
           <Button icon={<DownloadOutlined />} onClick={exportExcel}>
             导出表格
+          </Button>
+          <Button icon={<DownloadOutlined />} onClick={setStyles}>
+            设置样式
           </Button>
         </div>
       }

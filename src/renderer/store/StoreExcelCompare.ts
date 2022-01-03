@@ -6,13 +6,7 @@ const StoreExcelCompare = observable({
   excelInstance: {} as MySpreadsheet,
   init() {
     if (!(this.excelInstance instanceof MySpreadsheet)) {
-      const dom = document.getElementById(this.excelId)!;
-      this.excelInstance = new MySpreadsheet(`#${this.excelId}`,{
-        view: {
-          height: () => dom.clientHeight,
-          width: () => dom.clientWidth,
-        }
-      });
+      this.excelInstance = new MySpreadsheet(`#${this.excelId}`);
     }
   },
   setStore(options: { [x: string]: any }) {
