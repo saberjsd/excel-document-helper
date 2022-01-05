@@ -29,7 +29,7 @@ export default function Sidebar(props: any) {
         className="sidebar_menu"
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={['1']}
+        defaultSelectedKeys={['2']}
       >
         <Menu.Item key="1" icon={<UserOutlined />}>
           三表勾稽

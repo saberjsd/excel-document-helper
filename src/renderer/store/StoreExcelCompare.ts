@@ -7,6 +7,7 @@ const StoreExcelCompare = observable({
   resultExcelId: 'resultSheetCompare',
   resultExcelInstance: {} as MySpreadsheet,
   resultDialogVisible: false,
+  resultDialogCallback: null as any,
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
       const dom = document.getElementById(this.excelId);
@@ -26,14 +27,13 @@ const StoreExcelCompare = observable({
       }
     }
   },
+
   // 结果弹窗
   toggleDailog(visible: boolean) {
     this.resultDialogVisible = visible;
-    if (visible && document.getElementById(this.resultExcelId)) {
-      this.showResult();
-    }
   },
-  showResult() {
+
+  showFilterResult({ search }: { search: string }) {
     if (this.resultExcelInstance instanceof MySpreadsheet) {
       const dom = document.getElementById(this.resultExcelId);
       if (dom) {
@@ -41,7 +41,7 @@ const StoreExcelCompare = observable({
       }
     }
     this.resultExcelInstance = new MySpreadsheet(`#${this.resultExcelId}`);
-    this.getGroupExcel("应交税费")
+    this.getGroupExcel(search);
   },
 
   getGroupExcel(text: string) {
@@ -52,17 +52,37 @@ const StoreExcelCompare = observable({
       groupCol: 3,
     });
     const sdata = {
-      name: "sheet1111",
+      name: 'sheet1',
       rows: {
-       len: rows.length
-      }
-    }
-    rows.forEach((m: any,n: string | number)=>{
+        len: rows.length,
+      },
+      styles: [
+        // {
+        //   // 黄色
+        //   bgcolor: '#f4b184',
+        // },
+        {
+          // 淡黄色
+          bgcolor: '#f7ccac',
+        },
+        // {
+        //   // 绿色
+        //   bgcolor: '#b9d7bb',
+        // },
+        {
+          // 淡绿色
+          bgcolor: '#e3efd9',
+        },
+      ],
+    };
+    rows.forEach((m: any, n: string | number) => {
       // @ts-ignore
-      sdata.rows[n] = m
-    })
-    this.resultExcelInstance.loadData([sdata])
+      sdata.rows[n] = m;
+    });
+    this.resultExcelInstance.loadData([sdata]);
   },
 });
 
+// @ts-ignore
+window['StoreExcelCompare'] = StoreExcelCompare;
 export default StoreExcelCompare;

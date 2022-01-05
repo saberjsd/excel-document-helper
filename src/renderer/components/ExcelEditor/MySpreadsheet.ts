@@ -259,16 +259,21 @@ export default class MySpreadsheet extends Spreadsheet {
     let groupKeys: any[] = findRows.map((m) => m.row.cells[groupCol].text);
     groupKeys = Array.from(new Set(groupKeys));
     const rows: any = [];
-    groupKeys.forEach((n) => {
+    groupKeys.forEach((i, j) => {
       this.forEachRows(sheetIndex, ({ ri, row }) => {
         if (
           row &&
           row.cells &&
           row.cells[groupCol] &&
           row.cells[groupCol].text &&
-          row.cells[groupCol].text == n
+          row.cells[groupCol].text == i
         ) {
-          rows.push(cloneDeep(row));
+          const item = cloneDeep(row);
+          Object.entries(item.cells).forEach(([ci, cell])=>{
+            // @ts-ignore
+            cell.style = j % 2;
+          })
+          rows.push(item);
         }
       });
     });
