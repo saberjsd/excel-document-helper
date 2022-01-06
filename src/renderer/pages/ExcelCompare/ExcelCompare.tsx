@@ -1,5 +1,6 @@
 import { DownloadOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
+import Search from 'antd/lib/input/Search';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import Layout from 'renderer/components/Layout';
@@ -8,12 +9,11 @@ import StoreExcelCompare from 'renderer/store/StoreExcelCompare';
 import './styles.scss';
 
 export default function Header(props: any) {
-  const [userName, setUserName] = useState('');
+  const [search, setSearch] = useState('');
   useEffect(() => {
     StoreExcelCompare.init();
-    const disposer = autorun(() => {});
-
-    return disposer;
+    // const disposer = autorun(() => {});
+    // return disposer;
   }, []);
 
   const importExcel = () => {
@@ -42,7 +42,9 @@ export default function Header(props: any) {
     }
   };
 
-  const showReultDailog = () => {
+  const showReultDailog = (value: string) => {
+    setSearch(value)
+    if(!value) return;
     StoreExcelCompare.toggleDailog(true);
   };
 
@@ -50,7 +52,7 @@ export default function Header(props: any) {
     <Layout
       className="excel_compare_page"
       header={
-        <div>
+        <>
           <Button
             type="primary"
             icon={<VerticalAlignTopOutlined />}
@@ -61,18 +63,26 @@ export default function Header(props: any) {
           <Button icon={<DownloadOutlined />} onClick={exportExcel}>
             导出表格
           </Button>
-          <Button icon={<DownloadOutlined />} onClick={setStyles}>
+          {/* <Button icon={<DownloadOutlined />} onClick={setStyles}>
             设置样式
-          </Button>
-          <Button icon={<DownloadOutlined />} onClick={showReultDailog}>
+          </Button> */}
+          {/* <Button icon={<DownloadOutlined />} onClick={showReultDailog}>
             查询勾稽结果
-          </Button>
-        </div>
+          </Button> */}
+          <Search
+            className='header_search'
+            placeholder="请输入筛选“科目名称”"
+            allowClear
+            enterButton="筛选科目"
+            size="middle"
+            onSearch={showReultDailog}
+          />
+        </>
       }
     >
       <div id={StoreExcelCompare.excelId} className="content_excel"></div>
 
-      <ResultDailog></ResultDailog>
+      <ResultDailog params={{search}}></ResultDailog>
     </Layout>
   );
 }

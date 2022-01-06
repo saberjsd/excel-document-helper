@@ -12,6 +12,9 @@ export default function ResultDailog(props: any) {
       const { resultDialogVisible } = StoreExcelCompare;
       setVisible(resultDialogVisible);
     });
+
+    // StoreExcelCompare.showFilterResult(props.params)
+
     return disposer;
   }, []);
 
@@ -23,24 +26,28 @@ export default function ResultDailog(props: any) {
   };
 
   return (
-    <div className={clsx('dailog_result', props.className)}>
+    <div className={clsx('result_dailog', props.className)}>
       <Modal
+        className={clsx('result_dailog_modal')}
         title="查询结果"
         visible={visible}
         centered
-        className={clsx('el_dailog')}
+        destroyOnClose
         onOk={handleOk}
         onCancel={handleCancel}
+        okButtonProps={{className: "ok_btn"}}
+        cancelButtonProps={{className: "cancel_btn"}}
       >
-        <DailogExcel />
+        <DailogExcel params={props.params}/>
       </Modal>
     </div>
   );
 }
 
-function DailogExcel() {
+function DailogExcel(props:any) {
   useEffect(() => {
-    StoreExcelCompare.showResult();
+    // console.log(66666)
+    StoreExcelCompare.showFilterResult(props.params)
   }, []);
   return <div id={StoreExcelCompare.resultExcelId} className='dailog_excel'></div>;
 }
