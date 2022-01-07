@@ -233,6 +233,7 @@
     "electron-log": "^4.4.4",
     "electron-updater": "^4.6.4",
     "history": "^5.2.0",
+    "less": "^4.1.2",
     "less-loader": "^10.2.0",
     "lodash": "^4.17.21",
     "mobx": "^6.3.10",
