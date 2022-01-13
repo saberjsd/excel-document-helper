@@ -14,6 +14,15 @@ export default function Header(props: any) {
     StoreExcelCompare.init();
     // const disposer = autorun(() => {});
     // return disposer;
+
+    // @ts-ignore
+    $(function () {
+      // @ts-ignore
+      luckysheet.create({
+        container: "luckysheet",
+      });
+    });
+
   }, []);
 
   const importExcel = () => {

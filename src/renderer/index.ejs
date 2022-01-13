@@ -3,8 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <title>Excel助手</title>
+    <link rel='stylesheet' href='/luckysheet/plugins/css/pluginsCss.css' />
+    <link rel='stylesheet' href='/luckysheet/plugins/plugins.css' />
+    <link rel='stylesheet' href='/luckysheet/css/luckysheet.css' />
+    <link rel='stylesheet' href='/luckysheet/assets/iconfont/iconfont.css' />
+    <script src="/luckysheet/plugins/js/plugin.js"></script>
+    <script src="/luckysheet/luckysheet.umd.js"></script>
   </head>
   <body>
+    <div
+      id="luckysheet"
+      style="margin:0px;padding:0px;position:absolute;width:100%;left: 0px;top: 30px;bottom:0px;"
+    ></div>
     <div id="root"></div>
   </body>
   <script>
@@ -15,4 +25,5 @@
 
     window.electron.ipcRenderer.myPing();
   </script>
+  <script src="./test.js"></script>
 </html>
