@@ -38,7 +38,10 @@
       "dist",
       "node_modules",
       "package.json",
-      "public"
+      {
+        "from": "public",
+        "to": "dist/renderer/public"
+      }
     ],
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
