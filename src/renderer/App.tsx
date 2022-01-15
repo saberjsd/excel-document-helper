@@ -5,6 +5,7 @@ import ExcelCompare from './pages/ExcelCompare';
 import Home from './pages/Home';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { ConfigProvider } from 'antd';
+import LuckySheet from './pages/LuckySheet';
 
 const Hello = () => {
   return (
@@ -49,7 +50,8 @@ export default function App() {
       <Router>
         <Routes>
           {/* <Route path="/" element={<Home />} /> */}
-          <Route path="/" element={<ExcelCompare />} />
+          {/* <Route path="/" element={<ExcelCompare />} /> */}
+          <Route path="/" element={<LuckySheet />} />
         </Routes>
       </Router>
     </ConfigProvider>
