@@ -336,4 +336,13 @@ export default class MySpreadsheet extends Spreadsheet {
 
     return excelData;
   }
+
+  resize(){
+    try {
+      const ev = document.createEvent('Event');
+      ev.initEvent('resize', true, true);
+      window.dispatchEvent(ev);
+    } catch (e) {}
+  }
+
 }

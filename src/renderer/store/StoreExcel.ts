@@ -1,7 +1,7 @@
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 
-const StoreExcelCompare = observable({
+const StoreExcel = observable({
   excelId: 'treeSheetCompare',
   excelInstance: {} as MySpreadsheet,
   resultExcelId: 'resultSheetCompare',
@@ -57,18 +57,10 @@ const StoreExcelCompare = observable({
         len: rows.length,
       },
       styles: [
-        // {
-        //   // 黄色
-        //   bgcolor: '#f4b184',
-        // },
         {
           // 淡黄色
           bgcolor: '#f7ccac',
         },
-        // {
-        //   // 绿色
-        //   bgcolor: '#b9d7bb',
-        // },
         {
           // 淡绿色
           bgcolor: '#e3efd9',
@@ -84,5 +76,5 @@ const StoreExcelCompare = observable({
 });
 
 // @ts-ignore
-window['StoreExcelCompare'] = StoreExcelCompare;
-export default StoreExcelCompare;
+window['StoreExcel'] = StoreExcel;
+export default StoreExcel;

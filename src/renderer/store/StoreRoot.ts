@@ -1,8 +1,7 @@
 import { observable } from 'mobx';
 
 const StoreRoot = observable({
-  excelId: 'treeSheetCompare',
-  excelInstance: {},
+  currentMenu: "excel_1",
   init() {},
   setStore(options: { [x: string]: any }) {
     for (const key in options) {
