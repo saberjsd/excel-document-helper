@@ -59,7 +59,7 @@ export function stox(wb) {
 
     out.push(o);
   });
-
+  console.log("to x-spreadsheet:", out)
   return out;
 }
 

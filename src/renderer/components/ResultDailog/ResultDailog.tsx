@@ -6,6 +6,7 @@ import StoreExcel from 'renderer/store/StoreExcel';
 
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import './styles.scss';
+import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 
 export default function ResultDailog(props: any) {
   const [visible, setVisible] = useState(false);
@@ -59,13 +60,13 @@ export default function ResultDailog(props: any) {
       }
       visible={visible}
       centered
-      destroyOnClose
+      // destroyOnClose
       onOk={handleOk}
       onCancel={handleCancel}
       okButtonProps={{ className: 'ok_btn' }}
       cancelButtonProps={{ className: 'cancel_btn' }}
     >
-      <DailogExcel params={props.params} />
+      <DailogExcel />
     </Modal>
     // </div>
   );
@@ -73,8 +74,9 @@ export default function ResultDailog(props: any) {
 
 function DailogExcel(props: any) {
   useEffect(() => {
-    // console.log(66666)
-    StoreExcel.showFilterResult(props.params);
+    console.log(66666)
+    EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true)
+    StoreExcel.resultDialogRendered = true
   }, []);
   return <div id={StoreExcel.resultExcelId} className="dailog_excel"></div>;
 }

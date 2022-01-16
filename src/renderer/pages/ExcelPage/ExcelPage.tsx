@@ -11,10 +11,10 @@ import { useEffect, useState } from 'react';
 import Layout from 'renderer/components/Layout';
 import ResultDailog from 'renderer/components/ResultDailog';
 import StoreExcel from 'renderer/store/StoreExcel';
+import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import './styles.scss';
 
 export default function Header(props: any) {
-  const [search, setSearch] = useState('');
   useEffect(() => {
     StoreExcel.init();
     // const disposer = autorun(() => {});
@@ -43,12 +43,13 @@ export default function Header(props: any) {
 
   const showCompare = () => {
     StoreExcel.toggleDailog(true);
+    StoreExcel.compareSheet()
   };
   const checkRisk = () => {};
 
   const showReultDailog = (value: string) => {
-    setSearch(value);
     if (!value) return;
+    StoreExcel.getGroupExcel(value)
     StoreExcel.toggleDailog(true);
   };
 
@@ -86,7 +87,7 @@ export default function Header(props: any) {
     >
       <div id={StoreExcel.excelId} className="content_excel"></div>
 
-      <ResultDailog params={{ search }}></ResultDailog>
+      <ResultDailog />
     </Layout>
   );
 }

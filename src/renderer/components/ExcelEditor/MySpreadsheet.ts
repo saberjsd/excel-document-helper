@@ -7,6 +7,8 @@ import 'x-data-spreadsheet/src/index.less';
 import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
+import { getColByLetter } from 'renderer/utils';
+const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // @ts-ignore 汉化
 Spreadsheet.locale('zh-cn');
@@ -176,6 +178,7 @@ export default class MySpreadsheet extends Spreadsheet {
         o.rows.len = aoa.length;
         out.push(o);
       });
+      console.log('to x-spreadsheet:', out);
       return out;
     }
 
@@ -207,7 +210,11 @@ export default class MySpreadsheet extends Spreadsheet {
       }
     });
   }
-
+  /**
+   * 遍历行
+   * @param sheetIndex
+   * @param cb
+   */
   forEachRows(
     sheetIndex: number = 0,
     cb: (arg0: { ri: string; row: any }) => void
@@ -217,23 +224,53 @@ export default class MySpreadsheet extends Spreadsheet {
       cb({ ri, row });
     });
   }
+  /**
+   * 根据指定列遍历cell
+   * @param sheetIndex
+   * @param ci
+   * @param cb
+   */
+  forEachCellByCol(
+    sheetIndex: number = 0,
+    ci: number,
+    cb: (cell: any) => void
+  ) {
+    const { rows } = this.datas[sheetIndex];
+    Object.entries(rows._).forEach(([ri, row]: any) => {
+      if (row && row.cells && row.cells[ci]) {
+        cb(row.cells[ci]);
+      }
+    });
+  }
 
-  // getCellByText(text: string, sheetIndex = 0) {
-  //   const out: any[] = [];
-  //   this.forEachCells(sheetIndex, ({ ri, ci, row, cell }) => {
-  //     if (String(cell.text).includes(text)) {
-  //       out.push({ ri, ci, row, cell });
-  //     }
-  //   });
-  //   return out;
-  // }
-
-  getCellInfoByText(text: string, sheetIndex: number = 0, col?: number) {
+  /**
+   * 通过单元格内容，获取单元格信息。可以指定列
+   * @param text
+   * @param sheetIndex
+   * @param col
+   * @returns
+   */
+  getCellInfoByText(
+    text: string | RegExp,
+    sheetIndex: number = 0,
+    col?: number
+  ) {
     const out: any = [];
     this.forEachCells(sheetIndex, ({ ri, ci, cell, row }) => {
       const filterCol = col === undefined || col == ci;
-      if (filterCol && String(cell.text).includes(text)) {
-        out.push({ ri, ci, row, cell });
+      if (filterCol) {
+        const type = Object.prototype.toString.call(text).slice(8, -1);
+        if (type === 'RegExp') {
+          // @ts-ignore
+          if (text.test(String(cell.text))) {
+            out.push({ ri, ci, row, cell });
+          }
+        } else {
+          // @ts-ignore
+          if (String(cell.text).includes(text)) {
+            out.push({ ri, ci, row, cell });
+          }
+        }
       }
     });
     return out;
@@ -269,10 +306,10 @@ export default class MySpreadsheet extends Spreadsheet {
           row.cells[groupCol].text == i
         ) {
           const item = cloneDeep(row);
-          Object.entries(item.cells).forEach(([ci, cell])=>{
+          Object.entries(item.cells).forEach(([ci, cell]) => {
             // @ts-ignore
             cell.style = j % 2;
-          })
+          });
           rows.push(item);
         }
       });
@@ -337,7 +374,7 @@ export default class MySpreadsheet extends Spreadsheet {
     return excelData;
   }
 
-  resize(){
+  resize() {
     try {
       const ev = document.createEvent('Event');
       ev.initEvent('resize', true, true);
@@ -345,4 +382,135 @@ export default class MySpreadsheet extends Spreadsheet {
     } catch (e) {}
   }
 
+  /**
+   * 根据工作表名获取索引
+   * @param name
+   * @returns
+   */
+  getSheetIndexByName(name: string) {
+    for (let i = 0; i < this.datas.length; i++) {
+      const item = this.datas[i];
+      if (item.name === name) {
+        return i;
+      }
+    }
+    return 0;
+  }
+  getSheetByName(name: string) {
+    for (let i = 0; i < this.datas.length; i++) {
+      const item = this.datas[i];
+      if (item.name === name) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  // caclSumWithRows(resultRows: any,config: any, sheetIndex: number) {
+  //   const rows = this.datas[sheetIndex].rows._;
+  //   const sheetHeadRow = rows["0"];
+  //   const sheetFirstRow = rows["1"];
+  //   // 借方金额的列次
+  //   let debitCol = getColByLetter(config.debit.col);
+  //   // 贷方金额的列次
+  //   let creditCol = getColByLetter(config.credit.col);
+  //   // 是否借贷一列的表格
+  //   const isSameCol = sheetHeadRow.cells[debitCol]?.text === "方向" ||
+  //                     /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
+  //   // 存放数组，方便插入首行
+  //   const outRows:any = []
+  //   // const
+  //   config.findRows.forEach((m: any, n: number) => {
+  //     const outCells: any = {}
+  //     // 获取到符合的行相关信息
+  //     const rowInfo = this.getCellInfoByText(
+  //       m.findSubjectKeys,
+  //       sheetIndex,
+  //       getColByLetter(m.findSubjectCol.col)
+  //     );
+  //     let sumDebit = 0;
+  //     let sumCredit = 0;
+  //     if(rowInfo && rowInfo.length){
+  //       rowInfo.forEach((j:any)=>{
+  //         const cells = j.row.cells
+  //         if(isSameCol){
+  //           if(cells[debitCol] === "借"){
+  //             sumDebit += Numeral(cells[creditCol]?.text).value();
+  //           } else {
+  //             sumCredit += Numeral(cells[creditCol]?.text).value();
+  //           }
+  //         } else {
+  //           sumDebit += Numeral(cells[debitCol]?.text).value();
+  //           sumCredit += Numeral(cells[creditCol]?.text).value();
+  //         }
+  //       })
+  //     }
+  //     // 首列显示名称
+  //     outCells[0] = { text: m.name };
+  //     // 其中一表的
+  //     outCells[config.amountCol] = {
+  //       text: Numeral(m.direction === "debit" ? sumDebit : sumCredit).format("0,0.00")
+  //     };
+
+  //     // outRows.push({cells: outCells})
+  //     resultRows[n+1] = {cells: outCells}
+  //   });
+
+  //   // return outRows
+  // }
+  caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
+    // sheet的通用配置
+    const sheetConfig = config[sheetKey];
+    const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
+    const rows = this.datas[sheetIndex].rows._;
+    const sheetHeadRow = rows['0'];
+    const sheetFirstRow = rows['1'];
+    // 借方金额的列次
+    let debitCol = getColByLetter(sheetConfig.debit.col);
+    // 贷方金额的列次
+    let creditCol = getColByLetter(sheetConfig.credit.col);
+    // 是否借贷一列的表格
+    const isSameCol =
+      sheetHeadRow.cells[debitCol]?.text === '方向' ||
+      /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
+    // 根据配置，计算每一行
+    config.rows.forEach((m: any, n: number) => {
+      // sheet每一行的配置
+      const sheetRowConfig = m[sheetKey];
+      const outCells: any = {};
+      // 获取到符合的行相关信息
+      const rowInfo = this.getCellInfoByText(
+        sheetRowConfig.search,
+        sheetIndex,
+        getColByLetter(sheetConfig.findCol.col)
+      );
+      let sumDebit = 0;
+      let sumCredit = 0;
+      if (rowInfo && rowInfo.length) {
+        rowInfo.forEach((j: any) => {
+          const cells = j.row.cells;
+          if (isSameCol) {
+            if (cells[debitCol] === '借') {
+              sumDebit += Numeral(cells[creditCol]?.text).value();
+            } else {
+              sumCredit += Numeral(cells[creditCol]?.text).value();
+            }
+          } else {
+            sumDebit += Numeral(cells[debitCol]?.text).value();
+            sumCredit += Numeral(cells[creditCol]?.text).value();
+          }
+        });
+      }
+      // 首列显示名称
+      outCells[0] = { text: m.name };
+      // 其中一表的
+      outCells[sheetConfig.amountCol] = {
+        text: Numeral(
+          sheetRowConfig.direction === 'debit' ? sumDebit : sumCredit
+        ).format('0,0.00'),
+      };
+
+      resultRows[n + 1] = { cells: outCells };
+    });
+  }
 }
