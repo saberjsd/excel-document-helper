@@ -45,7 +45,9 @@ export default function Header(props: any) {
     StoreExcel.toggleDailog(true);
     StoreExcel.compareSheet()
   };
-  const checkRisk = () => {};
+  const checkRisk = () => {
+    StoreExcel.checkRisk()
+  };
 
   const showReultDailog = (value: string) => {
     if (!value) return;

@@ -227,18 +227,22 @@ export default class MySpreadsheet extends Spreadsheet {
   /**
    * 根据指定列遍历cell
    * @param sheetIndex
-   * @param ci
+   * @param cols
    * @param cb
    */
-  forEachCellByCol(
+  forEachCellByCols(
     sheetIndex: number = 0,
-    ci: number,
-    cb: (cell: any) => void
+    cols: number[],
+    cb: (outCols: any) => void
   ) {
     const { rows } = this.datas[sheetIndex];
     Object.entries(rows._).forEach(([ri, row]: any) => {
-      if (row && row.cells && row.cells[ci]) {
-        cb(row.cells[ci]);
+      const outCols: any = {};
+      if (row && row.cells) {
+        cols.forEach((m: any) => {
+          outCols[m] = row.cells[m];
+        });
+        cb(outCols);
       }
     });
   }
@@ -266,8 +270,8 @@ export default class MySpreadsheet extends Spreadsheet {
           // @ts-ignore
           if (text.test(String(cell.text))) {
             // 额外的“科目编号”筛选条件
-            if(subjectId && subjectCol){
-              if(subjectId.test(row.cells[subjectCol]?.text) ){
+            if (subjectId && subjectCol) {
+              if (subjectId.test(row.cells[subjectCol]?.text)) {
                 out.push({ ri, ci, row, cell });
               }
             } else {
@@ -415,58 +419,12 @@ export default class MySpreadsheet extends Spreadsheet {
     return null;
   }
 
-  // caclSumWithRows(resultRows: any,config: any, sheetIndex: number) {
-  //   const rows = this.datas[sheetIndex].rows._;
-  //   const sheetHeadRow = rows["0"];
-  //   const sheetFirstRow = rows["1"];
-  //   // 借方金额的列次
-  //   let debitCol = getColByLetter(config.debit.col);
-  //   // 贷方金额的列次
-  //   let creditCol = getColByLetter(config.credit.col);
-  //   // 是否借贷一列的表格
-  //   const isSameCol = sheetHeadRow.cells[debitCol]?.text === "方向" ||
-  //                     /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
-  //   // 存放数组，方便插入首行
-  //   const outRows:any = []
-  //   // const
-  //   config.findRows.forEach((m: any, n: number) => {
-  //     const outCells: any = {}
-  //     // 获取到符合的行相关信息
-  //     const rowInfo = this.getCellInfoByText(
-  //       m.findSubjectKeys,
-  //       sheetIndex,
-  //       getColByLetter(m.findSubjectCol.col)
-  //     );
-  //     let sumDebit = 0;
-  //     let sumCredit = 0;
-  //     if(rowInfo && rowInfo.length){
-  //       rowInfo.forEach((j:any)=>{
-  //         const cells = j.row.cells
-  //         if(isSameCol){
-  //           if(cells[debitCol] === "借"){
-  //             sumDebit += Numeral(cells[creditCol]?.text).value();
-  //           } else {
-  //             sumCredit += Numeral(cells[creditCol]?.text).value();
-  //           }
-  //         } else {
-  //           sumDebit += Numeral(cells[debitCol]?.text).value();
-  //           sumCredit += Numeral(cells[creditCol]?.text).value();
-  //         }
-  //       })
-  //     }
-  //     // 首列显示名称
-  //     outCells[0] = { text: m.name };
-  //     // 其中一表的
-  //     outCells[config.amountCol] = {
-  //       text: Numeral(m.direction === "debit" ? sumDebit : sumCredit).format("0,0.00")
-  //     };
-
-  //     // outRows.push({cells: outCells})
-  //     resultRows[n+1] = {cells: outCells}
-  //   });
-
-  //   // return outRows
-  // }
+  /**
+   * 三表勾稽，数据汇总
+   * @param resultRows
+   * @param config
+   * @param sheetKey
+   */
   caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
     // sheet的通用配置
     const sheetConfig = config[sheetKey];
@@ -521,5 +479,30 @@ export default class MySpreadsheet extends Spreadsheet {
 
       resultRows[n + 1] = { cells: outCells };
     });
+  }
+
+  loadRiskConfig() {
+    const readConfig = {
+      sheetName: '风险排查样式',
+      findCol: 'B',
+      outCol: 'C',
+    };
+
+    const riskConfig: any[] = [];
+    const findColIndex = getColByLetter(readConfig.findCol);
+    const outColIndex = getColByLetter(readConfig.outCol);
+    this.forEachCellByCols(
+      this.getSheetIndexByName(readConfig.sheetName),
+      [findColIndex, outColIndex],
+      (outCols) => {
+        riskConfig.push({
+          findKey: outCols[findColIndex]?.text,
+          outKey: outCols[outColIndex]?.text,
+        });
+      }
+    );
+
+    console.log("====riskConfig",riskConfig)
+
   }
 }

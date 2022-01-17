@@ -334,6 +334,11 @@ const StoreExcel = observable({
       rows: resultRows,
     });
   },
+
+  checkRisk(){
+    const riskConfig = this.excelInstance.loadRiskConfig()
+  }
+
 });
 
 // @ts-ignore
