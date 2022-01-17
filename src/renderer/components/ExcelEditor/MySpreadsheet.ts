@@ -253,7 +253,9 @@ export default class MySpreadsheet extends Spreadsheet {
   getCellInfoByText(
     text: string | RegExp,
     sheetIndex: number = 0,
-    col?: number
+    col?: number,
+    subjectId?: RegExp,
+    subjectCol?: number
   ) {
     const out: any = [];
     this.forEachCells(sheetIndex, ({ ri, ci, cell, row }) => {
@@ -263,7 +265,14 @@ export default class MySpreadsheet extends Spreadsheet {
         if (type === 'RegExp') {
           // @ts-ignore
           if (text.test(String(cell.text))) {
-            out.push({ ri, ci, row, cell });
+            // 额外的“科目编号”筛选条件
+            if(subjectId && subjectCol){
+              if(subjectId.test(row.cells[subjectCol]?.text) ){
+                out.push({ ri, ci, row, cell });
+              }
+            } else {
+              out.push({ ri, ci, row, cell });
+            }
           }
         } else {
           // @ts-ignore
@@ -477,7 +486,7 @@ export default class MySpreadsheet extends Spreadsheet {
     config.rows.forEach((m: any, n: number) => {
       // sheet每一行的配置
       const sheetRowConfig = m[sheetKey];
-      const outCells: any = {};
+      const outCells: any = resultRows[n + 1]?.cells || {};
       // 获取到符合的行相关信息
       const rowInfo = this.getCellInfoByText(
         sheetRowConfig.search,
