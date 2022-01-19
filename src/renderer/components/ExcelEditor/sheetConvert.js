@@ -11,18 +11,21 @@ import XLSX from 'xlsx';
  *
  * @returns {Object[]} An x-spreadsheet data
  */
-export function stox(wb) {
+ export function stox(wb) {
   var out = [];
   wb.SheetNames.forEach(function (name) {
     var o = { name: name, rows: {} };
     var ws = wb.Sheets[name];
-    var range = XLSX.utils.decode_range(ws['!ref']);
-    // sheet_to_json will lost empty row and col at begin as default
-    range.s = { r: 0, c: 0 };
+    var range
+    if(ws['!ref']){
+      range = XLSX.utils.decode_range(ws['!ref']);
+      // sheet_to_json will lost empty row and col at begin as default
+      range.s = { r: 0, c: 0 };
+    }
     var aoa = XLSX.utils.sheet_to_json(ws, {
       raw: false,
       header: 1,
-      range: range,
+      range: range
     });
 
     aoa.forEach(function (r, i) {
@@ -32,15 +35,15 @@ export function stox(wb) {
 
         var cellRef = XLSX.utils.encode_cell({ r: i, c: j });
 
-        if (ws[cellRef] != null && ws[cellRef].f != null) {
-          cells[j].text = '=' + ws[cellRef].f;
+        if ( ws[cellRef] != null && ws[cellRef].f != null) {
+          cells[j].text = "=" + ws[cellRef].f;
         }
       });
       o.rows[i] = { cells: cells };
     });
 
     o.merges = [];
-    (ws['!merges'] || []).forEach(function (merge, i) {
+    (ws["!merges"]||[]).forEach(function (merge, i) {
       //Needed to support merged cells with empty content
       if (o.rows[merge.s.r] == null) {
         o.rows[merge.s.r] = { cells: {} };
@@ -51,15 +54,16 @@ export function stox(wb) {
 
       o.rows[merge.s.r].cells[merge.s.c].merge = [
         merge.e.r - merge.s.r,
-        merge.e.c - merge.s.c,
+        merge.e.c - merge.s.c
       ];
 
       o.merges[i] = XLSX.utils.encode_range(merge);
     });
-
+    // 根据数据行数显示多少行
+    o.rows.len = aoa.length;
     out.push(o);
   });
-  console.log("to x-spreadsheet:", out)
+
   return out;
 }
 
@@ -98,44 +102,40 @@ export function xtos(sdata) {
           if (idx > maxCoord.c) maxCoord.c = idx;
         }
 
-        var cellText = row.cells[k].text,
-          type = 's';
+        var cellText = row.cells[k].text, type = "s";
         if (!cellText) {
-          cellText = '';
-          type = 'z';
+          cellText = "";
+          type = "z";
         } else if (!isNaN(parseFloat(cellText))) {
           cellText = parseFloat(cellText);
-          type = 'n';
-        } else if (
-          cellText.toLowerCase() === 'true' ||
-          cellText.toLowerCase() === 'false'
-        ) {
+          type = "n";
+        } else if (cellText.toLowerCase() === "true" || cellText.toLowerCase() === "false") {
           cellText = Boolean(cellText);
-          type = 'b';
+          type = "b";
         }
 
         ws[lastRef] = { v: cellText, t: type };
 
-        if (type == 's' && cellText[0] == '=') {
+        if (type == "s" && cellText[0] == "=") {
           ws[lastRef].f = cellText.slice(1);
         }
 
         if (row.cells[k].merge != null) {
-          if (ws['!merges'] == null) ws['!merges'] = [];
+          if (ws["!merges"] == null) ws["!merges"] = [];
 
-          ws['!merges'].push({
+          ws["!merges"].push({
             s: { r: ri, c: idx },
             e: {
               r: ri + row.cells[k].merge[0],
-              c: idx + row.cells[k].merge[1],
-            },
+              c: idx + row.cells[k].merge[1]
+            }
           });
         }
       });
 
-      ws['!ref'] = XLSX.utils.encode_range({
+      ws["!ref"] = XLSX.utils.encode_range({
         s: { r: minCoord.r, c: minCoord.c },
-        e: { r: maxCoord.r, c: maxCoord.c },
+        e: { r: maxCoord.r, c: maxCoord.c }
       });
     }
 

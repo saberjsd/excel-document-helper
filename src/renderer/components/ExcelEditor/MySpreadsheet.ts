@@ -9,7 +9,7 @@ import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { getColByLetter } from 'renderer/utils';
 const Numeral = require('numeral');
-// import { stox, xtos } from './sheetConvert';
+import { stox, xtos } from './sheetConvert';
 // @ts-ignore 汉化
 Spreadsheet.locale('zh-cn');
 
@@ -104,27 +104,27 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   downExcel() {
-    function xtos(sdata: any) {
-      var out = XLSX.utils.book_new();
-      sdata.forEach(function (xws: any) {
-        var aoa = [[]];
-        var rowobj = xws.rows;
-        for (var ri = 0; ri < rowobj.len; ++ri) {
-          var row = rowobj[ri];
-          if (!row) continue;
-          aoa[ri] = [];
-          Object.keys(row.cells).forEach(function (k) {
-            var idx = +k;
-            if (isNaN(idx)) return;
-            // @ts-ignore
-            aoa[ri][idx] = row.cells[k].text;
-          });
-        }
-        var ws = XLSX.utils.aoa_to_sheet(aoa);
-        XLSX.utils.book_append_sheet(out, ws, xws.name);
-      });
-      return out;
-    }
+    // function xtos(sdata: any) {
+    //   var out = XLSX.utils.book_new();
+    //   sdata.forEach(function (xws: any) {
+    //     var aoa = [[]];
+    //     var rowobj = xws.rows;
+    //     for (var ri = 0; ri < rowobj.len; ++ri) {
+    //       var row = rowobj[ri];
+    //       if (!row) continue;
+    //       aoa[ri] = [];
+    //       Object.keys(row.cells).forEach(function (k) {
+    //         var idx = +k;
+    //         if (isNaN(idx)) return;
+    //         // @ts-ignore
+    //         aoa[ri][idx] = row.cells[k].text;
+    //       });
+    //     }
+    //     var ws = XLSX.utils.aoa_to_sheet(aoa);
+    //     XLSX.utils.book_append_sheet(out, ws, xws.name);
+    //   });
+    //   return out;
+    // }
 
     /* build workbook from the grid data */
     // @ts-ignore
@@ -156,31 +156,31 @@ export default class MySpreadsheet extends Spreadsheet {
       reader.readAsBinaryString(file);
     });
 
-    function stox(wb: any) {
-      var out: any[] = [];
+    // function stox(wb: any) {
+    //   var out: any[] = [];
 
-      wb.SheetNames.forEach(function (name: string) {
-        var o = { name: name, rows: {} };
-        var ws = wb.Sheets[name];
-        var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
-          raw: false,
-          header: 1,
-        });
-        aoa.forEach(function (r, i) {
-          var cells: any = {};
-          r.forEach(function (c: any, j: string) {
-            cells[j] = { text: c };
-          });
-          // @ts-ignore
-          o.rows[i] = { cells: cells };
-        });
-        // @ts-ignore  根据数据行数显示多少行
-        o.rows.len = aoa.length;
-        out.push(o);
-      });
-      console.log('to x-spreadsheet:', out);
-      return out;
-    }
+    //   wb.SheetNames.forEach(function (name: string) {
+    //     var o = { name: name, rows: {} };
+    //     var ws = wb.Sheets[name];
+    //     var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
+    //       raw: false,
+    //       header: 1,
+    //     });
+    //     aoa.forEach(function (r, i) {
+    //       var cells: any = {};
+    //       r.forEach(function (c: any, j: string) {
+    //         cells[j] = { text: c };
+    //       });
+    //       // @ts-ignore
+    //       o.rows[i] = { cells: cells };
+    //     });
+    //     // @ts-ignore  根据数据行数显示多少行
+    //     o.rows.len = aoa.length;
+    //     out.push(o);
+    //   });
+    //   console.log('to x-spreadsheet:', out);
+    //   return out;
+    // }
 
     /* load data */
     // @ts-ignore
