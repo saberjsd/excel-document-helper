@@ -4,12 +4,13 @@ import Spreadsheet, { Options } from 'x-data-spreadsheet';
 // import './sheet_mixin.js';
 // import './row_mixin.js';
 import 'x-data-spreadsheet/src/index.less';
-import XLSX from 'xlsx';
+// import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { getColByLetter } from 'renderer/utils';
 const Numeral = require('numeral');
-import { stox, xtos } from './sheetConvert';
+// import { stox, xtos } from './sheetConvert';
+// import { XLSXspread } from "./xlsxspread.min.js"
 // @ts-ignore 汉化
 Spreadsheet.locale('zh-cn');
 
@@ -128,10 +129,15 @@ export default class MySpreadsheet extends Spreadsheet {
 
     /* build workbook from the grid data */
     // @ts-ignore
-    var new_wb: any = xtos(this.getData());
+    // var new_wb: any = xtos(this.getData());
 
-    /* generate download */
-    XLSX.writeFile(new_wb, '表格导出.xlsx');
+    // /* generate download */
+    // XLSX.writeFile(new_wb, '表格导出.xlsx');
+
+    var new_wb = XLSXspread.xtos(this.getData());
+    /* write file and trigger a download */
+    // @ts-ignore
+    XLSX.writeFile(new_wb, '表格导出.xlsx', {cellStyles: true});
   }
 
   async importExcel() {
@@ -146,7 +152,8 @@ export default class MySpreadsheet extends Spreadsheet {
 
       reader.onload = (e) => {
         var data = e.target!.result;
-        resolve(XLSX.read(data, { type: 'binary' }));
+        // @ts-ignore
+        resolve(XLSX.read(data, {type: 'binary', cellStyles: true}));
       };
 
       reader.onerror = () => {
@@ -184,7 +191,7 @@ export default class MySpreadsheet extends Spreadsheet {
 
     /* load data */
     // @ts-ignore
-    this.loadData(stox(workbook_object));
+    this.loadData(XLSXspread.stox(workbook_object));
   }
 
   /**

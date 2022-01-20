@@ -2,7 +2,7 @@
 /* eslint-env browser */
 /*global XLSX */
 /*exported stox, xtos */
-import XLSX from 'xlsx';
+// import XLSX from 'xlsx';
 
 /**
  * Converts data from SheetJS to x-spreadsheet
@@ -64,6 +64,7 @@ import XLSX from 'xlsx';
     out.push(o);
   });
 
+  console.log('import data:', out);
   return out;
 }
 
