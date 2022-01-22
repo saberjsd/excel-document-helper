@@ -1,10 +1,10 @@
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import clsx from 'clsx';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import StoreExcel from 'renderer/store/StoreExcel';
 
-import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
+import { DownloadOutlined } from '@ant-design/icons';
 import './styles.scss';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 
@@ -36,6 +36,18 @@ export default function ResultDailog(props: any) {
     StoreExcel.toggleDailog(false);
   };
 
+  const exportExcel = () => {
+    if (StoreExcel.resultExcelInstance) {
+      StoreExcel.resultExcelInstance.downloadExcel();
+    }
+  };
+
+  const exportCurrentExcel = () => {
+    if (StoreExcel.resultExcelInstance) {
+      StoreExcel.resultExcelInstance.downloadSheet();
+    }
+  };
+
   return (
     // <div className={clsx('result_dailog', props.className)}>
     <Modal
@@ -55,6 +67,13 @@ export default function ResultDailog(props: any) {
             ) : (
               <ArrowsAltOutlined onClick={toggleFullScreen} />
             )} */}
+
+            <Button icon={<DownloadOutlined />} onClick={exportExcel}>
+              导出整个表格
+            </Button>
+            <Button type="primary" icon={<DownloadOutlined />} onClick={exportCurrentExcel}>
+              导出当前sheet
+            </Button>
           </div>
         </>
       }
@@ -65,6 +84,7 @@ export default function ResultDailog(props: any) {
       onCancel={handleCancel}
       okButtonProps={{ className: 'ok_btn' }}
       cancelButtonProps={{ className: 'cancel_btn' }}
+      footer={null}
     >
       <DailogExcel />
     </Modal>

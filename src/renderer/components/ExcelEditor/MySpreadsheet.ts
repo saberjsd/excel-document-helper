@@ -104,7 +104,12 @@ export default class MySpreadsheet extends Spreadsheet {
     }
   }
 
-  downExcel() {
+  getCurrentSheetIndex(){
+    // @ts-ignore
+    return  this.bottombar.items.findIndex(m=>m === this.bottombar.activeEl)
+  }
+
+  downloadExcel() {
     // function xtos(sdata: any) {
     //   var out = XLSX.utils.book_new();
     //   sdata.forEach(function (xws: any) {
@@ -137,7 +142,15 @@ export default class MySpreadsheet extends Spreadsheet {
     var new_wb = XLSXspread.xtos(this.getData());
     /* write file and trigger a download */
     // @ts-ignore
-    XLSX.writeFile(new_wb, '表格导出.xlsx', {cellStyles: true});
+    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {cellStyles: true});
+  }
+
+  downloadSheet(sheetIndex: number = this.getCurrentSheetIndex()){
+    const data = [this.datas[sheetIndex].getData()]
+    // @ts-ignore
+    const new_wb = XLSXspread.xtos(data);
+    // @ts-ignore
+    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {cellStyles: true});
   }
 
   async importExcel() {

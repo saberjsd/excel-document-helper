@@ -22,18 +22,22 @@
           align-items: center;
         }
         .title_right{
-          margin-right: 36px;
-          .anticon{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 56px;
-            height: 56px;
-            border-radius: 4px;
-            &:hover{
-              background: #f1f1f1;
-            }
-          }
+          // margin-right: 36px;
+          margin-right: 80px;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          // .anticon{
+          //   display: flex;
+          //   justify-content: center;
+          //   align-items: center;
+          //   width: 56px;
+          //   height: 56px;
+          //   border-radius: 4px;
+          //   &:hover{
+          //     background: #f1f1f1;
+          //   }
+          // }
         }
       }
     }

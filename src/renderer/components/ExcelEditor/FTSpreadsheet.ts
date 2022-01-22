@@ -212,7 +212,7 @@ export default class FTSpreadsheet extends Spreadsheet {
     return this;
   }
 
-  downExcel() {
+  downloadExcel() {
 
     import('xlsx').then(XLSX=>{
       function xtos(sdata) {

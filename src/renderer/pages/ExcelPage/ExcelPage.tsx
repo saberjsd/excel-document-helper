@@ -28,7 +28,7 @@ export default function Header(props: any) {
   };
   const exportExcel = () => {
     if (StoreExcel.excelInstance) {
-      StoreExcel.excelInstance.downExcel();
+      StoreExcel.excelInstance.downloadExcel();
     }
   };
   const setStyles = () => {
