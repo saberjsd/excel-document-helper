@@ -489,27 +489,104 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   loadRiskConfig() {
-    const readConfig = {
+    const readRiskConfig = {
       sheetName: '风险排查样式',
-      findCol: 'B',
+      findSubjectCol: 'A',
+      findSummaryCol: 'B',
       outCol: 'C',
     };
 
     const riskConfig: any[] = [];
-    const findColIndex = getColByLetter(readConfig.findCol);
-    const outColIndex = getColByLetter(readConfig.outCol);
+    const findSubjectIndex = getColByLetter(readRiskConfig.findSubjectCol);
+    const findSummaryIndex = getColByLetter(readRiskConfig.findSummaryCol);
+    const outColIndex = getColByLetter(readRiskConfig.outCol);
     this.forEachCellByCols(
-      this.getSheetIndexByName(readConfig.sheetName),
-      [findColIndex, outColIndex],
+      this.getSheetIndexByName(readRiskConfig.sheetName),
+      [findSubjectIndex, findSummaryIndex, outColIndex],
       (outCols) => {
+        const findSubjectText = outCols[findSubjectIndex]?.text
+        const findSummaryText = outCols[findSummaryIndex]?.text
+        const findSubjectReg = (findSubjectText || "").split("、").filter((m:any)=>m).join("|");
+        const findSummaryReg = (findSummaryText || "").split("、").filter((m:any)=>m).join("|");
         riskConfig.push({
-          findKey: outCols[findColIndex]?.text,
-          outKey: outCols[outColIndex]?.text,
+          findSubjectReg,
+          findSummaryReg,
+          outText: outCols[outColIndex]?.text,
         });
       }
     );
 
     console.log("====riskConfig",riskConfig)
-
+    return riskConfig
   }
+
+  getRiskRows(riskConfig: any[], showAll?: boolean){
+    const readConfig = {
+      sheetName: '序时账',
+      findSubjectCol: 'E',
+      findSummaryCol: 'F',
+      outCol: 'N',
+      outTitle: "风险点"
+    }
+    const findSubjectIndex = getColByLetter(readConfig.findSubjectCol);
+    const findSummaryIndex = getColByLetter(readConfig.findSummaryCol);
+    const outIndex = getColByLetter(readConfig.outCol);
+
+    const outSheet = {
+      name: "风险排查结果",
+      rows: {} as any,
+    }
+    let outRows:any[] = []
+
+    console.time("process risk")
+    const { rows } = this.datas[this.getSheetIndexByName(readConfig.sheetName)];
+    Object.entries(rows._).forEach(([ri, row]: any) => {
+
+      const tempRows:any[] = []
+      // const insertRow = cloneDeep(row);
+      const insertRow = row;
+      if (row && row.cells) {
+        const subjectText = row.cells[findSubjectIndex]?.text;
+        const summaryText = row.cells[findSummaryIndex]?.text;
+        // 首行标题
+        if(ri == 0){
+          insertRow.cells[outIndex] = { text: readConfig.outTitle };
+          tempRows.push(insertRow)
+        } else {
+          riskConfig.forEach(m=>{
+            // 匹配科目名称和科目摘要
+            if(
+              (m.findSubjectReg && new RegExp(m.findSubjectReg).test(subjectText)) ||
+              (m.findSummaryReg && new RegExp(m.findSummaryReg).test(summaryText))
+            ){
+              insertRow.cells[outIndex] = { text: m.outText };
+              tempRows.push(insertRow)
+            }
+          })
+        }
+      }
+
+      // if(tempRows.length === 0){
+      //   tempRows.push({
+      //     ...insertRow,
+      //     hide: !showAll,
+      //   })
+      // }
+      if(showAll && tempRows.length === 0){
+        tempRows.push(insertRow)
+      }
+
+      outRows = outRows.concat(tempRows)
+    });
+
+    outRows.forEach((m,n)=>{
+      outSheet.rows[n] = m
+    })
+    outSheet.rows.len = outRows.length
+
+    console.timeEnd("process risk")
+    console.log("risk outSheet", outSheet)
+    return outSheet
+  }
+
 }

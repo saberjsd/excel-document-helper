@@ -247,7 +247,7 @@
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.1",
     "regenerator-runtime": "^0.13.9",
-    "x-data-spreadsheet": "^1.1.9",
+    "x-data-spreadsheet": "git+https://github.com/saberjsd/x-spreadsheet.git#master",
     "xlsx": "^0.17.5"
   },
   "devEngines": {

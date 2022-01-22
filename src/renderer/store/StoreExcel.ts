@@ -42,9 +42,12 @@ const StoreExcel = observable({
   showResultSheet(sheetData: any, isReset?: boolean) {
     const saveData = () => {
       if (isReset) {
-        this.resultSheets = [];
+        this.resultSheets = [sheetData];
       } else {
         this.resultSheets.unshift(sheetData);
+        if(this.resultSheets.length >= 10){
+          this.resultSheets.length === 10
+        }
       }
 
       if (this.resultExcelInstance instanceof MySpreadsheet) {
@@ -128,6 +131,8 @@ const StoreExcel = observable({
 
   checkRisk(){
     const riskConfig = this.excelInstance.loadRiskConfig()
+    const outSheet = this.excelInstance.getRiskRows(riskConfig)
+    this.showResultSheet(outSheet);
   }
 
 });

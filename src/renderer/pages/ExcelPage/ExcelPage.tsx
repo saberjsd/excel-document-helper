@@ -47,11 +47,13 @@ export default function Header(props: any) {
   };
   const checkRisk = () => {
     StoreExcel.checkRisk()
+    StoreExcel.toggleDailog(true);
   };
 
   const showReultDailog = (value: string) => {
-    if (!value) return;
-    StoreExcel.getGroupExcel(value)
+    if (value){
+      StoreExcel.getGroupExcel(value)
+    }
     StoreExcel.toggleDailog(true);
   };
 
