@@ -1,5 +1,6 @@
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
+import { FeatureType } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { compareConfig } from './compareConfig';
@@ -13,6 +14,7 @@ const StoreExcel = observable({
   resultDialogRendered: false,
   resultDialogCallback: null as any,
   resultSheets: [] as any[],
+  resultType: undefined as any as FeatureType,
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
       const dom = document.getElementById(this.excelId);
@@ -36,6 +38,10 @@ const StoreExcel = observable({
   // 结果弹窗
   toggleDailog(visible: boolean) {
     this.resultDialogVisible = visible;
+    if(!visible){
+      // @ts-ignore
+      this.resultType = undefined
+    }
   },
 
   // 将结果展示到弹窗
@@ -72,6 +78,7 @@ const StoreExcel = observable({
   },
 
   getGroupExcel(text: string) {
+    this.resultType = FeatureType.FILTER_EXCEL;
     const filterConfig = {
       sheetName: '序时帐',
       findCol: 'E',
@@ -88,7 +95,7 @@ const StoreExcel = observable({
     const sdata = {
       name: `筛选“${text}”结果`,
       rows: { len: rows.length },
-      styles: [{ bgcolor: '#f7ccac' }, { bgcolor: '#e3efd9' }],
+      styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
     };
     rows.forEach((m: any, n: string | number) => {
       // @ts-ignore
@@ -100,6 +107,7 @@ const StoreExcel = observable({
 
   // 三表勾稽
   compareSheet() {
+    this.resultType = FeatureType.COMPARE_EXCEL;
     // 利润表
     const profitSheet = this.excelInstance.getSheetByName('利润表');
     // 余额表
@@ -130,9 +138,15 @@ const StoreExcel = observable({
   },
 
   checkRisk(){
+    this.resultType = FeatureType.CHECK_RICK;
     const riskConfig = this.excelInstance.loadRiskConfig()
     const outSheet = this.excelInstance.getRiskRows(riskConfig)
     this.showResultSheet(outSheet);
+  },
+  saveRisk(){
+    const riskConfig = this.excelInstance.loadRiskConfig()
+    const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
+    // this.showResultSheet(outSheet);
   }
 
 });

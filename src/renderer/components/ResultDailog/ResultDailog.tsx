@@ -7,15 +7,18 @@ import StoreExcel from 'renderer/store/StoreExcel';
 import { DownloadOutlined } from '@ant-design/icons';
 import './styles.scss';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
+import { FeatureType } from 'renderer/constants';
 
 export default function ResultDailog(props: any) {
   const [visible, setVisible] = useState(false);
   const [fullScreen, setFullScreen] = useState(true);
+  const [featureType, setFeatureType] = useState<FeatureType>();
 
   useEffect(() => {
     const disposer = autorun(() => {
-      const { resultDialogVisible } = StoreExcel;
+      const { resultDialogVisible, resultType } = StoreExcel;
       setVisible(resultDialogVisible);
+      setFeatureType(resultType);
     });
 
     return disposer;
@@ -23,9 +26,9 @@ export default function ResultDailog(props: any) {
 
   const toggleFullScreen = () => {
     setFullScreen(!fullScreen);
-    if(!fullScreen){
+    if (!fullScreen) {
       setTimeout(() => {
-        StoreExcel.resultExcelInstance.resize()
+        StoreExcel.resultExcelInstance.resize();
       }, 200);
     }
   };
@@ -41,11 +44,14 @@ export default function ResultDailog(props: any) {
       StoreExcel.resultExcelInstance.downloadExcel();
     }
   };
-
   const exportCurrentExcel = () => {
     if (StoreExcel.resultExcelInstance) {
       StoreExcel.resultExcelInstance.downloadSheet();
     }
+  };
+
+  const saveRiskData = () => {
+    StoreExcel.saveRisk()
   };
 
   return (
@@ -68,10 +74,29 @@ export default function ResultDailog(props: any) {
               <ArrowsAltOutlined onClick={toggleFullScreen} />
             )} */}
 
-            <Button danger type="primary" icon={<DownloadOutlined />} onClick={exportExcel}>
+            {featureType === FeatureType.CHECK_RICK && (
+              <Button
+                type="primary"
+                danger
+                icon={<DownloadOutlined />}
+                onClick={saveRiskData}
+              >
+                同步风险结果到序时账
+              </Button>
+            )}
+
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={exportExcel}
+            >
               导出整个表格
             </Button>
-            <Button danger type="primary" icon={<DownloadOutlined />} onClick={exportCurrentExcel}>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={exportCurrentExcel}
+            >
               导出当前sheet
             </Button>
           </div>
@@ -94,9 +119,9 @@ export default function ResultDailog(props: any) {
 
 function DailogExcel(props: any) {
   useEffect(() => {
-    console.log(66666)
-    EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true)
-    StoreExcel.resultDialogRendered = true
+    console.log(66666);
+    EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true);
+    StoreExcel.resultDialogRendered = true;
   }, []);
   return <div id={StoreExcel.resultExcelId} className="dailog_excel"></div>;
 }
