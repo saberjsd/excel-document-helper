@@ -68,10 +68,10 @@ export default function ResultDailog(props: any) {
               <ArrowsAltOutlined onClick={toggleFullScreen} />
             )} */}
 
-            <Button icon={<DownloadOutlined />} onClick={exportExcel}>
+            <Button danger type="primary" icon={<DownloadOutlined />} onClick={exportExcel}>
               导出整个表格
             </Button>
-            <Button type="primary" icon={<DownloadOutlined />} onClick={exportCurrentExcel}>
+            <Button danger type="primary" icon={<DownloadOutlined />} onClick={exportCurrentExcel}>
               导出当前sheet
             </Button>
           </div>

@@ -8,6 +8,7 @@ import 'x-data-spreadsheet/src/index.less';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { getColByLetter } from 'renderer/utils';
+import StoreRoot from 'renderer/store/StoreRoot';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -159,6 +160,7 @@ export default class MySpreadsheet extends Spreadsheet {
     if (!file) {
       return;
     }
+    StoreRoot.rootLoading = true;
 
     let workbook_object = await new Promise((resolve, rejest) => {
       let reader = new FileReader();
@@ -205,6 +207,7 @@ export default class MySpreadsheet extends Spreadsheet {
     /* load data */
     // @ts-ignore
     this.loadData(XLSXspread.stox(workbook_object));
+    StoreRoot.rootLoading = false;
   }
 
   /**

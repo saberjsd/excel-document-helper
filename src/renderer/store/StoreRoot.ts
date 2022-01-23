@@ -2,6 +2,7 @@ import { observable } from 'mobx';
 
 const StoreRoot = observable({
   currentMenu: "excel_1",
+  rootLoading: false,
   init() {},
   setStore(options: { [x: string]: any }) {
     for (const key in options) {

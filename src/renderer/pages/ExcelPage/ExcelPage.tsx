@@ -69,7 +69,7 @@ export default function Header(props: any) {
           >
             导入表格
           </Button>
-          <Button icon={<DownloadOutlined />} onClick={exportExcel}>
+          <Button danger type="primary" icon={<DownloadOutlined />} onClick={exportExcel}>
             导出表格
           </Button>
           <Button icon={<SearchOutlined />} onClick={showCompare}>
