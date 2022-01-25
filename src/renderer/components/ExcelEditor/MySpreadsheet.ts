@@ -105,9 +105,9 @@ export default class MySpreadsheet extends Spreadsheet {
     }
   }
 
-  getCurrentSheetIndex(){
+  getCurrentSheetIndex() {
     // @ts-ignore
-    return  this.bottombar.items.findIndex(m=>m === this.bottombar.activeEl)
+    return this.bottombar.items.findIndex((m) => m === this.bottombar.activeEl);
   }
 
   downloadExcel() {
@@ -143,15 +143,19 @@ export default class MySpreadsheet extends Spreadsheet {
     var new_wb = XLSXspread.xtos(this.getData());
     /* write file and trigger a download */
     // @ts-ignore
-    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {cellStyles: true});
+    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
+      cellStyles: true,
+    });
   }
 
-  downloadSheet(sheetIndex: number = this.getCurrentSheetIndex()){
-    const data = [this.datas[sheetIndex].getData()]
+  downloadSheet(sheetIndex: number = this.getCurrentSheetIndex()) {
+    const data = [this.datas[sheetIndex].getData()];
     // @ts-ignore
     const new_wb = XLSXspread.xtos(data);
     // @ts-ignore
-    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {cellStyles: true});
+    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
+      cellStyles: true,
+    });
   }
 
   async importExcel() {
@@ -168,7 +172,7 @@ export default class MySpreadsheet extends Spreadsheet {
       reader.onload = (e) => {
         var data = e.target!.result;
         // @ts-ignore
-        resolve(XLSX.read(data, {type: 'binary', cellStyles: true}));
+        resolve(XLSX.read(data, { type: 'binary', cellStyles: true }));
       };
 
       reader.onerror = () => {
@@ -531,10 +535,16 @@ export default class MySpreadsheet extends Spreadsheet {
       this.getSheetIndexByName(readRiskConfig.sheetName),
       [findSubjectIndex, findSummaryIndex, outColIndex],
       (outCols) => {
-        const findSubjectText = outCols[findSubjectIndex]?.text
-        const findSummaryText = outCols[findSummaryIndex]?.text
-        const findSubjectReg = (findSubjectText || "").split("、").filter((m:any)=>m).join("|");
-        const findSummaryReg = (findSummaryText || "").split("、").filter((m:any)=>m).join("|");
+        const findSubjectText = outCols[findSubjectIndex]?.text;
+        const findSummaryText = outCols[findSummaryIndex]?.text;
+        const findSubjectReg = (findSubjectText || '')
+          .split('、')
+          .filter((m: any) => m)
+          .join('|');
+        const findSummaryReg = (findSummaryText || '')
+          .split('、')
+          .filter((m: any) => m)
+          .join('|');
         riskConfig.push({
           findSubjectReg,
           findSummaryReg,
@@ -543,53 +553,63 @@ export default class MySpreadsheet extends Spreadsheet {
       }
     );
 
-    console.log("====riskConfig",riskConfig)
-    return riskConfig
+    console.log('====riskConfig', riskConfig);
+    return riskConfig;
   }
 
-  getRiskRows(riskConfig: any[], showAll?: boolean, isReplace?:boolean){
+  getRiskRows(riskConfig: any[], showAll?: boolean, isReplace?: boolean) {
     const readConfig = {
       sheetName: '序时账',
       findSubjectCol: 'E',
       findSummaryCol: 'F',
       outCol: 'N',
-      outTitle: "风险点"
-    }
+    };
     const findSubjectIndex = getColByLetter(readConfig.findSubjectCol);
     const findSummaryIndex = getColByLetter(readConfig.findSummaryCol);
     const outIndex = getColByLetter(readConfig.outCol);
 
     const outSheet = {
-      name: "风险排查结果",
+      name: '风险排查结果',
       rows: {} as any,
-    }
-    let outRows:any[] = []
+    };
+    let outRows: any[] = [];
 
-    console.time("process risk")
+    console.time('process risk');
     const { rows } = this.datas[this.getSheetIndexByName(readConfig.sheetName)];
     Object.entries(rows._).forEach(([ri, row]: any) => {
-
-      const tempRows:any[] = []
+      const tempRows: any[] = [];
       if (row && row.cells) {
         const subjectText = row.cells[findSubjectIndex]?.text;
         const summaryText = row.cells[findSummaryIndex]?.text;
         // 首行标题
-        if(ri == 0){
+        if (ri == 0) {
           const insertRow = cloneDeep(row);
-          insertRow.cells[outIndex] = { text: readConfig.outTitle };
-          tempRows.push(insertRow)
+          insertRow.cells[outIndex] = { text: '风险点1' };
+          insertRow.cells[outIndex + 1] = { text: '确认签字' };
+          insertRow.cells[outIndex + 2] = { text: '风险点2' };
+          insertRow.cells[outIndex + 3] = { text: '确认签字' };
+          insertRow.cells[outIndex + 4] = { text: '风险点3' };
+          insertRow.cells[outIndex + 5] = { text: '确认签字' };
+          insertRow.cells[outIndex + 6] = { text: '风险点4' };
+          insertRow.cells[outIndex + 7] = { text: '确认签字' };
+          tempRows.push(insertRow);
         } else {
-          riskConfig.forEach(m=>{
+          const insertRow = cloneDeep(row);
+          const matchRisk = riskConfig.filter(
+            (m) =>
+              (m.findSubjectReg &&
+                new RegExp(m.findSubjectReg).test(subjectText)) ||
+              (m.findSummaryReg &&
+                new RegExp(m.findSummaryReg).test(summaryText))
+          );
+          const hasRisk = matchRisk.length > 0;
+          matchRisk.forEach((m, n) => {
             // 匹配科目名称和科目摘要
-            if(
-              (m.findSubjectReg && new RegExp(m.findSubjectReg).test(subjectText)) ||
-              (m.findSummaryReg && new RegExp(m.findSummaryReg).test(summaryText))
-            ){
-              const insertRow = cloneDeep(row);
-              insertRow.cells[outIndex] = { text: m.outText };
-              tempRows.push(insertRow)
-            }
-          })
+            insertRow.cells[outIndex + n * 2] = { text: m.outText };
+          });
+          if (hasRisk) {
+            tempRows.push(insertRow);
+          }
         }
       }
 
@@ -599,9 +619,9 @@ export default class MySpreadsheet extends Spreadsheet {
       //     hide: !showAll,
       //   })
       // }
-      if(showAll && tempRows.length === 0){
+      if (showAll && tempRows.length === 0) {
         const insertRow = cloneDeep(row);
-        tempRows.unshift(insertRow)
+        tempRows.unshift(insertRow);
       }
 
       // 添加样式
@@ -618,29 +638,29 @@ export default class MySpreadsheet extends Spreadsheet {
       //   m.style =
       // })
 
-      outRows = outRows.concat(tempRows)
+      outRows = outRows.concat(tempRows);
     });
 
-    if(isReplace){
-      outRows.forEach((m,n)=>{
-        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows._[n] = m
-        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows.len = outRows.length
-      })
+    if (isReplace) {
+      outRows.forEach((m, n) => {
+        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows._[n] =
+          m;
+        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows.len =
+          outRows.length;
+      });
     } else {
-      outRows.forEach((m,n)=>{
-        outSheet.rows[n] = m
-      })
-      outSheet.rows.len = outRows.length
+      outRows.forEach((m, n) => {
+        outSheet.rows[n] = m;
+      });
+      outSheet.rows.len = outRows.length;
     }
-
 
     // if(isReplace){
     //   this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows = outRows
     // }
 
-    console.timeEnd("process risk")
-    console.log("risk outSheet", outSheet)
-    return outSheet
+    console.timeEnd('process risk');
+    console.log('risk outSheet', outSheet);
+    return outSheet;
   }
-
 }

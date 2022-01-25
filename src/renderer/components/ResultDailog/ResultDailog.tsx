@@ -12,7 +12,10 @@ import { FeatureType } from 'renderer/constants';
 export default function ResultDailog(props: any) {
   const [visible, setVisible] = useState(false);
   const [fullScreen, setFullScreen] = useState(true);
+  // 当前弹窗的类型
   const [featureType, setFeatureType] = useState<FeatureType>();
+  // 风险同步按钮的loading
+  const [riskLoading, setRiskLoading] = useState(false);
 
   useEffect(() => {
     const disposer = autorun(() => {
@@ -51,7 +54,12 @@ export default function ResultDailog(props: any) {
   };
 
   const saveRiskData = () => {
-    StoreExcel.saveRisk()
+    setRiskLoading(true)
+    setTimeout(()=>{
+      StoreExcel.saveRisk()
+      setRiskLoading(false)
+
+    })
   };
 
   return (
@@ -80,6 +88,7 @@ export default function ResultDailog(props: any) {
                 danger
                 icon={<DownloadOutlined />}
                 onClick={saveRiskData}
+                loading={riskLoading}
               >
                 同步风险结果到序时账
               </Button>

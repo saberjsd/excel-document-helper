@@ -147,6 +147,7 @@ const StoreExcel = observable({
     const riskConfig = this.excelInstance.loadRiskConfig()
     const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
     // this.showResultSheet(outSheet);
+    this.toggleDailog(false)
   }
 
 });
