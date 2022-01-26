@@ -7,7 +7,7 @@ import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { compareConfig } from './compareConfig';
 
-let resultSheets:any[] = []
+let resultSheets: any[] = [];
 
 const StoreExcel = observable({
   excelId: 'treeSheetCompare',
@@ -41,22 +41,22 @@ const StoreExcel = observable({
   // 结果弹窗
   toggleDailog(visible: boolean) {
     this.resultDialogVisible = visible;
-    if(!visible){
+    if (!visible) {
       // @ts-ignore
-      this.resultType = undefined
+      this.resultType = undefined;
     }
   },
 
   // 将结果展示到弹窗
   showResultSheet(sheetData: any, isReset?: boolean) {
-    sheetData.cid = cuid()
+    sheetData.cid = cuid();
     const saveData = () => {
       if (isReset) {
         resultSheets = [sheetData];
       } else {
         resultSheets.unshift(sheetData);
-        if(resultSheets.length >= 10){
-          resultSheets.length === 10
+        if (resultSheets.length >= 10) {
+          resultSheets.length === 10;
         }
       }
 
@@ -85,25 +85,36 @@ const StoreExcel = observable({
     this.resultType = FeatureType.FILTER_EXCEL;
     const filterConfig = {
       sheetName: '序时帐',
+      firstRow: 1,
       findCol: 'E',
       groupCol: 'C',
     };
-    const rows = this.excelInstance.getGroupRows({
+
+    const sheetIndex = this.excelInstance.getSheetIndexByName(
+      filterConfig.sheetName
+    );
+    // 表头数据
+    const headRows = this.excelInstance.getHeadRows(sheetIndex);
+    // 打组数据
+    const groupRows = this.excelInstance.getGroupRows({
       text,
-      sheetIndex: this.excelInstance.getSheetIndexByName(
-        filterConfig.sheetName
-      ),
+      sheetIndex,
       findCol: getColByLetter(filterConfig.findCol),
       groupCol: getColByLetter(filterConfig.groupCol),
     });
     const sdata = {
       name: `筛选“${text}”结果`,
-      rows: { len: rows.length },
+      rows: { len: headRows.length + groupRows.length },
       styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
     };
-    rows.forEach((m: any, n: string | number) => {
+
+    headRows.forEach((m,n)=>{
       // @ts-ignore
-      sdata.rows[n] = m;
+      sdata.rows[n] = cloneDeep(m);
+    })
+    groupRows.forEach((m: any, n: string | number) => {
+      // @ts-ignore
+      sdata.rows[n + headRows.length] = m;
     });
 
     this.showResultSheet(sdata);
@@ -119,7 +130,6 @@ const StoreExcel = observable({
     // 序时帐
     const billSheet = this.excelInstance.getSheetByName('序时帐');
 
-
     const resultRows = {
       len: 100,
       '0': {
@@ -133,7 +143,11 @@ const StoreExcel = observable({
     };
 
     this.excelInstance.caclSumWithRows(resultRows, compareConfig, 'billSheet');
-    this.excelInstance.caclSumWithRows(resultRows, compareConfig, 'balanceSheet');
+    this.excelInstance.caclSumWithRows(
+      resultRows,
+      compareConfig,
+      'balanceSheet'
+    );
 
     this.showResultSheet({
       name: `勾稽结果`,
@@ -141,36 +155,49 @@ const StoreExcel = observable({
     });
   },
 
-  checkRisk(){
+  checkRisk() {
     this.resultType = FeatureType.CHECK_RICK;
-    const riskConfig = this.excelInstance.loadRiskConfig()
-    const outSheet = this.excelInstance.getRiskRows(riskConfig)
+    const riskConfig = this.excelInstance.loadRiskConfig();
+    const outSheet = this.excelInstance.getRiskRows(riskConfig);
     this.showResultSheet(outSheet);
   },
-  saveRisk(){
+  saveRisk() {
     // const riskConfig = this.excelInstance.loadRiskConfig()
     // const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
     // this.showResultSheet(outSheet);
-    const cid = this.resultExcelInstance.datas[0].cid
-    this.syncData(cid)
-    this.toggleDailog(false)
+    const cid = this.resultExcelInstance.datas[0].cid;
+    this.syncData(cid);
+    this.toggleDailog(false);
   },
 
-  syncData(cid: string){
-    const sourceSheet = this.resultExcelInstance.findSheetByCid(cid)
-    if(sourceSheet){
-      const outSheetData = sourceSheet.getData();
-      const targetSheet = this.excelInstance.findSheetByName("序时账");
-      Object.entries(outSheetData.rows).forEach(([ri, row])=>{
-        // const resRow:any = cloneDeep(row);
-        const resRow:any = row;
-        if(typeof resRow === "object" && !resRow.hide){
-          targetSheet.rows._[ri] = resRow
-        }
-      })
-    }
-  }
+  saveFilter() {
+    const cid = this.resultExcelInstance.datas[0].cid;
+    this.syncData(cid);
+    this.toggleDailog(false);
+  },
 
+  syncData(cid: string, options = {} as any) {
+    const { justText } = options
+    const sourceSheet = this.resultExcelInstance.findSheetByCid(cid);
+    if (sourceSheet) {
+      const outSheetData = sourceSheet.getData();
+      const targetSheet = this.excelInstance.findSheetByName('序时账');
+      Object.entries(outSheetData.rows).forEach(([ri, row]) => {
+        // const resRow:any = cloneDeep(row);
+        const resRow: any = row;
+        if (typeof resRow === 'object' && !resRow.hide) {
+          if(justText){
+            // Object.entries(resRow.cells).forEach(([ci,col])=>{
+
+            // })
+
+          } else {
+            targetSheet.rows._[ri] = resRow;
+          }
+        }
+      });
+    }
+  },
 });
 
 // @ts-ignore

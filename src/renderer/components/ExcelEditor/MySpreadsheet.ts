@@ -9,6 +9,7 @@ import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { addStyles, getColByLetter } from 'renderer/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
+import cuid from 'cuid';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -33,11 +34,28 @@ const defaultOptions = (container: string, opts: any) => {
 export default class MySpreadsheet extends Spreadsheet {
   targetEl;
   datas!: [any];
+  // 表头有几行
+  headRow: number = 1
   // sheet: any;
 
   constructor(container: string, opts?: Options | undefined) {
     super(container, defaultOptions(container, opts));
     this.targetEl = document.querySelector(container);
+  }
+
+  /**
+   * 获取所有表头行
+   * @param sheetIndex
+   * @param headRow
+   * @returns
+   */
+  getHeadRows(sheetIndex: number = 0, headRow: number = this.headRow){
+    const headRows:any[] = []
+    for (let i = 0; i < headRow; i++) {
+      const sheet = this.datas[sheetIndex]
+      headRows.push(cloneDeep(sheet.rows._[i]))
+    }
+    return headRows
   }
 
   // 设置数据
@@ -208,9 +226,21 @@ export default class MySpreadsheet extends Spreadsheet {
     //   return out;
     // }
 
-    /* load data */
     // @ts-ignore
-    this.loadData(XLSXspread.stox(workbook_object));
+    const sheets = XLSXspread.stox(workbook_object)
+    // 导入的数据都加上主键，方便后面查找修改
+    sheets.forEach((m:any)=>{
+      if(m.rows){
+        Object.entries<any>(m.rows).forEach(([ri,row])=>{
+          if(typeof row === "object"){
+            row.rowId = cuid()
+          }
+        })
+      }
+    })
+
+    /* load data */
+    this.loadData(sheets);
     StoreRoot.rootLoading = false;
   }
 

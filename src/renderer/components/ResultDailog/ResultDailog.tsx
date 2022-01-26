@@ -16,6 +16,8 @@ export default function ResultDailog(props: any) {
   const [featureType, setFeatureType] = useState<FeatureType>();
   // 风险同步按钮的loading
   const [riskLoading, setRiskLoading] = useState(false);
+  // 筛选同步按钮的loading
+  const [filterLoading, setFilterLoading] = useState(false);
 
   useEffect(() => {
     const disposer = autorun(() => {
@@ -58,7 +60,14 @@ export default function ResultDailog(props: any) {
     setTimeout(()=>{
       StoreExcel.saveRisk()
       setRiskLoading(false)
+    })
+  };
 
+  const saveFilterData = () => {
+    setFilterLoading(true)
+    setTimeout(()=>{
+      StoreExcel.saveFilter()
+      setFilterLoading(false)
     })
   };
 
@@ -91,6 +100,17 @@ export default function ResultDailog(props: any) {
                 loading={riskLoading}
               >
                 同步风险结果到序时账
+              </Button>
+            )}
+            {featureType === FeatureType.FILTER_EXCEL && (
+              <Button
+                type="primary"
+                danger
+                icon={<DownloadOutlined />}
+                onClick={saveFilterData}
+                loading={filterLoading}
+              >
+                同步筛选结果到序时账
               </Button>
             )}
 
