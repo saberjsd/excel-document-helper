@@ -456,6 +456,12 @@ export default class MySpreadsheet extends Spreadsheet {
     }
     return null;
   }
+  findSheetByCid(cid: string){
+    return this.datas.find(m=>m.cid === cid)
+  }
+  findSheetByName(sheetName: string){
+    return this.datas.find(m=>m.name === sheetName)
+  }
 
   /**
    * 三表勾稽，数据汇总
@@ -584,6 +590,7 @@ export default class MySpreadsheet extends Spreadsheet {
         // 首行标题
         if (ri == 0) {
           const insertRow = cloneDeep(row);
+          // const insertRow = row;
           insertRow.cells[outIndex] = { text: '风险点1' };
           insertRow.cells[outIndex + 1] = { text: '确认签字' };
           insertRow.cells[outIndex + 2] = { text: '风险点2' };
@@ -595,6 +602,7 @@ export default class MySpreadsheet extends Spreadsheet {
           tempRows.push(insertRow);
         } else {
           const insertRow = cloneDeep(row);
+          // const insertRow = row;
           const matchRisk = riskConfig.filter(
             (m) =>
               (m.findSubjectReg &&
@@ -609,6 +617,7 @@ export default class MySpreadsheet extends Spreadsheet {
           });
           if (hasRisk) {
             tempRows.push(insertRow);
+            insertRow.originRow = ri
           }
         }
       }
@@ -619,8 +628,11 @@ export default class MySpreadsheet extends Spreadsheet {
       //     hide: !showAll,
       //   })
       // }
-      if (showAll && tempRows.length === 0) {
+      // if (showAll && tempRows.length === 0) {
+      if (tempRows.length === 0) {
         const insertRow = cloneDeep(row);
+        // const insertRow = row;
+        insertRow.hide = true
         tempRows.unshift(insertRow);
       }
 

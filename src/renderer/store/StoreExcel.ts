@@ -1,9 +1,13 @@
+import cuid from 'cuid';
+import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 import { FeatureType } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { compareConfig } from './compareConfig';
+
+let resultSheets:any[] = []
 
 const StoreExcel = observable({
   excelId: 'treeSheetCompare',
@@ -13,7 +17,6 @@ const StoreExcel = observable({
   resultDialogVisible: false,
   resultDialogRendered: false,
   resultDialogCallback: null as any,
-  resultSheets: [] as any[],
   resultType: undefined as any as FeatureType,
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -46,13 +49,14 @@ const StoreExcel = observable({
 
   // 将结果展示到弹窗
   showResultSheet(sheetData: any, isReset?: boolean) {
+    sheetData.cid = cuid()
     const saveData = () => {
       if (isReset) {
-        this.resultSheets = [sheetData];
+        resultSheets = [sheetData];
       } else {
-        this.resultSheets.unshift(sheetData);
-        if(this.resultSheets.length >= 10){
-          this.resultSheets.length === 10
+        resultSheets.unshift(sheetData);
+        if(resultSheets.length >= 10){
+          resultSheets.length === 10
         }
       }
 
@@ -61,7 +65,7 @@ const StoreExcel = observable({
         this.resultExcelInstance = new MySpreadsheet(`#${this.resultExcelId}`);
       }
       // @ts-ignore
-      this.resultExcelInstance.loadData(this.resultSheets);
+      this.resultExcelInstance.loadData(resultSheets);
       requestAnimationFrame(() => {
         // @ts-ignore
         this.resultExcelInstance.reRender();
@@ -144,10 +148,27 @@ const StoreExcel = observable({
     this.showResultSheet(outSheet);
   },
   saveRisk(){
-    const riskConfig = this.excelInstance.loadRiskConfig()
-    const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
+    // const riskConfig = this.excelInstance.loadRiskConfig()
+    // const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
     // this.showResultSheet(outSheet);
+    const cid = this.resultExcelInstance.datas[0].cid
+    this.syncData(cid)
     this.toggleDailog(false)
+  },
+
+  syncData(cid: string){
+    const sourceSheet = this.resultExcelInstance.findSheetByCid(cid)
+    if(sourceSheet){
+      const outSheetData = sourceSheet.getData();
+      const targetSheet = this.excelInstance.findSheetByName("序时账");
+      Object.entries(outSheetData.rows).forEach(([ri, row])=>{
+        // const resRow:any = cloneDeep(row);
+        const resRow:any = row;
+        if(typeof resRow === "object" && !resRow.hide){
+          targetSheet.rows._[ri] = resRow
+        }
+      })
+    }
   }
 
 });
