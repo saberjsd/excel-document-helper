@@ -228,7 +228,9 @@ export default class MySpreadsheet extends Spreadsheet {
 
     // @ts-ignore
     const sheets = XLSXspread.stox(workbook_object)
+
     // 导入的数据都加上主键，方便后面查找修改
+    console.time("insert id")
     sheets.forEach((m:any)=>{
       if(m.rows){
         Object.entries<any>(m.rows).forEach(([ri,row])=>{
@@ -238,6 +240,7 @@ export default class MySpreadsheet extends Spreadsheet {
         })
       }
     })
+    console.timeEnd("insert id")
 
     /* load data */
     this.loadData(sheets);
@@ -380,6 +383,8 @@ export default class MySpreadsheet extends Spreadsheet {
             // @ts-ignore
             cell.style = j % 2;
           });
+          // 记录原来的行号，方便数据回写
+          item.originRow = ri
           rows.push(item);
         }
       });
@@ -619,8 +624,9 @@ export default class MySpreadsheet extends Spreadsheet {
         const summaryText = row.cells[findSummaryIndex]?.text;
         // 首行标题
         if (ri == 0) {
-          const insertRow = cloneDeep(row);
           // const insertRow = row;
+          const insertRow = cloneDeep(row);
+          insertRow.originRow = ri;
           insertRow.cells[outIndex] = { text: '风险点1' };
           insertRow.cells[outIndex + 1] = { text: '确认签字' };
           insertRow.cells[outIndex + 2] = { text: '风险点2' };
@@ -632,6 +638,7 @@ export default class MySpreadsheet extends Spreadsheet {
           tempRows.push(insertRow);
         } else {
           const insertRow = cloneDeep(row);
+          insertRow.originRow = ri;
           // const insertRow = row;
           const matchRisk = riskConfig.filter(
             (m) =>
@@ -658,11 +665,12 @@ export default class MySpreadsheet extends Spreadsheet {
       //     hide: !showAll,
       //   })
       // }
-      // if (showAll && tempRows.length === 0) {
-      if (tempRows.length === 0) {
+      if (showAll && tempRows.length === 0) {
+      // if (tempRows.length === 0) {
         const insertRow = cloneDeep(row);
+        insertRow.originRow = ri;
         // const insertRow = row;
-        insertRow.hide = true
+        // insertRow.hide = true
         tempRows.unshift(insertRow);
       }
 

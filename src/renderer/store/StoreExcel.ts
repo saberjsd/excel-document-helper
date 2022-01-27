@@ -108,10 +108,10 @@ const StoreExcel = observable({
       styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
     };
 
-    headRows.forEach((m,n)=>{
+    headRows.forEach((m, n) => {
       // @ts-ignore
       sdata.rows[n] = cloneDeep(m);
-    })
+    });
     groupRows.forEach((m: any, n: string | number) => {
       // @ts-ignore
       sdata.rows[n + headRows.length] = m;
@@ -166,18 +166,18 @@ const StoreExcel = observable({
     // const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
     // this.showResultSheet(outSheet);
     const cid = this.resultExcelInstance.datas[0].cid;
-    this.syncData(cid);
+    this.syncData(cid, { useOriginRow: true });
     this.toggleDailog(false);
   },
 
   saveFilter() {
     const cid = this.resultExcelInstance.datas[0].cid;
-    this.syncData(cid);
+    this.syncData(cid, { justText: true, useOriginRow: true });
     this.toggleDailog(false);
   },
 
   syncData(cid: string, options = {} as any) {
-    const { justText } = options
+    const { justText, useOriginRow } = options;
     const sourceSheet = this.resultExcelInstance.findSheetByCid(cid);
     if (sourceSheet) {
       const outSheetData = sourceSheet.getData();
@@ -185,14 +185,27 @@ const StoreExcel = observable({
       Object.entries(outSheetData.rows).forEach(([ri, row]) => {
         // const resRow:any = cloneDeep(row);
         const resRow: any = row;
-        if (typeof resRow === 'object' && !resRow.hide) {
-          if(justText){
-            // Object.entries(resRow.cells).forEach(([ci,col])=>{
-
-            // })
-
+        if (typeof resRow === 'object') {
+          const rowIndex = useOriginRow ? resRow.originRow : ri;
+          // 只保存文本
+          if (justText) {
+            // 根据原来数据的行号，回写数据
+            if (rowIndex && targetSheet.rows._[rowIndex]) {
+              Object.entries<any>(resRow.cells).forEach(([ci, cell]) => {
+                if (targetSheet.rows._[rowIndex].cells[ci]) {
+                  // 如果原来有东西，只改文案
+                  targetSheet.rows._[rowIndex].cells[ci].text = cell.text;
+                } else {
+                  // 如果没有，就只写入文案
+                  targetSheet.rows._[rowIndex].cells[ci] = {
+                    text: cell.text,
+                  };
+                }
+              });
+            }
           } else {
-            targetSheet.rows._[ri] = resRow;
+            // 整行保存
+            targetSheet.rows._[rowIndex] = resRow;
           }
         }
       });

@@ -4,7 +4,7 @@ import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import StoreExcel from 'renderer/store/StoreExcel';
 
-import { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, SyncOutlined } from '@ant-design/icons';
 import './styles.scss';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { FeatureType } from 'renderer/constants';
@@ -95,11 +95,11 @@ export default function ResultDailog(props: any) {
               <Button
                 type="primary"
                 danger
-                icon={<DownloadOutlined />}
+                icon={<SyncOutlined />}
                 onClick={saveRiskData}
                 loading={riskLoading}
               >
-                同步风险结果到序时账
+                同步最新风险结果到序时账
               </Button>
             )}
             {featureType === FeatureType.FILTER_EXCEL && (
@@ -110,7 +110,7 @@ export default function ResultDailog(props: any) {
                 onClick={saveFilterData}
                 loading={filterLoading}
               >
-                同步筛选结果到序时账
+                同步最新筛选结果到序时账
               </Button>
             )}
 

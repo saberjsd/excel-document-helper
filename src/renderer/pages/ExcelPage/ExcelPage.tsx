@@ -53,6 +53,9 @@ export default function Header(props: any) {
   const showReultDailog = (value: string) => {
     if (value){
       StoreExcel.getGroupExcel(value)
+    } else {
+      // 没有输入不处理
+      return
     }
     StoreExcel.toggleDailog(true);
   };
