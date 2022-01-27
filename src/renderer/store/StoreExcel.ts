@@ -18,6 +18,13 @@ const StoreExcel = observable({
   resultDialogRendered: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
+  // ------ 勾稽相关
+  compareConfig: [] as any[],
+  // 当前勾稽利润表配置
+  currentCompareConfigId: "",
+  // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）
+  compareIsSum: false,
+
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
       const dom = document.getElementById(this.excelId);
@@ -29,14 +36,14 @@ const StoreExcel = observable({
     // @ts-ignore
     window['FTExcel'] = this.excelInstance;
   },
-  setStore(options: { [x: string]: any }) {
-    for (const key in options) {
-      if (Object.prototype.hasOwnProperty.call(options, key)) {
-        // @ts-ignore
-        this[key] = options[key];
-      }
-    }
-  },
+  // setStore(options: { [x: string]: any }) {
+  //   for (const key in options) {
+  //     if (Object.prototype.hasOwnProperty.call(options, key)) {
+  //       // @ts-ignore
+  //       this[key] = options[key];
+  //     }
+  //   }
+  // },
 
   // 结果弹窗
   toggleDailog(visible: boolean) {
@@ -161,21 +168,23 @@ const StoreExcel = observable({
     const outSheet = this.excelInstance.getRiskRows(riskConfig);
     this.showResultSheet(outSheet);
   },
+  // 同步风险结果
   saveRisk() {
-    // const riskConfig = this.excelInstance.loadRiskConfig()
-    // const outSheet = this.excelInstance.getRiskRows(riskConfig, true, true)
-    // this.showResultSheet(outSheet);
     const cid = this.resultExcelInstance.datas[0].cid;
     this.syncData(cid, { useOriginRow: true });
     this.toggleDailog(false);
   },
-
+  // 同步筛选结果
   saveFilter() {
     const cid = this.resultExcelInstance.datas[0].cid;
     this.syncData(cid, { justText: true, useOriginRow: true });
     this.toggleDailog(false);
   },
-
+  /**
+   * 同步数据到序时账
+   * @param cid
+   * @param options
+   */
   syncData(cid: string, options = {} as any) {
     const { justText, useOriginRow } = options;
     const sourceSheet = this.resultExcelInstance.findSheetByCid(cid);
@@ -211,6 +220,18 @@ const StoreExcel = observable({
       });
     }
   },
+
+  getCompareConfigList(){
+    const readConfig = {
+      sheetName: '利润表-适用于已执行新金融准则|利润表-适用于未执行新金融准则等',
+      headRows: 3,
+      findSubjectCol: 'A',
+      findSummaryCol: 'B',
+      outCol: 'C',
+    };
+  }
+
+
 });
 
 // @ts-ignore
