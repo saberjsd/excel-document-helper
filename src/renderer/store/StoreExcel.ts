@@ -6,6 +6,7 @@ import { FeatureType } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { compareConfig } from './compareConfig';
+import { compareReadConfig } from './compareReadConfig';
 
 let resultSheets: any[] = [];
 
@@ -21,7 +22,7 @@ const StoreExcel = observable({
   // ------ 勾稽相关
   compareConfig: [] as any[],
   // 当前勾稽利润表配置
-  currentCompareConfigId: "",
+  currentCompareConfigId: 'profitExcuted',
   // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）
   compareIsSum: false,
 
@@ -130,36 +131,48 @@ const StoreExcel = observable({
   // 三表勾稽
   compareSheet() {
     this.resultType = FeatureType.COMPARE_EXCEL;
-    // 利润表
-    const profitSheet = this.excelInstance.getSheetByName('利润表');
-    // 余额表
-    const balanceSheet = this.excelInstance.getSheetByName('余额表');
-    // 序时帐
-    const billSheet = this.excelInstance.getSheetByName('序时帐');
 
-    const resultRows = {
-      len: 100,
-      '0': {
-        cells: {
-          '0': { text: '科目名称' },
-          '1': { text: '序时账' },
-          '2': { text: '余额表' },
-          '3': { text: '利润表' },
-        },
-      },
-    };
-
-    this.excelInstance.caclSumWithRows(resultRows, compareConfig, 'billSheet');
-    this.excelInstance.caclSumWithRows(
-      resultRows,
-      compareConfig,
-      'balanceSheet'
+    this.getCompareConfigList();
+    // // 利润表
+    // profitSheet
+    // // 余额表
+    // balanceSheet
+    // // 序时帐
+    // billSheet
+    let config = this.compareConfig.find(
+      (m) => m.id === this.currentCompareConfigId
     );
+    config = cloneDeep(config);
 
-    this.showResultSheet({
-      name: `勾稽结果`,
-      rows: resultRows,
-    });
+    // const resultRows: any = {
+    //   len: config.len,
+    // };
+    // config.headRows.forEach((m: any, n: number) => {
+    //   resultRows[n] = m;
+    // });
+
+    const profitSheet = this.excelInstance.findSheetByName("利润表");
+    const resultRows = profitSheet.rows._
+    this.excelInstance.caclSumWithRows(resultRows, config, 'billSheet');
+    this.excelInstance.caclSumWithRows(resultRows, config, 'balanceSheet');
+    // @ts-ignore
+    this.excelInstance.reRender();
+
+    // // 去除无用列
+    // Object.entries<any>(resultRows).forEach(([ri, row]) => {
+    //   if(typeof row === 'object'){
+    //     const outCells:any = {}
+    //     for (let i = 0; i < 5; i++) {
+    //       outCells[i] = row.cells[i]
+    //     }
+    //     row.cells = outCells
+    //   }
+    // })
+
+    // this.showResultSheet({
+    //   name: config.name,
+    //   rows: resultRows,
+    // });
   },
 
   checkRisk() {
@@ -221,17 +234,9 @@ const StoreExcel = observable({
     }
   },
 
-  getCompareConfigList(){
-    const readConfig = {
-      sheetName: '利润表-适用于已执行新金融准则|利润表-适用于未执行新金融准则等',
-      headRows: 3,
-      findSubjectCol: 'A',
-      findSummaryCol: 'B',
-      outCol: 'C',
-    };
-  }
-
-
+  getCompareConfigList() {
+    this.compareConfig = this.excelInstance.readCompareConfig(compareReadConfig);
+  },
 });
 
 // @ts-ignore

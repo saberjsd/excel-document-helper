@@ -1,3 +1,5 @@
+import { isEmpty } from "lodash";
+
 const mapCol = [
   'A',
   'B',
@@ -67,3 +69,10 @@ export const addStyles = (styles: any[], value: any) => {
   styles = styles || []
   return styles.push(value) - 1
 };
+
+export const isEmptyText = (value:any) => {
+  if(typeof value === "string"){
+    value = value.trim()
+  }
+  return isEmpty(value)
+}

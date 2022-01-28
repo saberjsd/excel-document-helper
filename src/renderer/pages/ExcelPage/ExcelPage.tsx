@@ -4,7 +4,7 @@ import {
   SearchOutlined,
   AlertOutlined,
 } from '@ant-design/icons';
-import { Button, Select } from 'antd';
+import { Button, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
@@ -46,8 +46,9 @@ export default function ExcelPage(props: any) {
     console.log(item);
   };
   const showCompare = () => {
-    StoreExcel.toggleDailog(true);
+    // StoreExcel.toggleDailog(true);
     StoreExcel.compareSheet();
+    message.success('三表勾稽结果已经写入利润表');
   };
 
   const checkRisk = () => {

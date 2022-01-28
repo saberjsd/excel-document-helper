@@ -7,7 +7,7 @@ import 'x-data-spreadsheet/src/index.less';
 // import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
-import { addStyles, getColByLetter } from 'renderer/utils';
+import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
 const Numeral = require('numeral');
@@ -35,7 +35,7 @@ export default class MySpreadsheet extends Spreadsheet {
   targetEl;
   datas!: [any];
   // 表头有几行
-  headRow: number = 1
+  headRow: number = 1;
   // sheet: any;
 
   constructor(container: string, opts?: Options | undefined) {
@@ -49,13 +49,13 @@ export default class MySpreadsheet extends Spreadsheet {
    * @param headRow
    * @returns
    */
-  getHeadRows(sheetIndex: number = 0, headRow: number = this.headRow){
-    const headRows:any[] = []
+  getHeadRows(sheetIndex: number = 0, headRow: number = this.headRow) {
+    const headRows: any[] = [];
     for (let i = 0; i < headRow; i++) {
-      const sheet = this.datas[sheetIndex]
-      headRows.push(cloneDeep(sheet.rows._[i]))
+      const sheet = this.datas[sheetIndex];
+      headRows.push(cloneDeep(sheet.rows._[i]));
     }
-    return headRows
+    return headRows;
   }
 
   // 设置数据
@@ -227,20 +227,20 @@ export default class MySpreadsheet extends Spreadsheet {
     // }
 
     // @ts-ignore
-    const sheets = XLSXspread.stox(workbook_object)
+    const sheets = XLSXspread.stox(workbook_object);
 
     // 导入的数据都加上主键，方便后面查找修改
-    console.time("insert id")
-    sheets.forEach((m:any)=>{
-      if(m.rows){
-        Object.entries<any>(m.rows).forEach(([ri,row])=>{
-          if(typeof row === "object"){
-            row.rowId = cuid()
+    console.time('insert id');
+    sheets.forEach((m: any) => {
+      if (m.rows) {
+        Object.entries<any>(m.rows).forEach(([ri, row]) => {
+          if (typeof row === 'object') {
+            row.rowId = cuid();
           }
-        })
+        });
       }
-    })
-    console.timeEnd("insert id")
+    });
+    console.timeEnd('insert id');
 
     /* load data */
     this.loadData(sheets);
@@ -384,7 +384,7 @@ export default class MySpreadsheet extends Spreadsheet {
             cell.style = j % 2;
           });
           // 记录原来的行号，方便数据回写
-          item.originRow = ri
+          item.originRow = ri;
           rows.push(item);
         }
       });
@@ -491,11 +491,40 @@ export default class MySpreadsheet extends Spreadsheet {
     }
     return null;
   }
-  findSheetByCid(cid: string){
-    return this.datas.find(m=>m.cid === cid)
+  findSheetByCid(cid: string) {
+    return this.datas.find((m) => m.cid === cid);
   }
-  findSheetByName(sheetName: string){
-    return this.datas.find(m=>m.name === sheetName)
+  findSheetByName(sheetName: string) {
+    return this.datas.find((m) => m.name === sheetName);
+  }
+
+  /**
+   * 读取勾稽配置
+   * @param readConfig
+   * @returns
+   */
+  readCompareConfig(readConfig: any) {
+    const compareConfigs: any[] = [];
+    readConfig.forEach((m: any) => {
+      const sheetIndex = this.getSheetIndexByName(m.name);
+      const { _, len } = this.datas[sheetIndex].rows;
+      const headRows: any[] = [];
+      const bodyRows: any[] = [];
+      Object.entries<any>(_).forEach(([ri, row]) => {
+        if (ri < m.headRowNumber) {
+          headRows.push(cloneDeep(row));
+        } else {
+          bodyRows.push(cloneDeep(row));
+        }
+      });
+      compareConfigs.push({
+        ...m,
+        headRows,
+        bodyRows,
+        len,
+      });
+    });
+    return compareConfigs;
   }
 
   /**
@@ -507,28 +536,36 @@ export default class MySpreadsheet extends Spreadsheet {
   caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
     // sheet的通用配置
     const sheetConfig = config[sheetKey];
+    // 表头的行数
+    const headRowNumber = config.headRowNumber;
     const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
     const rows = this.datas[sheetIndex].rows._;
     const sheetHeadRow = rows['0'];
     const sheetFirstRow = rows['1'];
     // 借方金额的列次
-    let debitCol = getColByLetter(sheetConfig.debit.col);
+    let debitCol = getColByLetter(sheetConfig.debitCol);
     // 贷方金额的列次
-    let creditCol = getColByLetter(sheetConfig.credit.col);
+    let creditCol = getColByLetter(sheetConfig.creditCol);
     // 是否借贷一列的表格
     const isSameCol =
       sheetHeadRow.cells[debitCol]?.text === '方向' ||
       /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
     // 根据配置，计算每一行
-    config.rows.forEach((m: any, n: number) => {
-      // sheet每一行的配置
-      const sheetRowConfig = m[sheetKey];
-      const outCells: any = resultRows[n + 1]?.cells || {};
+    config.bodyRows.forEach((configRow: any, n: number) => {
+      // 配置表，要匹配的科目名称，正则文本
+      const configSubject = configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text
+      // 配置表，要匹配的科目代码，正则文本
+      const configSubjectId = configRow.cells[getColByLetter(sheetConfig.configSubjectIdCol)]?.text
+      // 配置表，要匹配的科目借贷方向，"借"|"贷"
+      const configDirection = configRow.cells[getColByLetter(sheetConfig.configDirectionCol)]?.text
+
       // 获取到符合的行相关信息
       const rowInfo = this.getCellInfoByText(
-        sheetRowConfig.search,
+        new RegExp(configSubject),
         sheetIndex,
-        getColByLetter(sheetConfig.findCol.col)
+        getColByLetter(sheetConfig.findSubjectCol),
+        !isEmptyText(configSubjectId) ? new RegExp(configSubjectId) : undefined,
+        getColByLetter(sheetConfig.findSubjectIdCol),
       );
       let sumDebit = 0;
       let sumCredit = 0;
@@ -547,18 +584,86 @@ export default class MySpreadsheet extends Spreadsheet {
           }
         });
       }
-      // 首列显示名称
-      outCells[0] = { text: m.name };
-      // 其中一表的
-      outCells[sheetConfig.amountCol] = {
-        text: Numeral(
-          sheetRowConfig.direction === 'debit' ? sumDebit : sumCredit
-        ).format('0,0.00'),
-      };
 
-      resultRows[n + 1] = { cells: outCells };
+      // 金额汇总数据写入
+      resultRows[n + headRowNumber]
+        .cells[getColByLetter(sheetConfig.outAmountCol)]
+        .text =  Numeral(
+          configDirection === '借' ? sumDebit : sumCredit
+        ).format('0,0.00')
     });
   }
+  // /**
+  //  * 三表勾稽，数据汇总
+  //  * @param resultRows
+  //  * @param config
+  //  * @param sheetKey
+  //  */
+  // caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
+  //   // sheet的通用配置
+  //   const sheetConfig = config[sheetKey];
+  //   // 表头的行数
+  //   const headRowNumber = config.headRowNumber;
+  //   const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
+  //   const rows = this.datas[sheetIndex].rows._;
+  //   const sheetHeadRow = rows['0'];
+  //   const sheetFirstRow = rows['1'];
+  //   // 借方金额的列次
+  //   let debitCol = getColByLetter(sheetConfig.debitCol);
+  //   // 贷方金额的列次
+  //   let creditCol = getColByLetter(sheetConfig.creditCol);
+  //   // 是否借贷一列的表格
+  //   const isSameCol =
+  //     sheetHeadRow.cells[debitCol]?.text === '方向' ||
+  //     /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
+  //   // 根据配置，计算每一行
+  //   config.bodyRows.forEach((configRow: any, n: number) => {
+  //     // 配置表，要匹配的科目名称，正则文本
+  //     const configSubject = configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text
+  //     // 配置表，要匹配的科目代码，正则文本
+  //     const configSubjectId = configRow.cells[getColByLetter(sheetConfig.configSubjectIdCol)]?.text
+  //     // 配置表，要匹配的科目借贷方向，"借"|"贷"
+  //     const configDirection = configRow.cells[getColByLetter(sheetConfig.configDirectionCol)]?.text
+  //     // 配置表，读取的利润表金额数值列
+  //     const configAmountColIndex = getColByLetter(sheetConfig.configAmountCol)
+
+  //     const outCells: any =  configRow.cells
+
+  //     // 获取到符合的行相关信息
+  //     const rowInfo = this.getCellInfoByText(
+  //       new RegExp(configSubject),
+  //       sheetIndex,
+  //       getColByLetter(sheetConfig.findSubjectCol),
+  //       !isEmptyText(configSubjectId) ? new RegExp(configSubjectId) : undefined,
+  //       getColByLetter(sheetConfig.findSubjectIdCol),
+  //     );
+  //     let sumDebit = 0;
+  //     let sumCredit = 0;
+  //     if (rowInfo && rowInfo.length) {
+  //       rowInfo.forEach((j: any) => {
+  //         const cells = j.row.cells;
+  //         if (isSameCol) {
+  //           if (cells[debitCol] === '借') {
+  //             sumDebit += Numeral(cells[creditCol]?.text).value();
+  //           } else {
+  //             sumCredit += Numeral(cells[creditCol]?.text).value();
+  //           }
+  //         } else {
+  //           sumDebit += Numeral(cells[debitCol]?.text).value();
+  //           sumCredit += Numeral(cells[creditCol]?.text).value();
+  //         }
+  //       });
+  //     }
+  //     // 金额汇总数据写入
+  //     outCells[getColByLetter(sheetConfig.outAmountCol)] = {
+  //       text: Numeral(
+  //         configDirection === '借' ? sumDebit : sumCredit
+  //       ).format('0,0.00'),
+  //     };
+
+  //     resultRows[n + headRowNumber] = { cells: outCells };
+  //   });
+  // }
 
   loadRiskConfig() {
     const readRiskConfig = {
@@ -654,7 +759,7 @@ export default class MySpreadsheet extends Spreadsheet {
           });
           if (hasRisk) {
             tempRows.push(insertRow);
-            insertRow.originRow = ri
+            insertRow.originRow = ri;
           }
         }
       }
@@ -666,7 +771,7 @@ export default class MySpreadsheet extends Spreadsheet {
       //   })
       // }
       if (showAll && tempRows.length === 0) {
-      // if (tempRows.length === 0) {
+        // if (tempRows.length === 0) {
         const insertRow = cloneDeep(row);
         insertRow.originRow = ri;
         // const insertRow = row;
