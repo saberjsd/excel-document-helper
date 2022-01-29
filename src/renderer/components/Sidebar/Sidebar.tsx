@@ -14,7 +14,7 @@ import Sider from 'antd/lib/layout/Sider';
 import clsx from 'clsx';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
-import { MENU } from 'renderer/constants';
+import { FeatureType, MENU } from 'renderer/constants';
 import StoreExcel from 'renderer/store/StoreExcel';
 import StoreRoot from 'renderer/store/StoreRoot';
 import './styles.scss';
@@ -31,14 +31,21 @@ export default function Sidebar(props: any) {
     return disposer;
   }, []);
 
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
+  const resize = () => {
     setTimeout(() => {
-      StoreExcel.excelInstance.resize();
+      if (StoreRoot.currentMenu === MENU.EXCEL_BOARD) {
+        StoreExcel.excelInstance.resize();
+      }
     }, 200);
   };
+
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+    resize();
+  };
   const selectMenu = ({ key }: any) => {
-    StoreRoot.currentMenu = key
+    StoreRoot.currentMenu = key;
+    resize();
   };
 
   return (
@@ -89,7 +96,7 @@ export default function Sidebar(props: any) {
 
         {/* <Menu.SubMenu key="settings" icon={<AppstoreOutlined />} title="设置"> */}
         <Menu.Item key={MENU.SETTINGS_PROFIT} icon={<SettingOutlined />}>
-          余额表设置
+          利润表设置
         </Menu.Item>
         <Menu.Item key={MENU.SETTINGS_RISK} icon={<ToolOutlined />}>
           风险点设置

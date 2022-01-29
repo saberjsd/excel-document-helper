@@ -1,15 +1,74 @@
-import { DownloadOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
-import { useEffect } from 'react';
+import {
+  DownloadOutlined,
+  VerticalAlignTopOutlined,
+  FileExcelOutlined,
+} from '@ant-design/icons';
+import { Button, List } from 'antd';
+import { autorun } from 'mobx';
+import { useEffect, useState } from 'react';
 import Layout from 'renderer/components/Layout';
 import StoreExcel from 'renderer/store/StoreExcel';
 import './styles.scss';
 
 export default function SettingProfitPage(props: any) {
+  const [compareConfig, setCompareConfig] = useState<any[]>([]);
+
   useEffect(() => {
-    // const disposer = autorun(() => {});
-    // return disposer;
+    const disposer = autorun(() => {
+      const { compareConfig } = StoreExcel;
+      setCompareConfig(compareConfig);
+    });
+
+    StoreExcel.getCompareConfigList();
+
+    return disposer;
   }, []);
 
-  return <div hidden={props.hidden}>18138515315</div>;
+  const uploadConfig = ()=>{
+
+  }
+
+  return (
+    <div className="setting_profit_page" hidden={props.hidden}>
+      <div className="profit_head">
+        <h3>三表勾稽 - 利润表取数展示配置</h3>
+
+        <Button
+          type="primary"
+          icon={<VerticalAlignTopOutlined />}
+          onClick={uploadConfig}
+        >
+          导入利润表配置
+        </Button>
+      </div>
+      <List
+        itemLayout="horizontal"
+        dataSource={compareConfig}
+        bordered
+        renderItem={(item) => (
+          <List.Item
+            actions={[
+              <a key="list-loadmore-edit">查看</a>,
+              <a key="list-loadmore-more">删除</a>,
+            ]}
+          >
+            <List.Item.Meta
+              avatar={<FileExcelOutlined />}
+              title={item.name}
+              description={
+                <>
+                  <span className="mes_show">
+                    表头行数：{item.headRowNumber}
+                  </span>
+                  <span className="mes_show">
+                    内容行数：{item.bodyRows.length}
+                  </span>
+                </>
+              }
+            />
+          </List.Item>
+        )}
+      />
+    </div>
+  );
 }
