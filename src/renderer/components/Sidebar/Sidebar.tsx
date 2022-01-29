@@ -14,13 +14,14 @@ import Sider from 'antd/lib/layout/Sider';
 import clsx from 'clsx';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
+import { MENU } from 'renderer/constants';
 import StoreExcel from 'renderer/store/StoreExcel';
 import StoreRoot from 'renderer/store/StoreRoot';
 import './styles.scss';
 
 export default function Sidebar(props: any) {
   const [collapsed, setCollapsed] = useState(false);
-  const [currentMenu, setCurrentMenu] = useState('excel_1');
+  const [currentMenu, setCurrentMenu] = useState('');
 
   useEffect(() => {
     const disposer = autorun(() => {
@@ -37,7 +38,7 @@ export default function Sidebar(props: any) {
     }, 200);
   };
   const selectMenu = ({ key }: any) => {
-    setCurrentMenu(key);
+    StoreRoot.currentMenu = key
   };
 
   return (
@@ -65,7 +66,7 @@ export default function Sidebar(props: any) {
         onClick={selectMenu}
       >
         {/* <Menu.SubMenu key="excel" icon={<AppstoreOutlined />} title="表格操作"> */}
-        <Menu.Item key="excel_1" icon={<TableOutlined />}>
+        <Menu.Item key={MENU.EXCEL_BOARD} icon={<TableOutlined />}>
           表格操作
         </Menu.Item>
         {/* <Menu.Item key="excel_1" icon={<UserOutlined />}>
@@ -83,17 +84,18 @@ export default function Sidebar(props: any) {
         {/* </Menu.SubMenu> */}
 
         {/* <Menu.SubMenu key="word" icon={<AppstoreOutlined />} title="word操作"> */}
-        <Menu.Item key="word_1" icon={<SnippetsOutlined />}>
-          word模板导出
-        </Menu.Item>
+
         {/* </Menu.SubMenu> */}
 
         {/* <Menu.SubMenu key="settings" icon={<AppstoreOutlined />} title="设置"> */}
-        <Menu.Item key="settings_1" icon={<ToolOutlined />}>
+        <Menu.Item key={MENU.SETTINGS_PROFIT} icon={<SettingOutlined />}>
+          余额表设置
+        </Menu.Item>
+        <Menu.Item key={MENU.SETTINGS_RISK} icon={<ToolOutlined />}>
           风险点设置
         </Menu.Item>
-        <Menu.Item key="settings_2" icon={<SettingOutlined />}>
-          导出设置
+        <Menu.Item key={MENU.WORD_EXPORT} icon={<SnippetsOutlined />}>
+          word模板导出
         </Menu.Item>
         {/* </Menu.SubMenu> */}
       </Menu>

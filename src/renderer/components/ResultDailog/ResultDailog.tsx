@@ -56,19 +56,19 @@ export default function ResultDailog(props: any) {
   };
 
   const saveRiskData = () => {
-    setRiskLoading(true)
-    setTimeout(()=>{
-      StoreExcel.saveRisk()
-      setRiskLoading(false)
-    })
+    setRiskLoading(true);
+    setTimeout(() => {
+      StoreExcel.saveRisk();
+      setRiskLoading(false);
+    });
   };
 
   const saveFilterData = () => {
-    setFilterLoading(true)
-    setTimeout(()=>{
-      StoreExcel.saveFilter()
-      setFilterLoading(false)
-    })
+    setFilterLoading(true);
+    setTimeout(() => {
+      StoreExcel.saveFilter();
+      setFilterLoading(false);
+    });
   };
 
   return (

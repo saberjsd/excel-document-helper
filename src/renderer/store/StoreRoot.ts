@@ -1,7 +1,8 @@
 import { observable } from 'mobx';
+import { MENU } from 'renderer/constants';
 
 const StoreRoot = observable({
-  currentMenu: "excel_1",
+  currentMenu: MENU.EXCEL_BOARD as MENU,
   rootLoading: false,
   init() {},
   // setStore(options: { [x: string]: any }) {

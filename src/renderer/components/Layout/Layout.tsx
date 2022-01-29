@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import StoreRoot from 'renderer/store/StoreRoot';
 import Content from '../Content';
 import Header from '../Header';
+import ResultDailog from '../ResultDailog';
 import Sidebar from '../Sidebar';
 import './styles.scss';
 
@@ -22,11 +23,13 @@ export default function Layout(props: any) {
   return (
     <Spin className="" spinning={rootLoading}>
       <div className="layout_page">
-        <Header>{props.header}</Header>
+        <Header></Header>
         <div className="layout_main">
           <Sidebar></Sidebar>
-          <Content className={props.className}>{props.children}</Content>
+          <Content></Content>
         </div>
+
+        <ResultDailog />
       </div>
     </Spin>
   );

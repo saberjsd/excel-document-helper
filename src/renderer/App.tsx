@@ -1,7 +1,6 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 // import icon from '../../assets/icon.svg';
 import './App.css';
-import ExcelPage from './pages/ExcelPage';
 import Home from './pages/Home';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { ConfigProvider } from 'antd';
@@ -48,8 +47,7 @@ export default function App() {
     <ConfigProvider locale={zhCN}>
       <Router>
         <Routes>
-          {/* <Route path="/" element={<Home />} /> */}
-          <Route path="/" element={<ExcelPage />} />
+          <Route path="/" element={<Home />} />
         </Routes>
       </Router>
     </ConfigProvider>

@@ -6,3 +6,10 @@ export enum FeatureType {
   // 科目筛选
   FILTER_EXCEL = "filter_excel",
 }
+
+export enum MENU {
+  EXCEL_BOARD = "excel_board",
+  WORD_EXPORT = "word_export",
+  SETTINGS_PROFIT = "settings_profit",
+  SETTINGS_RISK = "settings_risk",
+}
