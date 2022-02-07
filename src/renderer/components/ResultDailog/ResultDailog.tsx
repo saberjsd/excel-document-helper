@@ -106,7 +106,7 @@ export default function ResultDailog(props: any) {
               <Button
                 type="primary"
                 danger
-                icon={<DownloadOutlined />}
+                icon={<SyncOutlined />}
                 onClick={saveFilterData}
                 loading={filterLoading}
               >

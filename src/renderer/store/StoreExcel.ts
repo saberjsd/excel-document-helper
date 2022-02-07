@@ -5,7 +5,6 @@ import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 import { FeatureType } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
-import { compareConfig } from './compareConfig';
 import { compareReadConfig } from './compareReadConfig';
 
 let resultSheets: any[] = [];
