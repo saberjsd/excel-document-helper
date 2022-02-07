@@ -93,9 +93,8 @@ const StoreExcel = observable({
     this.resultType = FeatureType.FILTER_EXCEL;
     const filterConfig = {
       sheetName: '序时帐',
-      firstRow: 1,
-      findCol: 'E',
-      groupCol: 'C',
+      findCol: 'F',
+      groupCol: 'D',
     };
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(

@@ -593,77 +593,6 @@ export default class MySpreadsheet extends Spreadsheet {
         ).format('0,0.00')
     });
   }
-  // /**
-  //  * 三表勾稽，数据汇总
-  //  * @param resultRows
-  //  * @param config
-  //  * @param sheetKey
-  //  */
-  // caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
-  //   // sheet的通用配置
-  //   const sheetConfig = config[sheetKey];
-  //   // 表头的行数
-  //   const headRowNumber = config.headRowNumber;
-  //   const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
-  //   const rows = this.datas[sheetIndex].rows._;
-  //   const sheetHeadRow = rows['0'];
-  //   const sheetFirstRow = rows['1'];
-  //   // 借方金额的列次
-  //   let debitCol = getColByLetter(sheetConfig.debitCol);
-  //   // 贷方金额的列次
-  //   let creditCol = getColByLetter(sheetConfig.creditCol);
-  //   // 是否借贷一列的表格
-  //   const isSameCol =
-  //     sheetHeadRow.cells[debitCol]?.text === '方向' ||
-  //     /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
-  //   // 根据配置，计算每一行
-  //   config.bodyRows.forEach((configRow: any, n: number) => {
-  //     // 配置表，要匹配的科目名称，正则文本
-  //     const configSubject = configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text
-  //     // 配置表，要匹配的科目代码，正则文本
-  //     const configSubjectId = configRow.cells[getColByLetter(sheetConfig.configSubjectIdCol)]?.text
-  //     // 配置表，要匹配的科目借贷方向，"借"|"贷"
-  //     const configDirection = configRow.cells[getColByLetter(sheetConfig.configDirectionCol)]?.text
-  //     // 配置表，读取的利润表金额数值列
-  //     const configAmountColIndex = getColByLetter(sheetConfig.configAmountCol)
-
-  //     const outCells: any =  configRow.cells
-
-  //     // 获取到符合的行相关信息
-  //     const rowInfo = this.getCellInfoByText(
-  //       new RegExp(configSubject),
-  //       sheetIndex,
-  //       getColByLetter(sheetConfig.findSubjectCol),
-  //       !isEmptyText(configSubjectId) ? new RegExp(configSubjectId) : undefined,
-  //       getColByLetter(sheetConfig.findSubjectIdCol),
-  //     );
-  //     let sumDebit = 0;
-  //     let sumCredit = 0;
-  //     if (rowInfo && rowInfo.length) {
-  //       rowInfo.forEach((j: any) => {
-  //         const cells = j.row.cells;
-  //         if (isSameCol) {
-  //           if (cells[debitCol] === '借') {
-  //             sumDebit += Numeral(cells[creditCol]?.text).value();
-  //           } else {
-  //             sumCredit += Numeral(cells[creditCol]?.text).value();
-  //           }
-  //         } else {
-  //           sumDebit += Numeral(cells[debitCol]?.text).value();
-  //           sumCredit += Numeral(cells[creditCol]?.text).value();
-  //         }
-  //       });
-  //     }
-  //     // 金额汇总数据写入
-  //     outCells[getColByLetter(sheetConfig.outAmountCol)] = {
-  //       text: Numeral(
-  //         configDirection === '借' ? sumDebit : sumCredit
-  //       ).format('0,0.00'),
-  //     };
-
-  //     resultRows[n + headRowNumber] = { cells: outCells };
-  //   });
-  // }
 
   loadRiskConfig() {
     const readRiskConfig = {
@@ -706,9 +635,9 @@ export default class MySpreadsheet extends Spreadsheet {
   getRiskRows(riskConfig: any[], showAll?: boolean, isReplace?: boolean) {
     const readConfig = {
       sheetName: '序时账',
-      findSubjectCol: 'E',
-      findSummaryCol: 'F',
-      outCol: 'N',
+      findSubjectCol: 'F',
+      findSummaryCol: 'G',
+      outCol: 'O',
     };
     const findSubjectIndex = getColByLetter(readConfig.findSubjectCol);
     const findSummaryIndex = getColByLetter(readConfig.findSummaryCol);

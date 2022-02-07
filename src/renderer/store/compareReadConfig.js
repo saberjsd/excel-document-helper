@@ -17,10 +17,10 @@ export const compareReadConfig = [
       configSubjectIdCol: 'G',
       configDirectionCol: 'H',
       // 查找的表的列
-      debitCol: 'H',
-      creditCol: 'I',
-      findSubjectCol: 'E',
-      findSubjectIdCol: 'D',
+      debitCol: 'I',
+      creditCol: 'J',
+      findSubjectCol: 'F',
+      findSubjectIdCol: 'E',
       // 输出配置
       outAmountCol: 'D',
     },
