@@ -10,6 +10,7 @@ import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
+import { readExcel } from 'renderer/utils/excelHelper';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -129,35 +130,7 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   downloadExcel() {
-    // function xtos(sdata: any) {
-    //   var out = XLSX.utils.book_new();
-    //   sdata.forEach(function (xws: any) {
-    //     var aoa = [[]];
-    //     var rowobj = xws.rows;
-    //     for (var ri = 0; ri < rowobj.len; ++ri) {
-    //       var row = rowobj[ri];
-    //       if (!row) continue;
-    //       aoa[ri] = [];
-    //       Object.keys(row.cells).forEach(function (k) {
-    //         var idx = +k;
-    //         if (isNaN(idx)) return;
-    //         // @ts-ignore
-    //         aoa[ri][idx] = row.cells[k].text;
-    //       });
-    //     }
-    //     var ws = XLSX.utils.aoa_to_sheet(aoa);
-    //     XLSX.utils.book_append_sheet(out, ws, xws.name);
-    //   });
-    //   return out;
-    // }
-
-    /* build workbook from the grid data */
     // @ts-ignore
-    // var new_wb: any = xtos(this.getData());
-
-    // /* generate download */
-    // XLSX.writeFile(new_wb, '表格导出.xlsx');
-
     var new_wb = XLSXspread.xtos(this.getData());
     /* write file and trigger a download */
     // @ts-ignore
@@ -177,74 +150,9 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   async importExcel() {
-    let [file] = await selectFile('.xlsx,.xls,.doc');
-
-    if (!file) {
-      return;
-    }
-    StoreRoot.rootLoading = true;
-
-    let workbook_object = await new Promise((resolve, rejest) => {
-      let reader = new FileReader();
-
-      reader.onload = (e) => {
-        var data = e.target!.result;
-        // @ts-ignore
-        resolve(XLSX.read(data, { type: 'binary', cellStyles: true }));
-      };
-
-      reader.onerror = () => {
-        rejest(undefined);
-      };
-
-      reader.readAsBinaryString(file);
-    });
-
-    // function stox(wb: any) {
-    //   var out: any[] = [];
-
-    //   wb.SheetNames.forEach(function (name: string) {
-    //     var o = { name: name, rows: {} };
-    //     var ws = wb.Sheets[name];
-    //     var aoa: any[] = XLSX.utils.sheet_to_json(ws, {
-    //       raw: false,
-    //       header: 1,
-    //     });
-    //     aoa.forEach(function (r, i) {
-    //       var cells: any = {};
-    //       r.forEach(function (c: any, j: string) {
-    //         cells[j] = { text: c };
-    //       });
-    //       // @ts-ignore
-    //       o.rows[i] = { cells: cells };
-    //     });
-    //     // @ts-ignore  根据数据行数显示多少行
-    //     o.rows.len = aoa.length;
-    //     out.push(o);
-    //   });
-    //   console.log('to x-spreadsheet:', out);
-    //   return out;
-    // }
-
-    // @ts-ignore
-    const sheets = XLSXspread.stox(workbook_object);
-
-    // 导入的数据都加上主键，方便后面查找修改
-    console.time('insert id');
-    sheets.forEach((m: any) => {
-      if (m.rows) {
-        Object.entries<any>(m.rows).forEach(([ri, row]) => {
-          if (typeof row === 'object') {
-            row.rowId = cuid();
-          }
-        });
-      }
-    });
-    console.timeEnd('insert id');
-
-    /* load data */
-    this.loadData(sheets);
-    StoreRoot.rootLoading = false;
+    readExcel().then(sheets=>{
+      this.loadData(sheets)
+    })
   }
 
   /**

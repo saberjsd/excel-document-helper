@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import Layout from 'renderer/components/Layout';
 import JsonStorage from 'renderer/store/JsonStorage';
 import StoreExcel from 'renderer/store/StoreExcel';
+import { readExcel } from 'renderer/utils/excelHelper';
 import './styles.scss';
 
 export default function SettingProfitPage(props: any) {
@@ -26,13 +27,17 @@ export default function SettingProfitPage(props: any) {
   }, []);
 
   const uploadConfig = () => {
-    JsonStorage.set('userConfig', { name: 'aaaaaaaabbbb' }).then(() => {
-      JsonStorage.get('userConfig').then((res) => {
-        console.log('==== read res', res);
-      }).catch(error=>{
-        console.log('==== read error', error);
-      })
-    });
+    // JsonStorage.set('userConfig', { name: 'aaaaaaaabbbb' }).then(() => {
+    //   JsonStorage.get('userConfig').then((res) => {
+    //     console.log('==== read res', res);
+    //   }).catch(error=>{
+    //     console.log('==== read error', error);
+    //   })
+    // });
+    // readExcel().then(sheets=>{
+    //   debugger
+    // })
+    StoreExcel.getCompareConfigList();
   };
 
   return (

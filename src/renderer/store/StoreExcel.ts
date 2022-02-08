@@ -5,7 +5,8 @@ import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 import { FeatureType } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
-import { compareReadConfig } from './compareReadConfig';
+import { readExcel } from 'renderer/utils/excelHelper';
+import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';
 
 let resultSheets: any[] = [];
 
@@ -21,7 +22,7 @@ const StoreExcel = observable({
   // ------ 勾稽相关
   compareConfig: [] as any[],
   // 当前勾稽利润表配置
-  currentCompareConfigId: 'profitExcuted',
+  currentCompareConfigId: '',
   // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）
   compareIsSum: false,
 
@@ -130,7 +131,7 @@ const StoreExcel = observable({
   compareSheet() {
     this.resultType = FeatureType.COMPARE_EXCEL;
 
-    this.getCompareConfigList();
+    // this.getCompareConfigList();
     // // 利润表
     // profitSheet
     // // 余额表
@@ -149,8 +150,8 @@ const StoreExcel = observable({
     //   resultRows[n] = m;
     // });
 
-    const profitSheet = this.excelInstance.findSheetByName("利润表");
-    const resultRows = profitSheet.rows._
+    const profitSheet = this.excelInstance.findSheetByName('利润表');
+    const resultRows = profitSheet.rows._;
     this.excelInstance.caclSumWithRows(resultRows, config, 'billSheet');
     this.excelInstance.caclSumWithRows(resultRows, config, 'balanceSheet');
     // @ts-ignore
@@ -232,8 +233,40 @@ const StoreExcel = observable({
     }
   },
 
+  /**
+   * 获取三表勾稽的配置数据
+   */
   getCompareConfigList() {
-    this.compareConfig = this.excelInstance.readCompareConfig(compareReadConfig);
+    // this.compareConfig = this.excelInstance.readCompareConfig(compareReadConfig);
+    readExcel().then((sheets) => {
+      const compareConfigs: any[] = [];
+      sheets.forEach((m: any) => {
+        const defaultConfig = cloneDeep(compareDefaultConfig);
+        const { len } = m.rows;
+        const headRows: any[] = [];
+        const bodyRows: any[] = [];
+        Object.entries<any>(m.rows).forEach(([ri, row]) => {
+          if(isNaN(Number(ri))){
+            return
+          }
+          if (Number(ri) < defaultConfig.headRowNumber) {
+            headRows.push(cloneDeep(row));
+          } else {
+            bodyRows.push(cloneDeep(row));
+          }
+        });
+        compareConfigs.push({
+          ...defaultConfig,
+          headRows,
+          bodyRows,
+          len,
+          name: m.name,
+          id: cuid(),
+        });
+      });
+      this.compareConfig = compareConfigs;
+      this.currentCompareConfigId = this.compareConfig[0].id;
+    });
   },
 });
 
