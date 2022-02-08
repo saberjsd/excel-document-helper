@@ -13,9 +13,17 @@
   <script>
     window.electron.ipcRenderer.once('ipc-example', (arg) => {
       // eslint-disable-next-line no-console
-      console.log(arg);
+      console.log("==render ipc-ex",arg);
     });
 
     window.electron.ipcRenderer.myPing();
+
+
+    window.electron.ipcRenderer.on('SET_JSON_STORAGE', (arg) => {
+      console.log("====render arg", arg)
+    });
+    window.electron.ipcRenderer.emit("SET_JSON_STORAGE", {
+      name: 'aaaaaaa'
+    });
   </script>
 </html>
