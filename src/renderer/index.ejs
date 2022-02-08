@@ -17,13 +17,5 @@
     });
 
     window.electron.ipcRenderer.myPing();
-
-
-    window.electron.ipcRenderer.on('SET_JSON_STORAGE', (arg) => {
-      console.log("====render arg", arg)
-    });
-    window.electron.ipcRenderer.emit("SET_JSON_STORAGE", {
-      name: 'aaaaaaa'
-    });
   </script>
 </html>

@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const validChannels = ['ipc-example','SET_JSON_STORAGE'];
+const validChannels = ['ipc-example', 'SET_JSON_STORAGE', 'GET_JSON_STORAGE'];
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
@@ -18,8 +18,8 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.once(channel, (event, ...args) => func(...args));
       }
     },
-    emit(channel, ...args){
+    emit(channel, ...args) {
       ipcRenderer.send(channel, ...args);
-    }
+    },
   },
 });
