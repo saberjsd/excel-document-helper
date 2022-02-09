@@ -13,3 +13,9 @@ export enum MENU {
   SETTINGS_PROFIT = "settings_profit",
   SETTINGS_RISK = "settings_risk",
 }
+
+
+export enum JSON_PATH {
+  // 三表勾稽，利润表配置
+  CONFIG_COMPARE_PROFILE = "config/compare_profile",
+}

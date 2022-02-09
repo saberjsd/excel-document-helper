@@ -46,12 +46,12 @@ export default function ResultDailog(props: any) {
 
   const exportExcel = () => {
     if (StoreExcel.resultExcelInstance) {
-      StoreExcel.resultExcelInstance.downloadExcel();
+      StoreExcel.resultExcelInstance.exportExcel();
     }
   };
   const exportCurrentExcel = () => {
     if (StoreExcel.resultExcelInstance) {
-      StoreExcel.resultExcelInstance.downloadSheet();
+      StoreExcel.resultExcelInstance.exportSheet();
     }
   };
 

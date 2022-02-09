@@ -2,11 +2,12 @@ import cuid from 'cuid';
 import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
-import { FeatureType } from 'renderer/constants';
+import { FeatureType, JSON_PATH } from 'renderer/constants';
 import { getColByLetter } from 'renderer/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';
+import JsonStorage from './JsonStorage';
 
 let resultSheets: any[] = [];
 
@@ -19,12 +20,15 @@ const StoreExcel = observable({
   resultDialogRendered: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
-  // ------ 勾稽相关
+  // ------ 勾稽相关 --------
+  // 勾稽利润表配置-转换后的数据
   compareConfig: [] as any[],
+  // 勾稽利润表配置-表格数据
+  compareConfigSheets: [] as any[],
   // 当前勾稽利润表配置
   currentCompareConfigId: '',
-  // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）
-  compareIsSum: false,
+  // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）, 0-false 1-true
+  compareIsSum: 0,
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -234,39 +238,56 @@ const StoreExcel = observable({
   },
 
   /**
-   * 获取三表勾稽的配置数据
+   * 导入三表勾稽的配置数据
+   */
+  async importCompareConfigList() {
+    const sheets = await readExcel().catch(() => {});
+    this._convertCompareConfig(sheets);
+    await JsonStorage.set(JSON_PATH.CONFIG_COMPARE_PROFILE, sheets).catch(
+      () => {}
+    );
+  },
+
+  /**
+   * 本地获取三表勾稽的配置数据
    */
   getCompareConfigList() {
-    // this.compareConfig = this.excelInstance.readCompareConfig(compareReadConfig);
-    readExcel().then((sheets) => {
-      const compareConfigs: any[] = [];
-      sheets.forEach((m: any) => {
-        const defaultConfig = cloneDeep(compareDefaultConfig);
-        const { len } = m.rows;
-        const headRows: any[] = [];
-        const bodyRows: any[] = [];
-        Object.entries<any>(m.rows).forEach(([ri, row]) => {
-          if(isNaN(Number(ri))){
-            return
-          }
-          if (Number(ri) < defaultConfig.headRowNumber) {
-            headRows.push(cloneDeep(row));
-          } else {
-            bodyRows.push(cloneDeep(row));
-          }
-        });
-        compareConfigs.push({
-          ...defaultConfig,
-          headRows,
-          bodyRows,
-          len,
-          name: m.name,
-          id: cuid(),
-        });
+    JsonStorage.get(JSON_PATH.CONFIG_COMPARE_PROFILE)
+      .then((data) => {
+        this._convertCompareConfig(data);
+      })
+      .catch((err) => {});
+  },
+
+  _convertCompareConfig(sheets: any[]) {
+    this.compareConfigSheets = sheets;
+    const compareConfigs: any[] = [];
+    sheets.forEach((m: any) => {
+      const defaultConfig = cloneDeep(compareDefaultConfig);
+      const { len } = m.rows;
+      const headRows: any[] = [];
+      const bodyRows: any[] = [];
+      Object.entries<any>(m.rows).forEach(([ri, row]) => {
+        if (isNaN(Number(ri))) {
+          return;
+        }
+        if (Number(ri) < defaultConfig.headRowNumber) {
+          headRows.push(cloneDeep(row));
+        } else {
+          bodyRows.push(cloneDeep(row));
+        }
       });
-      this.compareConfig = compareConfigs;
-      this.currentCompareConfigId = this.compareConfig[0].id;
+      compareConfigs.push({
+        ...defaultConfig,
+        headRows,
+        bodyRows,
+        len,
+        name: m.name,
+        id: cuid(),
+      });
     });
+    this.compareConfig = compareConfigs;
+    this.currentCompareConfigId = this.compareConfig[0].id;
   },
 });
 

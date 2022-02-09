@@ -10,6 +10,11 @@
       color: #000000d9;
       font-weight: 500;
     }
+    &_right{
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
   }
   .mes_show{
     margin-right: 24px;

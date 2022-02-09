@@ -1,3 +1,5 @@
+import { isEmpty } from "lodash";
+
 // set json storage
 class JsonStorage {
   set(key: string, value: any) {
@@ -17,10 +19,10 @@ class JsonStorage {
   }
 
   get(key: string) {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       // @ts-ignore
       window.electron.ipcRenderer.once('GET_JSON_STORAGE', (res) => {
-        if (!res.error) {
+        if (!res.error && !isEmpty(res.data)) {
           resolve(res.data);
         } else {
           reject(res.error);

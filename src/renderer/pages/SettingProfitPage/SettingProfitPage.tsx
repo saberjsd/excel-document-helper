@@ -3,13 +3,11 @@ import {
   VerticalAlignTopOutlined,
   FileExcelOutlined,
 } from '@ant-design/icons';
-import { Button, List } from 'antd';
+import { Button, List, message } from 'antd';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
-import Layout from 'renderer/components/Layout';
-import JsonStorage from 'renderer/store/JsonStorage';
 import StoreExcel from 'renderer/store/StoreExcel';
-import { readExcel } from 'renderer/utils/excelHelper';
+import { writeExcel } from 'renderer/utils/excelHelper';
 import './styles.scss';
 
 export default function SettingProfitPage(props: any) {
@@ -27,31 +25,37 @@ export default function SettingProfitPage(props: any) {
   }, []);
 
   const uploadConfig = () => {
-    // JsonStorage.set('userConfig', { name: 'aaaaaaaabbbb' }).then(() => {
-    //   JsonStorage.get('userConfig').then((res) => {
-    //     console.log('==== read res', res);
-    //   }).catch(error=>{
-    //     console.log('==== read error', error);
-    //   })
-    // });
-    // readExcel().then(sheets=>{
-    //   debugger
-    // })
-    StoreExcel.getCompareConfigList();
+    StoreExcel.importCompareConfigList().then(() => {
+      message.success('三表勾稽 - 利润表取数展示配置已导入');
+    });
+  };
+
+  const exportConfig = () => {
+    writeExcel(StoreExcel.compareConfigSheets)
   };
 
   return (
     <div className="setting_profit_page" hidden={props.hidden}>
       <div className="profit_head">
         <h3>三表勾稽 - 利润表取数展示配置</h3>
+        <div className='profit_head_right'>
+          <Button
+            type="primary"
+            danger
+            icon={<VerticalAlignTopOutlined />}
+            onClick={uploadConfig}
+          >
+            导入并更新利润表配置
+          </Button>
 
-        <Button
-          type="primary"
-          icon={<VerticalAlignTopOutlined />}
-          onClick={uploadConfig}
-        >
-          导入利润表配置
-        </Button>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={exportConfig}
+          >
+            导出利润表配置
+          </Button>
+        </div>
       </div>
       <List
         itemLayout="horizontal"
@@ -59,10 +63,12 @@ export default function SettingProfitPage(props: any) {
         bordered
         renderItem={(item) => (
           <List.Item
-            actions={[
-              <a key="list-loadmore-edit">查看</a>,
-              <a key="list-loadmore-more">删除</a>,
-            ]}
+            actions={
+              [
+                // <a key="list-loadmore-edit">查看</a>,
+                // <a key="list-loadmore-more">删除</a>,
+              ]
+            }
           >
             <List.Item.Meta
               avatar={<FileExcelOutlined />}

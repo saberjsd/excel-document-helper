@@ -3,6 +3,10 @@ import { selectFile } from '@/utils';
 import cuid from 'cuid';
 import StoreRoot from 'renderer/store/StoreRoot';
 
+/**
+ * 读取Excel
+ * @returns
+ */
 export const readExcel = async () => {
   let [file] = await selectFile('.xlsx,.xls,.doc');
 
@@ -70,5 +74,19 @@ export const readExcel = async () => {
   console.timeEnd('insert id');
 
   StoreRoot.rootLoading = false;
-  return sheets
+  return sheets;
+};
+
+/**
+ * 写入Excel
+ * @param sheets
+ */
+export const writeExcel = (sheets: any[]) => {
+  // @ts-ignore
+  var new_wb = XLSXspread.xtos(sheets);
+  /* write file and trigger a download */
+  // @ts-ignore
+  XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
+    cellStyles: true,
+  });
 };

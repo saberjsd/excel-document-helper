@@ -16,11 +16,19 @@ const { Option } = Select;
 
 export default function Header(props: any) {
   const [currentMenu, setCurrentMenu] = useState('');
+  const [compareConfig, setCompareConfig] = useState<any[]>([]);
+  const [currentCompareConfigId, setCurrentCompareConfigId] = useState('');
+  const [compareIsSum, setCompareIsSum] = useState(0);
 
   useEffect(() => {
     const disposer = autorun(() => {
       const { currentMenu } = StoreRoot;
+      const { compareConfig, currentCompareConfigId, compareIsSum } =
+        StoreExcel;
       setCurrentMenu(currentMenu);
+      setCompareConfig(compareConfig);
+      setCurrentCompareConfigId(currentCompareConfigId);
+      setCompareIsSum(compareIsSum);
     });
 
     return disposer;
@@ -33,9 +41,10 @@ export default function Header(props: any) {
   };
   const exportExcel = () => {
     if (StoreExcel.excelInstance) {
-      StoreExcel.excelInstance.downloadExcel();
+      StoreExcel.excelInstance.exportExcel();
     }
   };
+
   const setStyles = () => {
     if (StoreExcel.excelInstance) {
       // StoreExcel.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
@@ -47,8 +56,14 @@ export default function Header(props: any) {
   };
 
   const compareChange = (item: any) => {
-    console.log(item);
+    // console.log(item);
+    StoreExcel.currentCompareConfigId = item;
   };
+  const sumChange = (item: any) => {
+    // console.log(item);
+    StoreExcel.compareIsSum = item;
+  };
+
   const showCompare = () => {
     // StoreExcel.toggleDailog(true);
     StoreExcel.compareSheet();
@@ -92,20 +107,23 @@ export default function Header(props: any) {
             </Button>
 
             <Select
-              defaultValue="jack"
+              value={currentCompareConfigId}
               style={{ width: 258 }}
               onChange={compareChange}
             >
-              <Option value="jack">利润表-适用于已执行新金融准则</Option>
-              <Option value="lucy">利润表-适用于未执行新金融准则等</Option>
+              {compareConfig.map((m) => (
+                <Option value={m.id} key={m.id}>
+                  {m.name}
+                </Option>
+              ))}
             </Select>
             <Select
-              defaultValue="notSum"
+              value={compareIsSum}
               // style={{ width: 128 }}
-              onChange={compareChange}
+              onChange={sumChange}
             >
-              <Option value="notSum">序时账-未汇总</Option>
-              <Option value="isSum">序时账-已汇总</Option>
+              <Option value={0}>序时账-未汇总</Option>
+              <Option value={1}>序时账-已汇总</Option>
             </Select>
             <Button
               type="primary"

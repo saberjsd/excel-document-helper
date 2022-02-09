@@ -10,7 +10,7 @@ import { clamp, cloneDeep, uniqBy } from 'lodash';
 import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
-import { readExcel } from 'renderer/utils/excelHelper';
+import { readExcel, writeExcel } from 'renderer/utils/excelHelper';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -129,26 +129,27 @@ export default class MySpreadsheet extends Spreadsheet {
     return this.bottombar.items.findIndex((m) => m === this.bottombar.activeEl);
   }
 
-  downloadExcel() {
+  /**
+   * 导出整个表格
+   */
+  exportExcel() {
     // @ts-ignore
-    var new_wb = XLSXspread.xtos(this.getData());
-    /* write file and trigger a download */
-    // @ts-ignore
-    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
-      cellStyles: true,
-    });
+    writeExcel(this.getData())
   }
 
-  downloadSheet(sheetIndex: number = this.getCurrentSheetIndex()) {
+  /**
+   * 导出单个sheet
+   * @param sheetIndex
+   */
+  exportSheet(sheetIndex: number = this.getCurrentSheetIndex()) {
     const data = [this.datas[sheetIndex].getData()];
     // @ts-ignore
-    const new_wb = XLSXspread.xtos(data);
-    // @ts-ignore
-    XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
-      cellStyles: true,
-    });
+    writeExcel(data)
   }
 
+  /**
+   * 导入表格
+   */
   async importExcel() {
     readExcel().then(sheets=>{
       this.loadData(sheets)
