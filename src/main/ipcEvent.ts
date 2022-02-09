@@ -13,14 +13,14 @@ ipcMain.on('SET_JSON_STORAGE', async (event, arg) => {
   // console.log('====mian arg', arg);
   storage.set(arg.key, arg.value, function (error: any) {
     // event.reply('SET_JSON_STORAGE', `${storage.getDefaultDataPath()} && ${storage.getDataPath()}`);
-    event.reply('SET_JSON_STORAGE', { error });
+    event.reply('SET_JSON_STORAGE', { key: arg.key, error });
   });
 });
 
 ipcMain.on('GET_JSON_STORAGE', async (event, arg) => {
   storage.get(arg.key, function (error: any, data: any) {
     // console.log("==== get json", error, data)
-    event.reply('GET_JSON_STORAGE', { error, data });
+    event.reply('GET_JSON_STORAGE', { key: arg.key, error, data });
   });
 });
 

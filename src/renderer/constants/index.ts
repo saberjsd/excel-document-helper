@@ -17,5 +17,7 @@ export enum MENU {
 
 export enum JSON_PATH {
   // 三表勾稽，利润表配置
-  CONFIG_COMPARE_PROFILE = "config/compare_profile",
+  CONFIG_COMPARE_PROFILE = "config_compare_profile",
+  // 风险样式配置
+  CONFIG_RISK_LIST = "config_risk_list",
 }

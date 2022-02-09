@@ -5,12 +5,14 @@ class JsonStorage {
   set(key: string, value: any) {
     return new Promise<void>((resolve, reject) => {
       // @ts-ignore
-      window.electron.ipcRenderer.once('SET_JSON_STORAGE', (res) => {
+      window.electron.ipcRenderer.on('SET_JSON_STORAGE', (res) => {
         // console.log('====render res', res);
-        if (!res.error) {
-          resolve();
-        } else {
-          reject();
+        if(res.key === key){
+          if (!res.error) {
+            resolve();
+          } else {
+            reject();
+          }
         }
       });
       // @ts-ignore
@@ -21,11 +23,13 @@ class JsonStorage {
   get(key: string) {
     return new Promise<any>((resolve, reject) => {
       // @ts-ignore
-      window.electron.ipcRenderer.once('GET_JSON_STORAGE', (res) => {
-        if (!res.error && !isEmpty(res.data)) {
-          resolve(res.data);
-        } else {
-          reject(res.error);
+      window.electron.ipcRenderer.on('GET_JSON_STORAGE', (res) => {
+        if(res.key === key){
+          if (!res.error && !isEmpty(res.data)) {
+            resolve(res.data);
+          } else {
+            reject(res.error);
+          }
         }
       });
       // @ts-ignore

@@ -503,43 +503,43 @@ export default class MySpreadsheet extends Spreadsheet {
     });
   }
 
-  loadRiskConfig() {
-    const readRiskConfig = {
-      sheetName: '风险排查样式',
-      findSubjectCol: 'A',
-      findSummaryCol: 'B',
-      outCol: 'C',
-    };
+  // loadRiskConfig() {
+  //   const readRiskConfig = {
+  //     sheetName: '风险排查样式',
+  //     findSubjectCol: 'A',
+  //     findSummaryCol: 'B',
+  //     outCol: 'C',
+  //   };
 
-    const riskConfig: any[] = [];
-    const findSubjectIndex = getColByLetter(readRiskConfig.findSubjectCol);
-    const findSummaryIndex = getColByLetter(readRiskConfig.findSummaryCol);
-    const outColIndex = getColByLetter(readRiskConfig.outCol);
-    this.forEachCellByCols(
-      this.getSheetIndexByName(readRiskConfig.sheetName),
-      [findSubjectIndex, findSummaryIndex, outColIndex],
-      (outCols) => {
-        const findSubjectText = outCols[findSubjectIndex]?.text;
-        const findSummaryText = outCols[findSummaryIndex]?.text;
-        const findSubjectReg = (findSubjectText || '')
-          .split('、')
-          .filter((m: any) => m)
-          .join('|');
-        const findSummaryReg = (findSummaryText || '')
-          .split('、')
-          .filter((m: any) => m)
-          .join('|');
-        riskConfig.push({
-          findSubjectReg,
-          findSummaryReg,
-          outText: outCols[outColIndex]?.text,
-        });
-      }
-    );
+  //   const riskConfig: any[] = [];
+  //   const findSubjectIndex = getColByLetter(readRiskConfig.findSubjectCol);
+  //   const findSummaryIndex = getColByLetter(readRiskConfig.findSummaryCol);
+  //   const outColIndex = getColByLetter(readRiskConfig.outCol);
+  //   this.forEachCellByCols(
+  //     this.getSheetIndexByName(readRiskConfig.sheetName),
+  //     [findSubjectIndex, findSummaryIndex, outColIndex],
+  //     (outCols) => {
+  //       const findSubjectText = outCols[findSubjectIndex]?.text;
+  //       const findSummaryText = outCols[findSummaryIndex]?.text;
+  //       const findSubjectReg = (findSubjectText || '')
+  //         .split('、')
+  //         .filter((m: any) => m)
+  //         .join('|');
+  //       const findSummaryReg = (findSummaryText || '')
+  //         .split('、')
+  //         .filter((m: any) => m)
+  //         .join('|');
+  //       riskConfig.push({
+  //         findSubjectReg,
+  //         findSummaryReg,
+  //         outText: outCols[outColIndex]?.text,
+  //       });
+  //     }
+  //   );
 
-    console.log('====riskConfig', riskConfig);
-    return riskConfig;
-  }
+  //   console.log('====riskConfig', riskConfig);
+  //   return riskConfig;
+  // }
 
   getRiskRows(riskConfig: any[], showAll?: boolean, isReplace?: boolean) {
     const readConfig = {

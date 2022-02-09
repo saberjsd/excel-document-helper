@@ -20,6 +20,7 @@ const StoreExcel = observable({
   resultDialogRendered: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
+
   // ------ 勾稽相关 --------
   // 勾稽利润表配置-转换后的数据
   compareConfig: [] as any[],
@@ -29,6 +30,12 @@ const StoreExcel = observable({
   currentCompareConfigId: '',
   // 勾稽时，读取序时账时，数据是否“已汇总”（直接取汇总数据），反之是“未汇总”（需要自己汇总）, 0-false 1-true
   compareIsSum: 0,
+
+  // ----- 风险点相关 ------
+  // 风险样式配置条目数据
+  riskConfig: [] as any[],
+  // 风险样式配置sheets
+  riskConfigSheets: [] as any[],
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -180,8 +187,8 @@ const StoreExcel = observable({
 
   checkRisk() {
     this.resultType = FeatureType.CHECK_RICK;
-    const riskConfig = this.excelInstance.loadRiskConfig();
-    const outSheet = this.excelInstance.getRiskRows(riskConfig);
+    // const riskConfig = this.excelInstance.loadRiskConfig();
+    const outSheet = this.excelInstance.getRiskRows(this.riskConfig);
     this.showResultSheet(outSheet);
   },
   // 同步风险结果
@@ -288,6 +295,83 @@ const StoreExcel = observable({
     });
     this.compareConfig = compareConfigs;
     this.currentCompareConfigId = this.compareConfig[0].id;
+  },
+
+  /**
+   * 本地获取风险点配置数据
+   */
+  getRiskConfigList() {
+    JsonStorage.get(JSON_PATH.CONFIG_RISK_LIST)
+      .then((data) => {
+        this._convertRiskConfig(data);
+      })
+      .catch((err) => {});
+  },
+  /**
+   * 导入风险点配置数据
+   */
+  async importRiskConfigList() {
+    const sheets = await readExcel().catch(() => {});
+    this._convertRiskConfig(sheets);
+    await JsonStorage.set(JSON_PATH.CONFIG_RISK_LIST, sheets).catch(() => {});
+  },
+  _convertRiskConfig(sheets: any[]) {
+    this.riskConfigSheets = sheets;
+
+    const readRiskConfig = {
+      sheetName: '风险排查样式',
+      findSubjectCol: 'A',
+      findSummaryCol: 'B',
+      outCol: 'C',
+    };
+
+    const riskConfig: any[] = [];
+    const findSubjectIndex = getColByLetter(readRiskConfig.findSubjectCol);
+    const findSummaryIndex = getColByLetter(readRiskConfig.findSummaryCol);
+    const outColIndex = getColByLetter(readRiskConfig.outCol);
+
+    sheets.forEach((m: any) => {
+      forEachCellByCols(
+        m.rows,
+        [findSubjectIndex, findSummaryIndex, outColIndex],
+        (outCols) => {
+          const findSubjectText = outCols[findSubjectIndex]?.text;
+          const findSummaryText = outCols[findSummaryIndex]?.text;
+          const findSubjectReg = (findSubjectText || '')
+            .split('、')
+            .filter((j: any) => j)
+            .join('|');
+          const findSummaryReg = (findSummaryText || '')
+            .split('、')
+            .filter((j: any) => j)
+            .join('|');
+          riskConfig.push({
+            findSubjectReg,
+            findSummaryReg,
+            outText: outCols[outColIndex]?.text,
+          });
+        }
+      );
+    });
+
+    function forEachCellByCols(
+      rows: any[],
+      cols: number[],
+      cb: (outCols: any) => void
+    ) {
+      Object.entries(rows).forEach(([ri, row]: any) => {
+        const outCols: any = {};
+        if (row && row.cells) {
+          cols.forEach((m: any) => {
+            outCols[m] = row.cells[m];
+          });
+          cb(outCols);
+        }
+      });
+    }
+
+    console.log('====riskConfig', riskConfig);
+    this.riskConfig = riskConfig;
   },
 });
 
