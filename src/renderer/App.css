@@ -68,3 +68,7 @@ a:hover {
   height: 100%;
   overflow: hidden;
 }
+
+.ant-table-thead > tr > th{
+  font-weight: 600;
+}

@@ -40,6 +40,7 @@ export default function SettingRiskPage(props: any) {
       title: '科目关键字',
       dataIndex: 'findSubjectReg',
       key: 'findSubjectReg',
+      width: 150,
       render: (text: any) => <a>{text}</a>,
     },
     {
@@ -119,9 +120,12 @@ export default function SettingRiskPage(props: any) {
         columns={columns}
         dataSource={data}
         bordered
+        size="small"
+        scroll={{ y: 800 }}
         pagination={{
           position: ['bottomCenter'],
           showSizeChanger: true,
+          pageSize: 50,
         }}
       />
 
