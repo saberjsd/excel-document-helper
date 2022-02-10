@@ -72,3 +72,8 @@ a:hover {
 .ant-table-thead > tr > th{
   font-weight: 600;
 }
+
+
+.enter_confirm .ant-modal-confirm-btns button:first-child{
+  display: none;
+}

@@ -34,7 +34,7 @@ const mapCol = [
  * @param {string} [accept='.jpg,.jpeg,.png,.svg']
  */
 export const selectFile = (accept = '.jpg,.jpeg,.png,.svg') =>
-  new Promise((resolve, reject) => {
+  new Promise<any>((resolve, reject) => {
     let input = document.createElement('input');
     input.type = 'file';
     input.style.display = 'none';

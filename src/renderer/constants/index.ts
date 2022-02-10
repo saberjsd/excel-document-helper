@@ -20,4 +20,6 @@ export enum JSON_PATH {
   CONFIG_COMPARE_PROFILE = "config_compare_profile",
   // 风险样式配置
   CONFIG_RISK_LIST = "config_risk_list",
+  // 验证过的密码暂存
+  PASSWORD_STASH = "password_stash"
 }

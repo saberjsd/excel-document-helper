@@ -1,7 +1,7 @@
-// @ts-ignore
-import { selectFile } from '@/utils';
 import cuid from 'cuid';
+import moment from 'moment';
 import StoreRoot from 'renderer/store/StoreRoot';
+import { selectFile } from './utils';
 
 /**
  * 读取Excel
@@ -86,7 +86,7 @@ export const writeExcel = (sheets: any[]) => {
   var new_wb = XLSXspread.xtos(sheets);
   /* write file and trigger a download */
   // @ts-ignore
-  XLSX.writeFile(new_wb, `表格导出-${new Date().toLocaleString()}.xlsx`, {
+  XLSX.writeFile(new_wb, `表格导出-${moment().format('YYYY-MM-DD_HH-mm-ss')}.xlsx`, {
     cellStyles: true,
   });
 };

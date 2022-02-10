@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 import { FeatureType, JSON_PATH } from 'renderer/constants';
-import { getColByLetter } from 'renderer/utils';
+import { getColByLetter } from 'renderer/utils/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';

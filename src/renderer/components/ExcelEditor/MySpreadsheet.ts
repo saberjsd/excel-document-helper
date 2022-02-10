@@ -1,5 +1,3 @@
-// @ts-ignore
-import { selectFile } from '@/utils';
 import Spreadsheet, { Options } from 'x-data-spreadsheet';
 // import './sheet_mixin.js';
 // import './row_mixin.js';
@@ -7,7 +5,7 @@ import 'x-data-spreadsheet/src/index.less';
 // import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
-import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils';
+import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
 import { readExcel, writeExcel } from 'renderer/utils/excelHelper';
