@@ -78,9 +78,9 @@ export default function SettingProfitPage(props: any) {
                   <span className="mes_show">
                     表头行数：{item.headRowNumber}
                   </span>
-                  <span className="mes_show">
+                  {/* <span className="mes_show">
                     内容行数：{item.bodyRows.length}
-                  </span>
+                  </span> */}
                 </>
               }
             />

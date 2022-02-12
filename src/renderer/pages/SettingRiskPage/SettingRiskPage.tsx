@@ -121,11 +121,11 @@ export default function SettingRiskPage(props: any) {
         dataSource={data}
         bordered
         size="small"
-        scroll={{ y: 800 }}
+        // scroll={{ y: 400 }}
         pagination={{
           position: ['bottomCenter'],
           showSizeChanger: true,
-          pageSize: 50,
+          // pageSize: 20,
         }}
       />
 

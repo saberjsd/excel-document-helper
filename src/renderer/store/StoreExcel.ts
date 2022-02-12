@@ -163,8 +163,12 @@ const StoreExcel = observable({
 
     const profitSheet = this.excelInstance.findSheetByName('利润表');
     const resultRows = profitSheet.rows._;
-    this.excelInstance.caclSumWithRows(resultRows, config, 'billSheet');
-    this.excelInstance.caclSumWithRows(resultRows, config, 'balanceSheet');
+    this.excelInstance.caclSumWithRows(resultRows, config, 'billSheet', {
+      compareIsSum: this.compareIsSum,
+    });
+    this.excelInstance.caclSumWithRows(resultRows, config, 'balanceSheet', {
+      compareIsSum: this.compareIsSum,
+    });
     // @ts-ignore
     this.excelInstance.reRender();
 
@@ -320,6 +324,7 @@ const StoreExcel = observable({
 
     const readRiskConfig = {
       sheetName: '风险排查样式',
+      headRowNumber: 1,
       findSubjectCol: 'A',
       findSummaryCol: 'B',
       outCol: 'C',

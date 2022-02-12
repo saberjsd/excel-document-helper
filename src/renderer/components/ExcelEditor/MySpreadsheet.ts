@@ -132,7 +132,7 @@ export default class MySpreadsheet extends Spreadsheet {
    */
   exportExcel() {
     // @ts-ignore
-    writeExcel(this.getData())
+    writeExcel(this.getData());
   }
 
   /**
@@ -142,16 +142,16 @@ export default class MySpreadsheet extends Spreadsheet {
   exportSheet(sheetIndex: number = this.getCurrentSheetIndex()) {
     const data = [this.datas[sheetIndex].getData()];
     // @ts-ignore
-    writeExcel(data)
+    writeExcel(data);
   }
 
   /**
    * 导入表格
    */
   async importExcel() {
-    readExcel().then(sheets=>{
-      this.loadData(sheets)
-    })
+    readExcel().then((sheets) => {
+      this.loadData(sheets);
+    });
   }
 
   /**
@@ -225,7 +225,7 @@ export default class MySpreadsheet extends Spreadsheet {
     text: string | RegExp,
     sheetIndex: number = 0,
     col?: number,
-    subjectId?: RegExp,
+    subjectIdReg?: RegExp[],
     subjectCol?: number
   ) {
     const out: any = [];
@@ -237,8 +237,13 @@ export default class MySpreadsheet extends Spreadsheet {
           // @ts-ignore
           if (text.test(String(cell.text))) {
             // 额外的“科目编号”筛选条件
-            if (subjectId && subjectCol) {
-              if (subjectId.test(row.cells[subjectCol]?.text)) {
+            if (subjectIdReg && subjectIdReg.length && subjectCol) {
+              let text = row.cells[subjectCol]?.text
+              text = text ? text.replaceAll("\\r",'') : text
+              const find = subjectIdReg.every((reg) => {
+                return reg.test(text);
+              });
+              if (find) {
                 out.push({ ri, ci, row, cell });
               }
             } else {
@@ -440,7 +445,12 @@ export default class MySpreadsheet extends Spreadsheet {
    * @param config
    * @param sheetKey
    */
-  caclSumWithRows(resultRows: any, config: any, sheetKey: string) {
+  caclSumWithRows(
+    resultRows: any,
+    config: any,
+    sheetKey: string,
+    options: any
+  ) {
     // sheet的通用配置
     const sheetConfig = config[sheetKey];
     // 表头的行数
@@ -460,19 +470,32 @@ export default class MySpreadsheet extends Spreadsheet {
     // 根据配置，计算每一行
     config.bodyRows.forEach((configRow: any, n: number) => {
       // 配置表，要匹配的科目名称，正则文本
-      const configSubject = configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text
+      const configSubject =
+        configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text;
       // 配置表，要匹配的科目代码，正则文本
-      const configSubjectId = configRow.cells[getColByLetter(sheetConfig.configSubjectIdCol)]?.text
+      const configSubjectId =
+        configRow.cells[getColByLetter(sheetConfig.configSubjectIdCol)]?.text;
       // 配置表，要匹配的科目借贷方向，"借"|"贷"
-      const configDirection = configRow.cells[getColByLetter(sheetConfig.configDirectionCol)]?.text
+      const configDirection =
+        configRow.cells[getColByLetter(sheetConfig.configDirectionCol)]?.text;
+
+      let configSubjectIdRegArr: RegExp[] = [];
+      if (!isEmptyText(configSubjectId)) {
+        configSubjectIdRegArr = [new RegExp(configSubjectId)];
+      }
+      // 如果是已汇总的，只取汇总后的科目
+      if (options.compareIsSum) {
+        // 目前汇总后的数据在一级科目，一级科目的科目编码只有四位数字
+        configSubjectIdRegArr.push(/^\d{4}$/);
+      }
 
       // 获取到符合的行相关信息
       const rowInfo = this.getCellInfoByText(
         new RegExp(configSubject),
         sheetIndex,
         getColByLetter(sheetConfig.findSubjectCol),
-        !isEmptyText(configSubjectId) ? new RegExp(configSubjectId) : undefined,
-        getColByLetter(sheetConfig.findSubjectIdCol),
+        configSubjectIdRegArr,
+        getColByLetter(sheetConfig.findSubjectIdCol)
       );
       let sumDebit = 0;
       let sumCredit = 0;
@@ -493,11 +516,11 @@ export default class MySpreadsheet extends Spreadsheet {
       }
 
       // 金额汇总数据写入
-      resultRows[n + headRowNumber]
-        .cells[getColByLetter(sheetConfig.outAmountCol)]
-        .text =  Numeral(
-          configDirection === '借' ? sumDebit : sumCredit
-        ).format('0,0.00')
+      resultRows[n + headRowNumber].cells[
+        getColByLetter(sheetConfig.outAmountCol)
+      ].text = Numeral(configDirection === '借' ? sumDebit : sumCredit).format(
+        '0,0.00'
+      );
     });
   }
 

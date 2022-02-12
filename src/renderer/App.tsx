@@ -10,7 +10,12 @@ import JsonStorage from './store/JsonStorage';
 import { JSON_PATH } from './constants';
 
 const md5 = require('md5');
-const password = md5(moment().format('YYYY-MM-w'));
+const getPass = ()=>{
+  return md5(`${moment().format('YYYY-MM')}-email:1779144713@qq.com`)
+}
+const password = getPass()
+// @ts-ignore
+window["getPass"] = getPass;
 let permissionCode = '';
 
 export default function App() {
@@ -20,7 +25,7 @@ export default function App() {
     permissionCode = e.target?.value;
   };
   const onOk = (close: any) => {
-    // b0def15334e6c75ffc5db35d7896cd3c
+    // f4ec9eae0338bf494ba6d18ed461ca20
     if (permissionCode === password) {
       message.success('验证通过！');
       savePermissionCode(password);
