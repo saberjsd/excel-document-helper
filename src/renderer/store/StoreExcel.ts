@@ -371,7 +371,11 @@ const StoreExcel = observable({
       forEachCellByCols(
         m.rows,
         [findSubjectIndex, findSummaryIndex, outColIndex],
-        (outCols) => {
+        (outCols, ri) => {
+          // 去掉首行
+          if(Number(ri) < readRiskConfig.headRowNumber){
+            return
+          }
           const findSubjectText = outCols[findSubjectIndex]?.text;
           const findSummaryText = outCols[findSummaryIndex]?.text;
           const findSubjectReg = (findSubjectText || '')
@@ -394,7 +398,7 @@ const StoreExcel = observable({
     function forEachCellByCols(
       rows: any[],
       cols: number[],
-      cb: (outCols: any) => void
+      cb: (outCols: any, ri: number) => void
     ) {
       Object.entries(rows).forEach(([ri, row]: any) => {
         const outCols: any = {};
@@ -402,7 +406,7 @@ const StoreExcel = observable({
           cols.forEach((m: any) => {
             outCols[m] = row.cells[m];
           });
-          cb(outCols);
+          cb(outCols, ri);
         }
       });
     }
