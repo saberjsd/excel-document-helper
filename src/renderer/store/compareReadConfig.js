@@ -118,4 +118,9 @@ export const compareDefaultConfig = {
     // 输出配置
     outAmountCol: 'E',
   },
+  profitSheet: {
+    sheetName: '利润表',
+    // 输出配置
+    outAmountCol: 'C',
+  }
 };

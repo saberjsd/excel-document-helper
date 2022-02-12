@@ -8,6 +8,7 @@ import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';
 import JsonStorage from './JsonStorage';
+const Numeral = require('numeral');
 
 let resultSheets: any[] = [];
 
@@ -169,6 +170,37 @@ const StoreExcel = observable({
     this.excelInstance.caclSumWithRows(resultRows, config, 'balanceSheet', {
       compareIsSum: this.compareIsSum,
     });
+    // 高亮异常数据
+    if(profitSheet.styles)
+    profitSheet.styles = profitSheet.styles ? profitSheet.styles : []
+    const styleIndex = profitSheet.styles.push({
+      // bgcolor: "#fff2cd"
+      bgcolor: "#f4b184"
+    }) - 1
+    // debugger
+    Object.entries<any>(resultRows).forEach(([ri, row]) => {
+      if (isNaN(Number(ri))) {
+        return;
+      }
+      if (Number(ri) >= config.headRowNumber && row.cells) {
+        const checkArr:any[] = [];
+        const findColProfit = getColByLetter(config["profitSheet"].outAmountCol)
+        const findColBill = getColByLetter(config["billSheet"].outAmountCol)
+        const findColBalance = getColByLetter(config["balanceSheet"].outAmountCol)
+        const oneOf = row.cells[findColProfit]?.text;
+        checkArr.push(oneOf)
+        checkArr.push(row.cells[findColBill]?.text)
+        checkArr.push(row.cells[findColBalance]?.text)
+        const hasPass = checkArr.every(m=> Numeral(m).value() === Numeral(oneOf).value())
+        if(!hasPass){
+          Object.entries<any>(row.cells).forEach(([ci, col]) => {
+            // col
+            col.style = styleIndex
+          })
+        }
+      }
+    });
+
     // @ts-ignore
     this.excelInstance.reRender();
 

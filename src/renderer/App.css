@@ -77,3 +77,7 @@ a:hover {
 .enter_confirm .ant-modal-confirm-btns button:first-child{
   display: none;
 }
+
+.ant-message{
+  top: 80px;
+}
