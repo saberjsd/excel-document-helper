@@ -9,6 +9,7 @@ export enum FeatureType {
 
 export enum MENU {
   EXCEL_BOARD = "excel_board",
+  EXCEL_FILTER = "excel_filter",
   WORD_EXPORT = "word_export",
   SETTINGS_PROFIT = "settings_profit",
   SETTINGS_RISK = "settings_risk",

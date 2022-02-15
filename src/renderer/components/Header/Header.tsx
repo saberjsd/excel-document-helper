@@ -14,21 +14,35 @@ import StoreRoot from 'renderer/store/StoreRoot';
 import './styles.scss';
 const { Option } = Select;
 
+interface ItemProps {
+  label: string;
+  value: string;
+}
+
 export default function Header(props: any) {
   const [currentMenu, setCurrentMenu] = useState('');
   const [compareConfig, setCompareConfig] = useState<any[]>([]);
   const [currentCompareConfigId, setCurrentCompareConfigId] = useState('');
   const [compareIsSum, setCompareIsSum] = useState(0);
+  const [filterKeys, setFilterKeys] = useState<any[]>([]);
+  const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
 
   useEffect(() => {
     const disposer = autorun(() => {
       const { currentMenu } = StoreRoot;
-      const { compareConfig, currentCompareConfigId, compareIsSum } =
-        StoreExcel;
+      const {
+        compareConfig,
+        currentCompareConfigId,
+        compareIsSum,
+        filterOptions,
+        filterKeys,
+      } = StoreExcel;
       setCurrentMenu(currentMenu);
       setCompareConfig(compareConfig);
       setCurrentCompareConfigId(currentCompareConfigId);
       setCompareIsSum(compareIsSum);
+      setFilterOptions(filterOptions);
+      setFilterKeys(filterKeys);
     });
 
     return disposer;
@@ -137,14 +151,36 @@ export default function Header(props: any) {
               风险点排查
             </Button>
 
-            <Search
+            {/* <Search
               className="header_search"
               placeholder="请输入筛选“科目名称”"
               allowClear
               enterButton="筛选科目"
               size="middle"
               onSearch={showReultDailog}
-            />
+            /> */}
+          </>
+        )}
+
+        {currentMenu === MENU.EXCEL_FILTER && (
+          <>
+            <div className="header_filter_wrap">
+              <Select
+                className="header_filter"
+                mode="multiple"
+                value={filterKeys}
+                options={filterOptions}
+                onChange={(newValue: string[]) => {
+                  // setFilterKeys(newValue);
+                  StoreExcel.filterKeys = newValue
+                }}
+                placeholder="输入或者选择筛选条件"
+                maxTagCount="responsive"
+              />
+              <Button type="primary" icon={<SearchOutlined />}>
+                点击筛选
+              </Button>
+            </div>
           </>
         )}
       </div>

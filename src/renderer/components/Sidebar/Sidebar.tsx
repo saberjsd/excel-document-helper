@@ -8,6 +8,7 @@ import {
   SettingOutlined,
   SnippetsOutlined,
   ToolOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
 import { Menu } from 'antd';
 import Sider from 'antd/lib/layout/Sider';
@@ -46,6 +47,9 @@ export default function Sidebar(props: any) {
   const selectMenu = ({ key }: any) => {
     StoreRoot.currentMenu = key;
     resize();
+    if(key === MENU.EXCEL_FILTER){
+      StoreExcel.getFliterOptions()
+    }
   };
 
   return (
@@ -75,6 +79,9 @@ export default function Sidebar(props: any) {
         {/* <Menu.SubMenu key="excel" icon={<AppstoreOutlined />} title="表格操作"> */}
         <Menu.Item key={MENU.EXCEL_BOARD} icon={<TableOutlined />}>
           表格操作
+        </Menu.Item>
+        <Menu.Item key={MENU.EXCEL_FILTER} icon={<FilterOutlined />}>
+          科目筛选
         </Menu.Item>
         {/* <Menu.Item key="excel_1" icon={<UserOutlined />}>
           三表勾稽

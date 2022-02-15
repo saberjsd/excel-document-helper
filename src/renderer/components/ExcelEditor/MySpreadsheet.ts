@@ -193,23 +193,25 @@ export default class MySpreadsheet extends Spreadsheet {
   }
   /**
    * 根据指定列遍历cell
-   * @param sheetIndex
+   * @param sheetName
    * @param cols
    * @param cb
    */
   forEachCellByCols(
-    sheetIndex: number = 0,
+    sheetName: string,
     cols: number[],
-    cb: (outCols: any) => void
+    cb: (outCols: any, ri: number) => void
   ) {
-    const { rows } = this.datas[sheetIndex];
+    const sheet = this.getSheetByName(sheetName);
+    if (!sheet) return;
+    const { rows } = sheet;
     Object.entries(rows._).forEach(([ri, row]: any) => {
       const outCols: any = {};
       if (row && row.cells) {
         cols.forEach((m: any) => {
           outCols[m] = row.cells[m];
         });
-        cb(outCols);
+        cb(outCols, ri);
       }
     });
   }
@@ -238,8 +240,8 @@ export default class MySpreadsheet extends Spreadsheet {
           if (text.test(String(cell.text))) {
             // 额外的“科目编号”筛选条件
             if (subjectIdReg && subjectIdReg.length && subjectCol) {
-              let text = row.cells[subjectCol]?.text
-              text = text ? text.replaceAll("\\r",'') : text
+              let text = row.cells[subjectCol]?.text;
+              text = text ? text.replaceAll('\\r', '') : text;
               const find = subjectIdReg.every((reg) => {
                 return reg.test(text);
               });

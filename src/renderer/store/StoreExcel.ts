@@ -12,6 +12,13 @@ const Numeral = require('numeral');
 
 let resultSheets: any[] = [];
 
+const filterConfig = {
+  headRowNumber: 1,
+  sheetName: '序时帐',
+  findCol: 'F',
+  groupCol: 'D',
+};
+
 const StoreExcel = observable({
   excelId: 'treeSheetCompare',
   excelInstance: {} as MySpreadsheet,
@@ -37,6 +44,12 @@ const StoreExcel = observable({
   riskConfig: [] as any[],
   // 风险样式配置sheets
   riskConfigSheets: [] as any[],
+
+  // ----- 科目筛选相关 ------
+  // 科目多条件筛选数据
+  filterOptions: [] as any[],
+  // 已经选择的科目名称
+  filterKeys: [] as any[],
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -103,11 +116,7 @@ const StoreExcel = observable({
 
   getGroupExcel(text: string) {
     this.resultType = FeatureType.FILTER_EXCEL;
-    const filterConfig = {
-      sheetName: '序时帐',
-      findCol: 'F',
-      groupCol: 'D',
-    };
+
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
@@ -414,6 +423,31 @@ const StoreExcel = observable({
     console.log('====riskConfig', riskConfig);
     this.riskConfig = riskConfig;
   },
+
+
+  /**
+   * 获取筛选的科目下拉配置
+   */
+  getFliterOptions(){
+    const findColIndex = getColByLetter(filterConfig.findCol)
+    const filterOptions:any[] = []
+    this.excelInstance.forEachCellByCols("序时账", [findColIndex], (cellsInfo, ri)=>{
+      // 忽略首行
+      if(Number(ri) < filterConfig.headRowNumber){
+        return
+      }
+      // cellsInfo
+      const text = cellsInfo[findColIndex]?.text
+      if(!filterOptions.find(m=> m.value === text)){
+        filterOptions.push({
+          label: text,
+          value: text,
+        })
+      }
+    })
+    this.filterOptions = filterOptions
+  }
+
 });
 
 // @ts-ignore
