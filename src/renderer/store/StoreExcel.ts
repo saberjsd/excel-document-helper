@@ -16,7 +16,10 @@ const filterConfig = {
   headRowNumber: 1,
   sheetName: '序时帐',
   findCol: 'F',
+  // 分组的凭证号
   groupCol: 'D',
+  // 分组的月
+  groupMonthCol: 'B',
 };
 
 const StoreExcel = observable({
@@ -117,7 +120,6 @@ const StoreExcel = observable({
   getGroupExcel(text: string) {
     this.resultType = FeatureType.FILTER_EXCEL;
 
-
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
     );
@@ -129,7 +131,9 @@ const StoreExcel = observable({
       sheetIndex,
       findCol: getColByLetter(filterConfig.findCol),
       groupCol: getColByLetter(filterConfig.groupCol),
+      groupMonthCol: getColByLetter(filterConfig.groupMonthCol),
     });
+    // debugger
     const sdata = {
       name: `筛选“${text}”结果`,
       rows: { len: headRows.length + groupRows.length },
@@ -180,32 +184,39 @@ const StoreExcel = observable({
       compareIsSum: this.compareIsSum,
     });
     // 高亮异常数据
-    if(profitSheet.styles)
-    profitSheet.styles = profitSheet.styles ? profitSheet.styles : []
-    const styleIndex = profitSheet.styles.push({
-      // bgcolor: "#fff2cd"
-      bgcolor: "#f4b184"
-    }) - 1
+    if (profitSheet.styles)
+      profitSheet.styles = profitSheet.styles ? profitSheet.styles : [];
+    const styleIndex =
+      profitSheet.styles.push({
+        // bgcolor: "#fff2cd"
+        bgcolor: '#f4b184',
+      }) - 1;
     // debugger
     Object.entries<any>(resultRows).forEach(([ri, row]) => {
       if (isNaN(Number(ri))) {
         return;
       }
       if (Number(ri) >= config.headRowNumber && row.cells) {
-        const checkArr:any[] = [];
-        const findColProfit = getColByLetter(config["profitSheet"].outAmountCol)
-        const findColBill = getColByLetter(config["billSheet"].outAmountCol)
-        const findColBalance = getColByLetter(config["balanceSheet"].outAmountCol)
+        const checkArr: any[] = [];
+        const findColProfit = getColByLetter(
+          config['profitSheet'].outAmountCol
+        );
+        const findColBill = getColByLetter(config['billSheet'].outAmountCol);
+        const findColBalance = getColByLetter(
+          config['balanceSheet'].outAmountCol
+        );
         const oneOf = row.cells[findColProfit]?.text;
-        checkArr.push(oneOf)
-        checkArr.push(row.cells[findColBill]?.text)
-        checkArr.push(row.cells[findColBalance]?.text)
-        const hasPass = checkArr.every(m=> Numeral(m).value() === Numeral(oneOf).value())
-        if(!hasPass){
+        checkArr.push(oneOf);
+        checkArr.push(row.cells[findColBill]?.text);
+        checkArr.push(row.cells[findColBalance]?.text);
+        const hasPass = checkArr.every(
+          (m) => Numeral(m).value() === Numeral(oneOf).value()
+        );
+        if (!hasPass) {
           Object.entries<any>(row.cells).forEach(([ci, col]) => {
             // col
-            col.style = styleIndex
-          })
+            col.style = styleIndex;
+          });
         }
       }
     });
@@ -382,8 +393,8 @@ const StoreExcel = observable({
         [findSubjectIndex, findSummaryIndex, outColIndex],
         (outCols, ri) => {
           // 去掉首行
-          if(Number(ri) < readRiskConfig.headRowNumber){
-            return
+          if (Number(ri) < readRiskConfig.headRowNumber) {
+            return;
           }
           const findSubjectText = outCols[findSubjectIndex]?.text;
           const findSummaryText = outCols[findSummaryIndex]?.text;
@@ -424,30 +435,32 @@ const StoreExcel = observable({
     this.riskConfig = riskConfig;
   },
 
-
   /**
    * 获取筛选的科目下拉配置
    */
-  getFliterOptions(){
-    const findColIndex = getColByLetter(filterConfig.findCol)
-    const filterOptions:any[] = []
-    this.excelInstance.forEachCellByCols("序时账", [findColIndex], (cellsInfo, ri)=>{
-      // 忽略首行
-      if(Number(ri) < filterConfig.headRowNumber){
-        return
+  getFliterOptions() {
+    const findColIndex = getColByLetter(filterConfig.findCol);
+    const filterOptions: any[] = [];
+    this.excelInstance.forEachCellByCols(
+      '序时账',
+      [findColIndex],
+      (cellsInfo, ri) => {
+        // 忽略首行
+        if (Number(ri) < filterConfig.headRowNumber) {
+          return;
+        }
+        // cellsInfo
+        const text = cellsInfo[findColIndex]?.text;
+        if (!filterOptions.find((m) => m.value === text)) {
+          filterOptions.push({
+            label: text,
+            value: text,
+          });
+        }
       }
-      // cellsInfo
-      const text = cellsInfo[findColIndex]?.text
-      if(!filterOptions.find(m=> m.value === text)){
-        filterOptions.push({
-          label: text,
-          value: text,
-        })
-      }
-    })
-    this.filterOptions = filterOptions
-  }
-
+    );
+    this.filterOptions = filterOptions;
+  },
 });
 
 // @ts-ignore

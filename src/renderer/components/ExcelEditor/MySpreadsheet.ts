@@ -5,7 +5,12 @@ import 'x-data-spreadsheet/src/index.less';
 // import XLSX from 'xlsx';
 import 'x-data-spreadsheet/dist/locale/zh-cn';
 import { clamp, cloneDeep, uniqBy } from 'lodash';
-import { addStyles, getColByLetter, isEmptyText } from 'renderer/utils/utils';
+import {
+  addStyles,
+  getColByLetter,
+  getMonthFromString,
+  isEmptyText,
+} from 'renderer/utils/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
 import { readExcel, writeExcel } from 'renderer/utils/excelHelper';
@@ -273,37 +278,63 @@ export default class MySpreadsheet extends Spreadsheet {
     sheetIndex,
     findCol,
     groupCol,
+    groupMonthCol,
   }: {
     text: string;
     sheetIndex: number;
     findCol: number;
     groupCol: number;
+    groupMonthCol: number;
   }) {
+    // console.time("11111")
     const findRows: any[] = this.getCellInfoByText(text, sheetIndex, findCol);
-    let groupKeys: any[] = findRows.map((m) => m.row.cells[groupCol].text);
-    groupKeys = Array.from(new Set(groupKeys));
-    const rows: any = [];
-    groupKeys.forEach((i, j) => {
-      this.forEachRows(sheetIndex, ({ ri, row }) => {
-        if (
-          row &&
-          row.cells &&
-          row.cells[groupCol] &&
-          row.cells[groupCol].text &&
-          row.cells[groupCol].text == i
-        ) {
-          const item = cloneDeep(row);
-          Object.entries(item.cells).forEach(([ci, cell]) => {
-            // @ts-ignore
-            cell.style = j % 2;
-          });
-          // 记录原来的行号，方便数据回写
-          item.originRow = ri;
-          rows.push(item);
-        }
-      });
+    let groupKeys: any[] = findRows.map((m) => {
+      const month = getMonthFromString(m.row?.cells[groupMonthCol]?.text);
+      const id = m.row?.cells[groupCol]?.text;
+      return  `${id}-${month}`;
     });
-    return rows;
+    groupKeys = Array.from(new Set(groupKeys));
+    let outRows: any = [];
+    // console.timeEnd("11111")
+    // console.time("22222")
+
+    const { rows } = this.datas[sheetIndex];
+    const sourceRows = Object.entries<any>(rows._);
+
+    const map:any = {}
+
+    sourceRows.forEach(([ri, row])=>{
+      const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
+      const id = row?.cells[groupCol]?.text;
+      const mid = `${id}-${month}`;
+      // const curKey = groupKeys.shift();
+      if (mid) {
+        const findIndex = groupKeys.findIndex(m=>m === mid);
+        if(findIndex < 0) return
+        const item = cloneDeep(row);
+        Object.entries(item.cells).forEach(([ci, cell]) => {
+          // @ts-ignore
+          cell.style = findIndex % 2;
+        });
+        // 记录原来的行号，方便数据回写
+        item.originRow = ri;
+
+        if(!map[mid]){
+          map[mid] = [item]
+        } else {
+          map[mid].push(item)
+        }
+      }
+
+    })
+
+    Object.entries<any>(map).forEach(([key, vals])=>{
+      outRows = outRows.concat(vals)
+    })
+
+    // console.timeEnd("22222")
+    // console.log("outRows",outRows)
+    return outRows;
   }
 
   // excel数据转二维数组

@@ -151,14 +151,14 @@ export default function Header(props: any) {
               风险点排查
             </Button>
 
-            {/* <Search
+            <Search
               className="header_search"
               placeholder="请输入筛选“科目名称”"
               allowClear
               enterButton="筛选科目"
               size="middle"
               onSearch={showReultDailog}
-            /> */}
+            />
           </>
         )}
 

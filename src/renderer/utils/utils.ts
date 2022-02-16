@@ -1,4 +1,5 @@
-import { isEmpty } from "lodash";
+import { isEmpty } from 'lodash';
+import moment from 'moment';
 
 const mapCol = [
   'A',
@@ -66,13 +67,20 @@ export const getLetterByCol = (col: number) => {
 };
 
 export const addStyles = (styles: any[], value: any) => {
-  styles = styles || []
-  return styles.push(value) - 1
+  styles = styles || [];
+  return styles.push(value) - 1;
 };
 
-export const isEmptyText = (value:any) => {
-  if(typeof value === "string"){
-    value = value.trim()
+export const isEmptyText = (value: any) => {
+  if (typeof value === 'string') {
+    value = value.trim();
   }
-  return isEmpty(value)
-}
+  return isEmpty(value);
+};
+
+export const getMonthFromString = (str: string) => {
+  let out = ""
+  if(!str) return out
+  out += moment(str).month()
+  return out
+};
