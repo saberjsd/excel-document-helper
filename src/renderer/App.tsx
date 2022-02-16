@@ -1,6 +1,6 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 // import icon from '../../assets/icon.svg';
-import './App.css';
+import './App.scss';
 import Home from './pages/Home';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { ConfigProvider, Input, message, Modal } from 'antd';

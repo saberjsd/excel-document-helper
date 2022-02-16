@@ -2,7 +2,7 @@
  * @NOTE: Prepend a `~` to css file paths that are in your node_modules
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
- @import '~antd/dist/antd.css';
+@import '~antd/dist/antd.css';
 
 body {
   position: relative;
@@ -22,7 +22,7 @@ body {
   justify-content: center;
   align-items: center; */
 }
-#root{
+#root {
   width: 100%;
   height: 100%;
 }
@@ -62,22 +62,46 @@ a:hover {
   text-decoration: none;
 }
 
-
 .content_excel {
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
 
-.ant-table-thead > tr > th{
+.ant-table-thead > tr > th {
   font-weight: 600;
 }
 
-
-.enter_confirm .ant-modal-confirm-btns button:first-child{
+.enter_confirm .ant-modal-confirm-btns button:first-child {
   display: none;
 }
 
-.ant-message{
+.ant-message {
   top: 80px;
+}
+
+// 注释不要的工具栏按钮
+.x-spreadsheet-toolbar {
+  .x-spreadsheet-toolbar-btn,
+  .x-spreadsheet-toolbar-divider {
+    &:nth-of-type(3),
+    &:nth-of-type(4),
+    &:nth-of-type(5),
+    &:nth-of-type(6),
+    &:nth-of-type(7),
+    &:nth-of-type(8),
+    &:nth-of-type(9),
+    &:nth-of-type(10),
+    &:nth-of-type(14),
+    &:nth-of-type(15),
+    &:nth-of-type(17),
+    &:nth-of-type(20),
+    &:nth-of-type(21),
+    &:nth-of-type(22),
+    &:nth-of-type(23),
+    &:nth-of-type(24),
+    &:nth-of-type(23) {
+      display: none;
+    }
+  }
 }
