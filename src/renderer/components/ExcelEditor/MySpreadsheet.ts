@@ -598,9 +598,9 @@ export default class MySpreadsheet extends Spreadsheet {
   getRiskRows(riskConfig: any[], showAll?: boolean, isReplace?: boolean) {
     const readConfig = {
       sheetName: '序时账',
-      findSubjectCol: 'F',
-      findSummaryCol: 'G',
-      outCol: 'O',
+      findSubjectCol: 'G',
+      findSummaryCol: 'H',
+      outCol: 'P',
     };
     const findSubjectIndex = getColByLetter(readConfig.findSubjectCol);
     const findSummaryIndex = getColByLetter(readConfig.findSummaryCol);

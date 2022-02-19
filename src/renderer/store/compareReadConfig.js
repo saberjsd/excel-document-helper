@@ -97,10 +97,10 @@ export const compareDefaultConfig = {
     configSubjectIdCol: 'G',
     configDirectionCol: 'H',
     // 查找的表的列
-    debitCol: 'I',
-    creditCol: 'J',
-    findSubjectCol: 'F',
-    findSubjectIdCol: 'E',
+    debitCol: 'J',
+    creditCol: 'K',
+    findSubjectCol: 'G',
+    findSubjectIdCol: 'F',
     // 输出配置
     outAmountCol: 'D',
   },

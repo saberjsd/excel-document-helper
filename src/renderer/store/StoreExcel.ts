@@ -15,9 +15,9 @@ let resultSheets: any[] = [];
 const filterConfig = {
   headRowNumber: 1,
   sheetName: '序时帐',
-  findCol: 'F',
+  findCol: 'G',
   // 分组的凭证号
-  groupCol: 'D',
+  groupCol: 'E',
   // 分组的月
   groupMonthCol: 'B',
 };
