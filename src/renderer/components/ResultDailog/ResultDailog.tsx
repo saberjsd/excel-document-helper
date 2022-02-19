@@ -133,7 +133,8 @@ export default function ResultDailog(props: any) {
       }
       visible={visible}
       centered
-      // destroyOnClose
+      destroyOnClose
+      // forceRender
       onOk={handleOk}
       onCancel={handleCancel}
       okButtonProps={{ className: 'ok_btn' }}
@@ -149,8 +150,9 @@ export default function ResultDailog(props: any) {
 function DailogExcel(props: any) {
   useEffect(() => {
     console.log(66666);
-    EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true);
-    StoreExcel.resultDialogRendered = true;
+    requestAnimationFrame(()=>{
+      EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true);
+    })
   }, []);
   return <div id={StoreExcel.resultExcelId} className="dailog_excel"></div>;
 }

@@ -3,6 +3,7 @@ import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import { MENU } from 'renderer/constants';
 import ExcelPage from 'renderer/pages/ExcelPage';
+import FilterPage from 'renderer/pages/FilterPage';
 import SettingProfitPage from 'renderer/pages/SettingProfitPage';
 import SettingRiskPage from 'renderer/pages/SettingRiskPage';
 import StoreRoot from 'renderer/store/StoreRoot';
@@ -24,6 +25,7 @@ export default function Content(props: any) {
     <div className={clsx('page_content', props.className)}>
       <div className="page_content_inner">
         <ExcelPage hidden={currentMenu !== MENU.EXCEL_BOARD} />
+        <FilterPage hidden={currentMenu !== MENU.EXCEL_FILTER} />
         <SettingProfitPage hidden={currentMenu !== MENU.SETTINGS_PROFIT} />
         <SettingRiskPage hidden={currentMenu !== MENU.SETTINGS_RISK} />
       </div>

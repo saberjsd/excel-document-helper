@@ -28,7 +28,6 @@ const StoreExcel = observable({
   resultExcelId: 'resultSheetCompare',
   resultExcelInstance: {} as MySpreadsheet,
   resultDialogVisible: false,
-  resultDialogRendered: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
 
@@ -75,31 +74,34 @@ const StoreExcel = observable({
   // },
 
   // 结果弹窗
-  toggleDailog(visible: boolean) {
+  toggleDailog(visible: boolean, callback?: any) {
     this.resultDialogVisible = visible;
     if (!visible) {
       // @ts-ignore
       this.resultType = undefined;
+    } else {
+      EventBus.once(EVENT_CONSTANT.DAILOG_RENDERED, (show: boolean) => {
+        callback && callback();
+      });
     }
   },
 
   // 将结果展示到弹窗
-  showResultSheet(sheetData: any, isReset?: boolean) {
-    sheetData.cid = cuid();
+  showResultSheet(sheetData?: any, isReset?: boolean) {
     const saveData = () => {
-      if (isReset) {
-        resultSheets = [sheetData];
-      } else {
-        resultSheets.unshift(sheetData);
-        if (resultSheets.length >= 10) {
-          resultSheets.length === 10;
+      if (sheetData) {
+        sheetData.cid = cuid();
+        // 直接打开弹窗
+        if (isReset) {
+          resultSheets = [sheetData];
+        } else {
+          resultSheets.unshift(sheetData);
+          if (resultSheets.length >= 10) {
+            resultSheets.length === 10;
+          }
         }
       }
-
-      if (this.resultExcelInstance instanceof MySpreadsheet) {
-      } else {
-        this.resultExcelInstance = new MySpreadsheet(`#${this.resultExcelId}`);
-      }
+      this.resultExcelInstance = new MySpreadsheet(`#${this.resultExcelId}`);
       // @ts-ignore
       this.resultExcelInstance.loadData(resultSheets);
       requestAnimationFrame(() => {
@@ -108,17 +110,15 @@ const StoreExcel = observable({
       });
     };
 
-    if (this.resultDialogRendered) {
+    this.toggleDailog(true, () => {
       saveData();
-    } else {
-      EventBus.once(EVENT_CONSTANT.DAILOG_RENDERED, (show: boolean) => {
-        saveData();
-      });
-    }
+    });
   },
 
-  getGroupExcel(text: string) {
+  filterExcel(filterKeys: string[]) {
     this.resultType = FeatureType.FILTER_EXCEL;
+    const str = filterKeys.join('|');
+    const reg = new RegExp(str);
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
@@ -127,7 +127,7 @@ const StoreExcel = observable({
     const headRows = this.excelInstance.getHeadRows(sheetIndex);
     // 打组数据
     const groupRows = this.excelInstance.getGroupRows({
-      text,
+      text: reg,
       sheetIndex,
       findCol: getColByLetter(filterConfig.findCol),
       groupCol: getColByLetter(filterConfig.groupCol),
@@ -135,7 +135,7 @@ const StoreExcel = observable({
     });
     // debugger
     const sdata = {
-      name: `筛选“${text}”结果`,
+      name: `筛选“${str}”结果`,
       rows: { len: headRows.length + groupRows.length },
       styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
     };

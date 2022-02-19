@@ -280,7 +280,7 @@ export default class MySpreadsheet extends Spreadsheet {
     groupCol,
     groupMonthCol,
   }: {
-    text: string;
+    text: string | RegExp;
     sheetIndex: number;
     findCol: number;
     groupCol: number;

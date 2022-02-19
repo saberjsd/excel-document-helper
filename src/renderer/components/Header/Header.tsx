@@ -3,6 +3,7 @@ import {
   DownloadOutlined,
   SearchOutlined,
   VerticalAlignTopOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import { Button, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
@@ -86,17 +87,16 @@ export default function Header(props: any) {
 
   const checkRisk = () => {
     StoreExcel.checkRisk();
-    StoreExcel.toggleDailog(true);
+    // StoreExcel.toggleDailog(true);
   };
 
-  const showReultDailog = (value: string) => {
-    if (value) {
-      StoreExcel.getGroupExcel(value);
+  const showFilter = (filterKeys: string[]) => {
+    if (filterKeys && filterKeys.length) {
+      StoreExcel.filterExcel(filterKeys);
     } else {
-      // 没有输入不处理
-      return;
+      StoreExcel.showResultSheet()
     }
-    StoreExcel.toggleDailog(true);
+    // StoreExcel.toggleDailog(true);
   };
 
   return (
@@ -151,20 +151,29 @@ export default function Header(props: any) {
               风险点排查
             </Button>
 
-            <Search
+            {/* <Search
               className="header_search"
               placeholder="请输入筛选“科目名称”"
               allowClear
               enterButton="筛选科目"
               size="middle"
-              onSearch={showReultDailog}
-            />
+              onSearch={(val)=>showFilter([val])}
+            /> */}
           </>
         )}
 
         {currentMenu === MENU.EXCEL_FILTER && (
           <>
             <div className="header_filter_wrap">
+              <Button
+                type="primary"
+                icon={<HistoryOutlined />}
+                onClick={() => showFilter([])}
+                style={{ marginRight: 16 }}
+              >
+                查看历史结果
+              </Button>
+
               <Select
                 className="header_filter"
                 mode="multiple"
@@ -172,12 +181,16 @@ export default function Header(props: any) {
                 options={filterOptions}
                 onChange={(newValue: string[]) => {
                   // setFilterKeys(newValue);
-                  StoreExcel.filterKeys = newValue
+                  StoreExcel.filterKeys = newValue;
                 }}
                 placeholder="输入或者选择筛选条件"
                 maxTagCount="responsive"
               />
-              <Button type="primary" icon={<SearchOutlined />}>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={() => showFilter(StoreExcel.filterKeys)}
+              >
                 点击筛选
               </Button>
             </div>
