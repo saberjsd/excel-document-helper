@@ -1,7 +1,7 @@
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 
-const mapCol = [
+export const mapCol = [
   'A',
   'B',
   'C',
@@ -58,7 +58,7 @@ export const getColByLetter = (letter: any) => {
   return mapCol.findIndex((m) => m === letter);
 };
 
-export const getLetterByCol = (col: number) => {
+export const getLetterByCol = (col: any) => {
   try {
     return mapCol[Number(col)];
   } catch (error) {

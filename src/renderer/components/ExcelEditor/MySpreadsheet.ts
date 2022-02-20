@@ -14,6 +14,7 @@ import {
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
 import { readExcel, writeExcel } from 'renderer/utils/excelHelper';
+import { SORT_DIRECTION } from 'renderer/constants';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -274,24 +275,38 @@ export default class MySpreadsheet extends Spreadsheet {
    * @returns
    */
   getGroupRows({
-    text,
     sheetIndex,
+    findReg,
     findCol,
     groupCol,
     groupMonthCol,
+    sortDirection = SORT_DIRECTION.DESC,
+    sortCol,
+    filterList,
   }: {
-    text: string | RegExp;
+    findReg: RegExp;
     sheetIndex: number;
     findCol: number;
+    // 分组条件：凭证号
     groupCol: number;
+    // 分组条件：月份
     groupMonthCol: number;
+    // 组间排序方向
+    sortDirection?: SORT_DIRECTION;
+    // 组间排序依据列次
+    sortCol?: number;
+    filterList?: any[];
   }) {
     // console.time("11111")
-    const findRows: any[] = this.getCellInfoByText(text, sheetIndex, findCol);
+    const findRows: any[] = this.getCellInfoByText(
+      findReg,
+      sheetIndex,
+      findCol
+    );
     let groupKeys: any[] = findRows.map((m) => {
       const month = getMonthFromString(m.row?.cells[groupMonthCol]?.text);
       const id = m.row?.cells[groupCol]?.text;
-      return  `${id}-${month}`;
+      return `${id}-${month}`;
     });
     groupKeys = Array.from(new Set(groupKeys));
     let outRows: any = [];
@@ -301,16 +316,16 @@ export default class MySpreadsheet extends Spreadsheet {
     const { rows } = this.datas[sheetIndex];
     const sourceRows = Object.entries<any>(rows._);
 
-    const map:any = {}
+    const map: any = {};
 
-    sourceRows.forEach(([ri, row])=>{
+    sourceRows.forEach(([ri, row]) => {
       const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
       const id = row?.cells[groupCol]?.text;
       const mid = `${id}-${month}`;
       // const curKey = groupKeys.shift();
       if (mid) {
-        const findIndex = groupKeys.findIndex(m=>m === mid);
-        if(findIndex < 0) return
+        const findIndex = groupKeys.findIndex((m) => m === mid);
+        if (findIndex < 0) return;
         const item = cloneDeep(row);
         Object.entries(item.cells).forEach(([ci, cell]) => {
           // @ts-ignore
@@ -319,18 +334,49 @@ export default class MySpreadsheet extends Spreadsheet {
         // 记录原来的行号，方便数据回写
         item.originRow = ri;
 
-        if(!map[mid]){
-          map[mid] = [item]
+        if (!map[mid]) {
+          map[mid] = [item];
         } else {
-          map[mid].push(item)
+          map[mid].push(item);
         }
       }
+    });
 
-    })
+    const mapArr = Object.entries<any>(map);
+    if (sortCol !== undefined) {
+      mapArr.sort(([keyA, rowsA], [keyB, rowsB]) => {
+        const sortRowA = rowsA.find((m: any) =>
+          findReg.test(m?.cells[findCol]?.text)
+        );
+        const sortRowB = rowsB.find((m: any) =>
+          findReg.test(m?.cells[findCol]?.text)
+        );
+        const sortA = Numeral(sortRowA?.cells[sortCol]?.text).value();
+        const sortB = Numeral(sortRowB?.cells[sortCol]?.text).value();
+        if (sortDirection === SORT_DIRECTION.ASC) {
+          return sortA - sortB;
+        } else {
+          return sortB - sortA;
+        }
+      });
+    }
 
-    Object.entries<any>(map).forEach(([key, vals])=>{
-      outRows = outRows.concat(vals)
-    })
+    mapArr.forEach(([key, rows]) => {
+      // 更多过滤条件
+      if (filterList && filterList.length) {
+        rows = rows.filter((j: any) => {
+          return filterList.every((m) => {
+            if (m.col && m.value) {
+              const val = j.cells[getColByLetter(m.col)]?.text;
+              return new RegExp(m.value).test(val);
+            } else {
+              return true;
+            }
+          });
+        });
+      }
+      outRows = outRows.concat(rows);
+    });
 
     // console.timeEnd("22222")
     // console.log("outRows",outRows)

@@ -1,138 +1,207 @@
-import {
-  DownloadOutlined,
-  VerticalAlignTopOutlined,
-  SearchOutlined,
-  AlertOutlined,
-} from '@ant-design/icons';
-import { Button, message, Select } from 'antd';
-import Search from 'antd/lib/input/Search';
+import { Button, Drawer, Input, Select, Space } from 'antd';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
-import Layout from 'renderer/components/Layout';
-import ResultDailog from 'renderer/components/ResultDailog';
 import StoreExcel from 'renderer/store/StoreExcel';
-import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import './styles.scss';
+import {
+  HistoryOutlined,
+  SearchOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
+import { mapCol } from 'renderer/utils/utils';
+import cuid from 'cuid';
 const { Option } = Select;
 
+interface ItemProps {
+  label: string;
+  value: string;
+}
+
 export default function ExcelPage(props: any) {
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [filterKeys, setFilterKeys] = useState<any[]>([]);
+  const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
+  const [filterColConfig, setFilterColConfig] = useState<any[]>([]);
+  const [headColOptions, setHeadColOptions] = useState<any[]>([]);
+
   useEffect(() => {
     StoreExcel.init();
-    // const disposer = autorun(() => {});
-    // return disposer;
+    const disposer = autorun(() => {
+      const {
+        showDrawer,
+        filterOptions,
+        filterKeys,
+        filterColConfig,
+        headColOptions,
+      } = StoreExcel;
+      setShowDrawer(showDrawer);
+      setFilterOptions(filterOptions);
+      setFilterKeys(filterKeys);
+      setFilterColConfig(filterColConfig);
+      setHeadColOptions(headColOptions);
+    });
+
+    return disposer;
   }, []);
 
-  // const importExcel = () => {
-  //   if (StoreExcel.excelInstance) {
-  //     StoreExcel.excelInstance.importExcel();
-  //   }
-  // };
-  // const exportExcel = () => {
-  //   if (StoreExcel.excelInstance) {
-  //     StoreExcel.excelInstance.downloadExcel();
-  //   }
-  // };
-  // const setStyles = () => {
-  //   if (StoreExcel.excelInstance) {
-  //     // StoreExcel.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
-  //     StoreExcel.excelInstance.setCellStyle(2, 2, 'bgcolor', '#ff0000', 0);
-  //     // StoreExcel.excelInstance.setCellStyle(2,2,"color","#ff0000",0)
-  //     // @ts-ignore
-  //     StoreExcel.excelInstance.reRender();
-  //   }
-  // };
+  const onClose = () => {
+    StoreExcel.showDrawer = false;
+  };
 
-  // const compareChange = (item:any) => {
-  //   console.log(item);
-  // };
-  // const showCompare = () => {
-  //   // StoreExcel.toggleDailog(true);
-  //   StoreExcel.compareSheet();
-  //   message.success('三表勾稽结果已经写入利润表');
-  // };
+  const showFilter = (filterKeys: string[]) => {
+    if (filterKeys && filterKeys.length) {
+      StoreExcel.filterExcel(filterKeys);
+    } else {
+      StoreExcel.showResultSheet();
+    }
+    // StoreExcel.toggleDailog(true);
+  };
 
-  // const checkRisk = () => {
-  //   StoreExcel.checkRisk();
-  //   StoreExcel.toggleDailog(true);
-  // };
-
-  // const showReultDailog = (value: string) => {
-  //   if (value) {
-  //     StoreExcel.getGroupExcel(value);
-  //   } else {
-  //     // 没有输入不处理
-  //     return;
-  //   }
-  //   StoreExcel.toggleDailog(true);
-  // };
+  const addFilterConfig = () => {
+    StoreExcel.addFilterConfig();
+  };
+  const deleteFilterConfig = (key: string) => {
+    StoreExcel.deleteFilterConfig(key);
+  };
+  const changeFilterConfig = (prams: any) => {
+    StoreExcel.changeFilterConfig(prams);
+  };
 
   return (
-    // <Layout
-    //   className="excel_compare_page"
-    //   hidden={props.hidden}
-    //   header={
-    //     <>
-    //       <Button
-    //         type="primary"
-    //         icon={<VerticalAlignTopOutlined />}
-    //         onClick={importExcel}
-    //       >
-    //         导入表格
-    //       </Button>
-    //       <Button
-    //         type="primary"
-    //         icon={<DownloadOutlined />}
-    //         onClick={exportExcel}
-    //       >
-    //         导出表格
-    //       </Button>
-
-    //       <Select
-    //         defaultValue="jack"
-    //         style={{ width: 258 }}
-    //         onChange={compareChange}
-    //       >
-    //         <Option value="jack">利润表-适用于已执行新金融准则</Option>
-    //         <Option value="lucy">利润表-适用于未执行新金融准则等</Option>
-    //       </Select>
-    //       <Select
-    //         defaultValue="notSum"
-    //         // style={{ width: 128 }}
-    //         onChange={compareChange}
-    //       >
-    //         <Option value="notSum">序时账-未汇总</Option>
-    //         <Option value="isSum">序时账-已汇总</Option>
-    //       </Select>
-    //       <Button type="primary" icon={<SearchOutlined />} onClick={showCompare}>
-    //         三表勾稽
-    //       </Button>
-
-    //       <Button type="primary" icon={<AlertOutlined />} onClick={checkRisk}>
-    //         风险点排查
-    //       </Button>
-
-    //       <Search
-    //         className="header_search"
-    //         placeholder="请输入筛选“科目名称”"
-    //         allowClear
-    //         enterButton="筛选科目"
-    //         size="middle"
-    //         onSearch={showReultDailog}
-    //       />
-    //     </>
-    //   }
-    // >
-    //   <div id={StoreExcel.excelId} className="content_excel"></div>
-
-    //   <ResultDailog />
-    // </Layout>
-
     <>
       <div
         hidden={props.hidden}
         id={StoreExcel.excelId}
         className="content_excel"
       ></div>
+
+      <Drawer
+        title={'筛选条件设置'}
+        width="50%"
+        placement="right"
+        size="large"
+        onClose={onClose}
+        visible={showDrawer}
+        extra={
+          <Space>
+            {/* <Button onClick={onClose}>Cancel</Button>
+            <Button type="primary" onClick={onClose}>
+              OK
+            </Button> */}
+            <Button
+              type="primary"
+              icon={<HistoryOutlined />}
+              onClick={() => showFilter([])}
+              style={{ marginRight: 16 }}
+            >
+              查看历史结果
+            </Button>
+            <Button
+              type="primary"
+              danger
+              icon={<SearchOutlined />}
+              onClick={() => showFilter(StoreExcel.filterKeys)}
+            >
+              点击筛选
+            </Button>
+          </Space>
+        }
+      >
+        <div className="filter_wrap">
+          <div className="filter_wrap_line">
+            <span className="btn_label">科目名称：</span>
+            <Select
+              className="filter_select_key"
+              mode="multiple"
+              value={filterKeys}
+              options={filterOptions}
+              onChange={(newValue: string[]) => {
+                // setFilterKeys(newValue);
+                StoreExcel.filterKeys = newValue;
+              }}
+              placeholder="输入或者选择筛选条件"
+              maxTagCount="responsive"
+            />
+          </div>
+          <div className="filter_wrap_line">
+            <Input.Group compact>
+              <span className="btn_label">排序方式：</span>
+              <Select
+                onChange={(val) => (StoreExcel.filterSortCol = val)}
+                allowClear
+                placeholder="请选择金额列次"
+                style={{ width: '160px' }}
+              >
+                {headColOptions.map((m) => (
+                  <Select.Option value={m.value} key={m.value}>
+                    {m.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Input.Group>
+          </div>
+          {/* ----------------- */}
+          {filterColConfig.map((j, k) => (
+            <div className="filter_wrap_line" key={j.key}>
+              <Input.Group compact>
+                <Select
+                  value={j.col}
+                  onChange={(val) =>
+                    changeFilterConfig({
+                      key: j.key,
+                      findKey: 'col',
+                      value: val,
+                    })
+                  }
+                  allowClear
+                  placeholder="筛选列次"
+                  style={{ width: '160px' }}
+                >
+                  {headColOptions.map((m) => (
+                    <Select.Option value={m.value} key={m.value}>
+                      {m.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <span className="btn_gap">包含</span>
+                <Input
+                  value={j.value}
+                  onChange={(e) =>
+                    changeFilterConfig({
+                      key: j.key,
+                      findKey: 'value',
+                      value: e.target?.value,
+                    })
+                  }
+                  allowClear
+                  style={{ width: '160px' }}
+                  placeholder="关键词"
+                />
+                <Button
+                  danger
+                  onClick={() => deleteFilterConfig(j.key)}
+                  style={{ marginLeft: '8px' }}
+                >
+                  删除
+                </Button>
+              </Input.Group>
+            </div>
+          ))}
+          <div className="filter_wrap_line">
+            <Button
+              onClick={addFilterConfig}
+              type="primary"
+              shape="round"
+              icon={<PlusOutlined />}
+            >
+              增加筛选条件
+            </Button>
+          </div>
+          <div className="filter_wrap_line"></div>
+          <div className="filter_wrap_line"></div>
+          <div className="filter_wrap_line"></div>
+        </div>
+      </Drawer>
     </>
   );
 }

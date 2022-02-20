@@ -2,8 +2,8 @@ import cuid from 'cuid';
 import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
-import { FeatureType, JSON_PATH } from 'renderer/constants';
-import { getColByLetter } from 'renderer/utils/utils';
+import { FeatureType, JSON_PATH, SORT_DIRECTION } from 'renderer/constants';
+import { getColByLetter, getLetterByCol } from 'renderer/utils/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';
@@ -30,6 +30,9 @@ const StoreExcel = observable({
   resultDialogVisible: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
+  //
+  showDrawer: false,
+  headColOptions: [] as any[],
 
   // ------ 勾稽相关 --------
   // 勾稽利润表配置-转换后的数据
@@ -52,6 +55,12 @@ const StoreExcel = observable({
   filterOptions: [] as any[],
   // 已经选择的科目名称
   filterKeys: [] as any[],
+  // 筛选排序
+  filterSortCol: '',
+  //
+  filterSortDirection: SORT_DIRECTION.DESC as SORT_DIRECTION,
+  // 列次筛选条件
+  filterColConfig: [] as any[],
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -61,6 +70,7 @@ const StoreExcel = observable({
       }
     }
     this.excelInstance = new MySpreadsheet(`#${this.excelId}`);
+    this.addFilterConfig()
     // @ts-ignore
     window['FTExcel'] = this.excelInstance;
   },
@@ -115,10 +125,60 @@ const StoreExcel = observable({
     });
   },
 
+  updateHeadColOptions() {
+    const billSheet = this.excelInstance.getSheetByName('序时账');
+    let headRow = billSheet.rows._[0]?.cells;
+    const headColOptions = Object.entries<any>(headRow).map(([ri, cell]) => {
+      const letter = getLetterByCol(ri);
+      const text = cell.text || '';
+      return {
+        label: `${letter} - ${text}`,
+        text,
+        value: letter,
+      };
+    });
+    this.headColOptions = headColOptions;
+  },
+
+  /**
+   * 更多筛选配置更新
+   */
+  addFilterConfig() {
+    this.filterColConfig = this.filterColConfig.concat({
+      key: cuid(),
+      col: undefined,
+      value: '',
+    });
+  },
+  deleteFilterConfig(key: string) {
+    this.filterColConfig = this.filterColConfig.filter((m, n) => m.key !== key);
+  },
+  changeFilterConfig({
+    key,
+    findKey,
+    value,
+  }: {
+    key: any;
+    findKey: 'col' | 'value';
+    value: any;
+  }) {
+    const arr = [...this.filterColConfig];
+    arr.forEach((m) => {
+      if (m.key === key) {
+        m[findKey] = value;
+      }
+    });
+    this.filterColConfig = arr;
+  },
+
+  /**
+   * 科目筛选功能
+   * @param filterKeys
+   */
   filterExcel(filterKeys: string[]) {
     this.resultType = FeatureType.FILTER_EXCEL;
     const str = filterKeys.join('|');
-    const reg = new RegExp(str);
+    const findReg = new RegExp(str);
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
@@ -127,11 +187,14 @@ const StoreExcel = observable({
     const headRows = this.excelInstance.getHeadRows(sheetIndex);
     // 打组数据
     const groupRows = this.excelInstance.getGroupRows({
-      text: reg,
       sheetIndex,
+      findReg,
       findCol: getColByLetter(filterConfig.findCol),
       groupCol: getColByLetter(filterConfig.groupCol),
       groupMonthCol: getColByLetter(filterConfig.groupMonthCol),
+      sortCol: getColByLetter(this.filterSortCol),
+      sortDirection: this.filterSortDirection,
+      filterList: this.filterColConfig,
     });
     // debugger
     const sdata = {

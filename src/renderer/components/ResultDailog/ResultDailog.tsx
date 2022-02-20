@@ -1,4 +1,4 @@
-import { Button, Modal } from 'antd';
+import { Button, Dropdown, Input, Menu, Modal, Select } from 'antd';
 import clsx from 'clsx';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import { DownloadOutlined, SyncOutlined } from '@ant-design/icons';
 import './styles.scss';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { FeatureType } from 'renderer/constants';
+import { mapCol } from 'renderer/utils/utils';
 
 export default function ResultDailog(props: any) {
   const [visible, setVisible] = useState(false);
@@ -71,6 +72,8 @@ export default function ResultDailog(props: any) {
     });
   };
 
+  const handleMenuClick = () => {};
+
   return (
     // <div className={clsx('result_dailog', props.className)}>
     <Modal
@@ -99,22 +102,48 @@ export default function ResultDailog(props: any) {
                 onClick={saveRiskData}
                 loading={riskLoading}
               >
-                同步最新风险结果到序时账
+                同步结果到序时账
               </Button>
             )}
             {featureType === FeatureType.FILTER_EXCEL && (
-              <Button
-                type="primary"
-                danger
-                icon={<SyncOutlined />}
-                onClick={saveFilterData}
-                loading={filterLoading}
-              >
-                同步最新筛选结果到序时账
-              </Button>
+              <>
+                <Button
+                  type="primary"
+                  danger
+                  icon={<SyncOutlined />}
+                  onClick={saveFilterData}
+                  loading={filterLoading}
+                >
+                  同步结果到序时账
+                </Button>
+              </>
             )}
 
-            <Button
+            {/* <Input.Group compact>
+              <Input style={{ width: '120px' }} placeholder="科目名称" />
+              <Select placeholder="金额列次">
+                {mapCol.map((m) => (
+                  <Select.Option value={m} key={m}>
+                    {m}
+                  </Select.Option>
+                ))}
+              </Select>
+              <Button type="primary">排序</Button>
+            </Input.Group> */}
+
+            <Dropdown.Button
+              type="primary"
+              onClick={exportExcel}
+              overlay={
+                <Menu onClick={exportCurrentExcel}>
+                  <Menu.Item key="1">导出当前sheet</Menu.Item>
+                </Menu>
+              }
+            >
+              导出表格
+            </Dropdown.Button>
+
+            {/* <Button
               type="primary"
               icon={<DownloadOutlined />}
               onClick={exportExcel}
@@ -127,7 +156,7 @@ export default function ResultDailog(props: any) {
               onClick={exportCurrentExcel}
             >
               导出当前sheet
-            </Button>
+            </Button> */}
           </div>
         </>
       }
@@ -150,9 +179,9 @@ export default function ResultDailog(props: any) {
 function DailogExcel(props: any) {
   useEffect(() => {
     console.log(66666);
-    requestAnimationFrame(()=>{
+    requestAnimationFrame(() => {
       EventBus.emit(EVENT_CONSTANT.DAILOG_RENDERED, true);
-    })
+    });
   }, []);
   return <div id={StoreExcel.resultExcelId} className="dailog_excel"></div>;
 }

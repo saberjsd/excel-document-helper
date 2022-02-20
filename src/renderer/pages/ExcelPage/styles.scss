@@ -1,5 +1,26 @@
 .excel_compare_page {
 }
-.header_search{
+.header_search {
   width: 268px;
+}
+
+.filter_wrap {
+  .filter_wrap_line {
+    width: 100%;
+    margin-bottom: 24px;
+
+    .btn_gap,
+    .btn_label {
+      display: inline-block;
+      line-height: 32px;
+      padding: 0 8px;
+      color: #7e7e7e;
+    }
+    .btn_label {
+      padding-left: 0;
+    }
+  }
+  .filter_select_key {
+    width: calc(100% - 78px);
+  }
 }

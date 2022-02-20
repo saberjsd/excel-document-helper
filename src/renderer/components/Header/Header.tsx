@@ -4,8 +4,9 @@ import {
   SearchOutlined,
   VerticalAlignTopOutlined,
   HistoryOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
-import { Button, message, Select } from 'antd';
+import { Button, Input, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
@@ -94,9 +95,19 @@ export default function Header(props: any) {
     if (filterKeys && filterKeys.length) {
       StoreExcel.filterExcel(filterKeys);
     } else {
-      StoreExcel.showResultSheet()
+      StoreExcel.showResultSheet();
     }
     // StoreExcel.toggleDailog(true);
+  };
+
+  const openDrawer = () => {
+    if (StoreExcel.excelInstance.getSheetByName('序时账')) {
+      StoreExcel.showDrawer = true;
+      StoreExcel.getFliterOptions();
+      StoreExcel.updateHeadColOptions();
+    } else {
+      message.error('请先导入序时账表格数据！');
+    }
   };
 
   return (
@@ -151,6 +162,14 @@ export default function Header(props: any) {
               风险点排查
             </Button>
 
+            <Button
+              type="primary"
+              icon={<FilterOutlined />}
+              onClick={openDrawer}
+            >
+              科目筛选
+            </Button>
+
             {/* <Search
               className="header_search"
               placeholder="请输入筛选“科目名称”"
@@ -174,6 +193,7 @@ export default function Header(props: any) {
                 查看历史结果
               </Button>
 
+              {/* <Input.Group compact> */}
               <Select
                 className="header_filter"
                 mode="multiple"
@@ -193,6 +213,7 @@ export default function Header(props: any) {
               >
                 点击筛选
               </Button>
+              {/* </Input.Group> */}
             </div>
           </>
         )}
