@@ -478,7 +478,7 @@ export default class MySpreadsheet extends Spreadsheet {
   getSheetIndexByName(name: string) {
     for (let i = 0; i < this.datas.length; i++) {
       const item = this.datas[i];
-      if (item.name === name) {
+      if (item.name.trim() === name.trim()) {
         return i;
       }
     }
@@ -487,7 +487,7 @@ export default class MySpreadsheet extends Spreadsheet {
   getSheetByName(name: string) {
     for (let i = 0; i < this.datas.length; i++) {
       const item = this.datas[i];
-      if (item.name === name) {
+      if (item.name.trim() === name.trim()) {
         return item;
       }
     }
@@ -497,7 +497,7 @@ export default class MySpreadsheet extends Spreadsheet {
     return this.datas.find((m) => m.cid === cid);
   }
   findSheetByName(sheetName: string) {
-    return this.datas.find((m) => m.name === sheetName);
+    return this.datas.find((m) => m.name.trim() === sheetName.trim());
   }
 
   /**
