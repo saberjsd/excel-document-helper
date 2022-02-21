@@ -170,6 +170,15 @@ export default function Header(props: any) {
               科目筛选
             </Button>
 
+            <Button
+              type="primary"
+              icon={<HistoryOutlined />}
+              onClick={() => showFilter([])}
+              // style={{ marginRight: 16 }}
+            >
+              查看历史
+            </Button>
+
             {/* <Search
               className="header_search"
               placeholder="请输入筛选“科目名称”"

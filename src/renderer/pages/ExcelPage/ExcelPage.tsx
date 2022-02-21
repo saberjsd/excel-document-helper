@@ -88,14 +88,14 @@ export default function ExcelPage(props: any) {
             <Button type="primary" onClick={onClose}>
               OK
             </Button> */}
-            <Button
+            {/* <Button
               type="primary"
               icon={<HistoryOutlined />}
               onClick={() => showFilter([])}
               style={{ marginRight: 16 }}
             >
               查看历史结果
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               danger
