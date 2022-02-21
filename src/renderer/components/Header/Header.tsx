@@ -5,6 +5,8 @@ import {
   VerticalAlignTopOutlined,
   HistoryOutlined,
   FilterOutlined,
+  DoubleRightOutlined,
+  DoubleLeftOutlined,
 } from '@ant-design/icons';
 import { Button, Input, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
@@ -28,6 +30,7 @@ export default function Header(props: any) {
   const [compareIsSum, setCompareIsSum] = useState(0);
   const [filterKeys, setFilterKeys] = useState<any[]>([]);
   const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
+  const [showDrawer, setShowDrawer] = useState(false);
 
   useEffect(() => {
     const disposer = autorun(() => {
@@ -38,6 +41,7 @@ export default function Header(props: any) {
         compareIsSum,
         filterOptions,
         filterKeys,
+        showDrawer,
       } = StoreExcel;
       setCurrentMenu(currentMenu);
       setCompareConfig(compareConfig);
@@ -45,6 +49,7 @@ export default function Header(props: any) {
       setCompareIsSum(compareIsSum);
       setFilterOptions(filterOptions);
       setFilterKeys(filterKeys);
+      setShowDrawer(showDrawer);
     });
 
     return disposer;
@@ -61,15 +66,15 @@ export default function Header(props: any) {
     }
   };
 
-  const setStyles = () => {
-    if (StoreExcel.excelInstance) {
-      // StoreExcel.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
-      StoreExcel.excelInstance.setCellStyle(2, 2, 'bgcolor', '#ff0000', 0);
-      // StoreExcel.excelInstance.setCellStyle(2,2,"color","#ff0000",0)
-      // @ts-ignore
-      StoreExcel.excelInstance.reRender();
-    }
-  };
+  // const setStyles = () => {
+  //   if (StoreExcel.excelInstance) {
+  //     // StoreExcel.excelInstance.datas[0].addStyle({bgcolor: "#ff0000"});
+  //     StoreExcel.excelInstance.setCellStyle(2, 2, 'bgcolor', '#ff0000', 0);
+  //     // StoreExcel.excelInstance.setCellStyle(2,2,"color","#ff0000",0)
+  //     // @ts-ignore
+  //     StoreExcel.excelInstance.reRender();
+  //   }
+  // };
 
   const compareChange = (item: any) => {
     // console.log(item);
@@ -107,6 +112,13 @@ export default function Header(props: any) {
       StoreExcel.updateHeadColOptions();
     } else {
       message.error('请先导入序时账表格数据！');
+    }
+  };
+  const toggleDrawer = () => {
+    if (StoreExcel.showDrawer) {
+      StoreExcel.showDrawer = false;
+    } else {
+      openDrawer();
     }
   };
 
@@ -171,7 +183,7 @@ export default function Header(props: any) {
             </Button>
 
             <Button
-              type="primary"
+              // type="primary"
               icon={<HistoryOutlined />}
               onClick={() => showFilter([])}
               // style={{ marginRight: 16 }}
@@ -227,6 +239,14 @@ export default function Header(props: any) {
           </>
         )}
       </div>
+      <Button
+        className="mini_drawer_btn"
+        type="primary"
+        icon={showDrawer ? <DoubleRightOutlined /> : <DoubleLeftOutlined />}
+        onClick={toggleDrawer}
+      >
+        {/* {showDrawer ? '点击收起' : '点击展开'} */}
+      </Button>
     </header>
   );
 }

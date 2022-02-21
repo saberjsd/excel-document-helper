@@ -112,3 +112,18 @@ a:hover {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.ant-btn {
+  padding: 4px 8px;
+}
+
+.ant-drawer {
+  z-index: 2000;
+}
+
+.mini_drawer_btn {
+  position: fixed;
+  z-index: 3000;
+  top: calc(50% - 16px);
+  right: 0px;
+}

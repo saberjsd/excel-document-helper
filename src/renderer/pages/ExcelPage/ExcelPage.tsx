@@ -7,6 +7,8 @@ import {
   HistoryOutlined,
   SearchOutlined,
   PlusOutlined,
+  DoubleRightOutlined,
+  DoubleLeftOutlined,
 } from '@ant-design/icons';
 import { mapCol } from 'renderer/utils/utils';
 import cuid from 'cuid';
@@ -47,6 +49,9 @@ export default function ExcelPage(props: any) {
   const onClose = () => {
     StoreExcel.showDrawer = false;
   };
+  const onResize = () => {
+    StoreExcel.showDrawer = !StoreExcel.showDrawer;
+  };
 
   const showFilter = (filterKeys: string[]) => {
     if (filterKeys && filterKeys.length) {
@@ -74,6 +79,15 @@ export default function ExcelPage(props: any) {
         id={StoreExcel.excelId}
         className="content_excel"
       ></div>
+
+      {/* <Button
+        className="mini_drawer_btn"
+        type="primary"
+        icon={showDrawer ? <DoubleRightOutlined /> : <DoubleLeftOutlined />}
+        onClick={() => onResize()}
+      >
+        {showDrawer ? '点击收起' : '点击展开'}
+      </Button> */}
 
       <Drawer
         title={'筛选条件设置'}
@@ -121,6 +135,7 @@ export default function ExcelPage(props: any) {
               }}
               placeholder="输入或者选择筛选条件"
               maxTagCount="responsive"
+              getPopupContainer={(triggerNode)=>triggerNode}
             />
           </div>
           <div className="filter_wrap_line">
@@ -131,6 +146,7 @@ export default function ExcelPage(props: any) {
                 allowClear
                 placeholder="请选择金额列次"
                 style={{ width: '160px' }}
+                getPopupContainer={(triggerNode)=>triggerNode}
               >
                 {headColOptions.map((m) => (
                   <Select.Option value={m.value} key={m.value}>
@@ -156,6 +172,7 @@ export default function ExcelPage(props: any) {
                   allowClear
                   placeholder="筛选列次"
                   style={{ width: '160px' }}
+                  getPopupContainer={(triggerNode)=>triggerNode}
                 >
                   {headColOptions.map((m) => (
                     <Select.Option value={m.value} key={m.value}>

@@ -30,8 +30,9 @@ const StoreExcel = observable({
   resultDialogVisible: false,
   resultDialogCallback: null as any,
   resultType: undefined as any as FeatureType,
-  //
+  // 抽屉是否展开
   showDrawer: false,
+  // 从表头列次读取的下拉列表
   headColOptions: [] as any[],
 
   // ------ 勾稽相关 --------
@@ -70,7 +71,7 @@ const StoreExcel = observable({
       }
     }
     this.excelInstance = new MySpreadsheet(`#${this.excelId}`);
-    this.addFilterConfig()
+    this.addFilterConfig();
     // @ts-ignore
     window['FTExcel'] = this.excelInstance;
   },
@@ -111,6 +112,10 @@ const StoreExcel = observable({
           }
         }
       }
+      const dom = document.getElementById(this.resultExcelId);
+      if (dom) {
+        dom.innerHTML = '';
+      }
       this.resultExcelInstance = new MySpreadsheet(`#${this.resultExcelId}`);
       // @ts-ignore
       this.resultExcelInstance.loadData(resultSheets);
@@ -120,9 +125,13 @@ const StoreExcel = observable({
       });
     };
 
-    this.toggleDailog(true, () => {
+    if (this.resultDialogVisible) {
       saveData();
-    });
+    } else {
+      this.toggleDailog(true, () => {
+        saveData();
+      });
+    }
   },
 
   updateHeadColOptions() {
@@ -211,6 +220,8 @@ const StoreExcel = observable({
       // @ts-ignore
       sdata.rows[n + headRows.length] = m;
     });
+
+    this.showDrawer = false;
 
     this.showResultSheet(sdata);
   },
