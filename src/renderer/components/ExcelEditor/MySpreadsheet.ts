@@ -327,10 +327,10 @@ export default class MySpreadsheet extends Spreadsheet {
         const findIndex = groupKeys.findIndex((m) => m === mid);
         if (findIndex < 0) return;
         const item = cloneDeep(row);
-        Object.entries(item.cells).forEach(([ci, cell]) => {
-          // @ts-ignore
-          cell.style = findIndex % 2;
-        });
+        // Object.entries(item.cells).forEach(([ci, cell]) => {
+        //   // @ts-ignore
+        //   cell.style = findIndex % 2;
+        // });
         // 记录原来的行号，方便数据回写
         item.originRow = ri;
 
@@ -361,6 +361,8 @@ export default class MySpreadsheet extends Spreadsheet {
       });
     }
 
+    // 间隔颜色
+    let nextStyle = 0
     mapArr.forEach(([key, rows]) => {
       // 更多过滤条件
       if (filterList && filterList.length) {
@@ -374,6 +376,15 @@ export default class MySpreadsheet extends Spreadsheet {
             }
           });
         });
+      }
+      if(rows.length){
+        rows.forEach((m:any)=>{
+          Object.entries(m.cells).forEach(([ci, cell]) => {
+            // @ts-ignore
+            cell.style = nextStyle;
+          });
+        })
+        nextStyle = Number(!nextStyle)
       }
       outRows = outRows.concat(rows);
     });
