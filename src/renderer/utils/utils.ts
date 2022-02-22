@@ -84,3 +84,13 @@ export const getMonthFromString = (str: string) => {
   out += moment(str).month()
   return out
 };
+
+/**
+ * 字符串转正则，添加转义
+ * @param str
+ * @returns
+ */
+export const string2RegExp = (str: string)=>{
+  if(!str || !str.trim()) return null
+  return new RegExp(str.replaceAll("\\","\\\\"))
+}

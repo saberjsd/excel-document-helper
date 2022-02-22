@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
 import { FeatureType, JSON_PATH, SORT_DIRECTION } from 'renderer/constants';
-import { getColByLetter, getLetterByCol } from 'renderer/utils/utils';
+import { getColByLetter, getLetterByCol, string2RegExp } from 'renderer/utils/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig, compareReadConfig } from './compareReadConfig';
@@ -186,8 +186,9 @@ const StoreExcel = observable({
    */
   filterExcel(filterKeys: string[]) {
     this.resultType = FeatureType.FILTER_EXCEL;
+    // 替换转义符
     const str = filterKeys.join('|');
-    const findReg = new RegExp(str);
+    const findReg = string2RegExp(str)!;
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName

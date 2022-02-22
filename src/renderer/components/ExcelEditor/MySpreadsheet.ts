@@ -10,6 +10,7 @@ import {
   getColByLetter,
   getMonthFromString,
   isEmptyText,
+  string2RegExp,
 } from 'renderer/utils/utils';
 import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
@@ -370,7 +371,7 @@ export default class MySpreadsheet extends Spreadsheet {
           return filterList.every((m) => {
             if (m.col && m.value) {
               const val = j.cells[getColByLetter(m.col)]?.text;
-              return new RegExp(m.value).test(val);
+              return string2RegExp(m.value)?.test(val);
             } else {
               return true;
             }
@@ -571,7 +572,7 @@ export default class MySpreadsheet extends Spreadsheet {
 
       let configSubjectIdRegArr: RegExp[] = [];
       if (!isEmptyText(configSubjectId)) {
-        configSubjectIdRegArr = [new RegExp(configSubjectId)];
+        configSubjectIdRegArr = [string2RegExp(configSubjectId)!];
       }
       // 如果是已汇总的，只取汇总后的科目
       if (options.compareIsSum) {
@@ -581,7 +582,7 @@ export default class MySpreadsheet extends Spreadsheet {
 
       // 获取到符合的行相关信息
       const rowInfo = this.getCellInfoByText(
-        new RegExp(configSubject),
+        string2RegExp(configSubject)!,
         sheetIndex,
         getColByLetter(sheetConfig.findSubjectCol),
         configSubjectIdRegArr,
@@ -697,9 +698,9 @@ export default class MySpreadsheet extends Spreadsheet {
           const matchRisk = riskConfig.filter(
             (m) =>
               (m.findSubjectReg &&
-                new RegExp(m.findSubjectReg).test(subjectText)) ||
+                string2RegExp(m.findSubjectReg)?.test(subjectText)) ||
               (m.findSummaryReg &&
-                new RegExp(m.findSummaryReg).test(summaryText))
+                string2RegExp(m.findSummaryReg)?.test(summaryText))
           );
           const hasRisk = matchRisk.length > 0;
           matchRisk.forEach((m, n) => {
