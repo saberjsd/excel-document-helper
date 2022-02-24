@@ -90,6 +90,9 @@ const StoreExcel = observable({
     if (!visible) {
       // @ts-ignore
       this.resultType = undefined;
+      // 关闭弹窗时，把数据回显到内存
+      // @ts-ignore
+      resultSheets = this.resultExcelInstance.getData()
     } else {
       EventBus.once(EVENT_CONSTANT.DAILOG_RENDERED, (show: boolean) => {
         callback && callback();
