@@ -363,7 +363,7 @@ export default class MySpreadsheet extends Spreadsheet {
     }
 
     // 间隔颜色
-    let nextStyle = 0
+    let nextStyle = 0;
     mapArr.forEach(([key, rows]) => {
       // 更多过滤条件
       if (filterList && filterList.length) {
@@ -378,14 +378,14 @@ export default class MySpreadsheet extends Spreadsheet {
           });
         });
       }
-      if(rows.length){
-        rows.forEach((m:any)=>{
+      if (rows.length) {
+        rows.forEach((m: any) => {
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore
             cell.style = nextStyle;
           });
-        })
-        nextStyle = Number(!nextStyle)
+        });
+        nextStyle = Number(!nextStyle);
       }
       outRows = outRows.concat(rows);
     });
@@ -663,15 +663,19 @@ export default class MySpreadsheet extends Spreadsheet {
     const findSubjectIndex = getColByLetter(readConfig.findSubjectCol);
     const findSummaryIndex = getColByLetter(readConfig.findSummaryCol);
     const outIndex = getColByLetter(readConfig.outCol);
+    const sheetIndex = this.getSheetIndexByName(readConfig.sheetName);
+    const sheetData = this.getData()[sheetIndex];
 
     const outSheet = {
       name: '风险排查结果',
       rows: {} as any,
+      cols: cloneDeep(sheetData.cols),
     };
     let outRows: any[] = [];
 
     console.time('process risk');
-    const { rows } = this.datas[this.getSheetIndexByName(readConfig.sheetName)];
+
+    const { rows } = this.datas[sheetIndex];
     Object.entries(rows._).forEach(([ri, row]: any) => {
       const tempRows: any[] = [];
       if (row && row.cells) {
@@ -748,10 +752,8 @@ export default class MySpreadsheet extends Spreadsheet {
 
     if (isReplace) {
       outRows.forEach((m, n) => {
-        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows._[n] =
-          m;
-        this.datas[this.getSheetIndexByName(readConfig.sheetName)].rows.len =
-          outRows.length;
+        this.datas[sheetIndex].rows._[n] = m;
+        this.datas[sheetIndex].rows.len = outRows.length;
       });
     } else {
       outRows.forEach((m, n) => {

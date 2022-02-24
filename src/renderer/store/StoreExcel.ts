@@ -198,6 +198,7 @@ const StoreExcel = observable({
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
     );
+    const sheetData = this.excelInstance.getData()[sheetIndex]
     // 表头数据
     const headRows = this.excelInstance.getHeadRows(sheetIndex);
     // 打组数据
@@ -214,6 +215,8 @@ const StoreExcel = observable({
     // debugger
     const sdata = {
       name: `筛选“${str}”结果`,
+      // 列的属性也带上
+      cols: cloneDeep(sheetData.cols),
       rows: { len: headRows.length + groupRows.length },
       styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
     };
