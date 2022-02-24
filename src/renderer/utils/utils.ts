@@ -92,5 +92,7 @@ export const getMonthFromString = (str: string) => {
  */
 export const string2RegExp = (str: string)=>{
   if(!str || !str.trim()) return null
+  // TODO: 其他符号转义
+  const needRepalce = /(\[|\\|\^|\$|\.|\||\?|\*|\+|\(|\))/
   return new RegExp(str.replaceAll("\\","\\\\"))
 }

@@ -102,6 +102,8 @@ const StoreExcel = observable({
     const saveData = () => {
       if (sheetData) {
         sheetData.cid = cuid();
+        // 筛选结果默认冻结第一行
+        sheetData.freeze = "A2"
         // 直接打开弹窗
         if (isReset) {
           resultSheets = [sheetData];
