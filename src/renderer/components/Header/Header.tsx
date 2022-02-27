@@ -25,8 +25,6 @@ interface ItemProps {
 
 export default function Header(props: any) {
   const [currentMenu, setCurrentMenu] = useState('');
-  const [compareConfig, setCompareConfig] = useState<any[]>([]);
-  const [currentCompareConfigId, setCurrentCompareConfigId] = useState('');
   const [compareIsSum, setCompareIsSum] = useState(0);
   const [filterKeys, setFilterKeys] = useState<any[]>([]);
   const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
@@ -36,16 +34,12 @@ export default function Header(props: any) {
     const disposer = autorun(() => {
       const { currentMenu } = StoreRoot;
       const {
-        compareConfig,
-        currentCompareConfigId,
         compareIsSum,
         filterOptions,
         filterKeys,
         showDrawer,
       } = StoreExcel;
       setCurrentMenu(currentMenu);
-      setCompareConfig(compareConfig);
-      setCurrentCompareConfigId(currentCompareConfigId);
       setCompareIsSum(compareIsSum);
       setFilterOptions(filterOptions);
       setFilterKeys(filterKeys);
@@ -75,11 +69,6 @@ export default function Header(props: any) {
   //     StoreExcel.excelInstance.reRender();
   //   }
   // };
-
-  const compareChange = (item: any) => {
-    // console.log(item);
-    StoreExcel.currentCompareConfigId = item;
-  };
   const sumChange = (item: any) => {
     // console.log(item);
     StoreExcel.compareIsSum = item;
@@ -143,17 +132,6 @@ export default function Header(props: any) {
               导出表格
             </Button>
 
-            <Select
-              value={currentCompareConfigId}
-              style={{ width: 258 }}
-              onChange={compareChange}
-            >
-              {compareConfig.map((m) => (
-                <Option value={m.id} key={m.id}>
-                  {m.name}
-                </Option>
-              ))}
-            </Select>
             <Select
               value={compareIsSum}
               // style={{ width: 128 }}

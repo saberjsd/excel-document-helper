@@ -227,27 +227,27 @@ export default class MySpreadsheet extends Spreadsheet {
    * 通过单元格内容，获取单元格信息。可以指定列
    * @param text
    * @param sheetIndex
-   * @param col
+   * @param textCol
    * @returns
    */
   getCellInfoByText(
-    text: string | RegExp,
     sheetIndex: number = 0,
-    col?: number,
+    text: string | RegExp,
+    textCol?: number,
     subjectIdReg?: RegExp[],
-    subjectCol?: number
+    subjectIdCol?: number
   ) {
     const out: any = [];
     this.forEachCells(sheetIndex, ({ ri, ci, cell, row }) => {
-      const filterCol = col === undefined || col == ci;
+      const filterCol = textCol === undefined || textCol == ci;
       if (filterCol) {
         const type = Object.prototype.toString.call(text).slice(8, -1);
         if (type === 'RegExp') {
           // @ts-ignore
           if (text.test(String(cell.text))) {
             // 额外的“科目编号”筛选条件
-            if (subjectIdReg && subjectIdReg.length && subjectCol) {
-              let text = row.cells[subjectCol]?.text;
+            if (subjectIdReg && subjectIdReg.length && subjectIdCol) {
+              let text = row.cells[subjectIdCol]?.text;
               text = text ? text.replaceAll('\\r', '') : text;
               const find = subjectIdReg.every((reg) => {
                 return reg.test(text);
@@ -300,8 +300,8 @@ export default class MySpreadsheet extends Spreadsheet {
   }) {
     // console.time("11111")
     const findRows: any[] = this.getCellInfoByText(
-      findReg,
       sheetIndex,
+      findReg,
       findCol
     );
     let groupKeys: any[] = findRows.map((m) => {
@@ -501,34 +501,6 @@ export default class MySpreadsheet extends Spreadsheet {
     return this.datas.find((m) => m.name.trim() === sheetName.trim());
   }
 
-  /**
-   * 读取勾稽配置
-   * @param readConfig
-   * @returns
-   */
-  readCompareConfig(readConfig: any) {
-    const compareConfigs: any[] = [];
-    readConfig.forEach((m: any) => {
-      const sheetIndex = this.getSheetIndexByName(m.name);
-      const { _, len } = this.datas[sheetIndex].rows;
-      const headRows: any[] = [];
-      const bodyRows: any[] = [];
-      Object.entries<any>(_).forEach(([ri, row]) => {
-        if (ri < m.headRowNumber) {
-          headRows.push(cloneDeep(row));
-        } else {
-          bodyRows.push(cloneDeep(row));
-        }
-      });
-      compareConfigs.push({
-        ...m,
-        headRows,
-        bodyRows,
-        len,
-      });
-    });
-    return compareConfigs;
-  }
 
   /**
    * 三表勾稽，数据汇总
@@ -545,19 +517,18 @@ export default class MySpreadsheet extends Spreadsheet {
     // sheet的通用配置
     const sheetConfig = config[sheetKey];
     // 表头的行数
-    const headRowNumber = config.headRowNumber;
     const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
     const rows = this.datas[sheetIndex].rows._;
-    const sheetHeadRow = rows['0'];
-    const sheetFirstRow = rows['1'];
+    const sheetHeadRow = rows[sheetConfig.headRowNumber - 1];
+    const sheetFirstRow = rows[sheetHeadRow];
     // 借方金额的列次
     let debitCol = getColByLetter(sheetConfig.debitCol);
     // 贷方金额的列次
     let creditCol = getColByLetter(sheetConfig.creditCol);
     // 是否借贷一列的表格
     const isSameCol =
-      sheetHeadRow.cells[debitCol]?.text === '方向' ||
-      /借|贷/.test(sheetFirstRow.cells[debitCol]?.text);
+      sheetHeadRow?.cells[debitCol]?.text === '方向' ||
+      /借|贷/.test(sheetFirstRow?.cells[debitCol]?.text);
     // 根据配置，计算每一行
     config.bodyRows.forEach((configRow: any, n: number) => {
       // 配置表，要匹配的科目名称，正则文本
@@ -582,8 +553,8 @@ export default class MySpreadsheet extends Spreadsheet {
 
       // 获取到符合的行相关信息
       const rowInfo = this.getCellInfoByText(
-        string2RegExp(configSubject)!,
         sheetIndex,
+        string2RegExp(configSubject)!,
         getColByLetter(sheetConfig.findSubjectCol),
         configSubjectIdRegArr,
         getColByLetter(sheetConfig.findSubjectIdCol)
@@ -607,11 +578,46 @@ export default class MySpreadsheet extends Spreadsheet {
       }
 
       // 金额汇总数据写入
-      resultRows[n + headRowNumber].cells[
+      resultRows[configRow.profitRow].cells[
         getColByLetter(sheetConfig.outAmountCol)
       ].text = Numeral(configDirection === '借' ? sumDebit : sumCredit).format(
         '0,0.00'
       );
+    });
+  }
+
+  /**
+   * 根据实际利润表，决定哪些配置可用
+   * @param config
+   * @param sheetKey
+   */
+  caclProfitSheet(config: any, sheetKey: string) {
+    // sheet的通用配置
+    const sheetConfig = config[sheetKey];
+    // 表头的行数
+    const sheetIndex = this.getSheetIndexByName(sheetConfig.sheetName);
+    // 根据配置，计算每一行
+    config.bodyRows = config.bodyRows.map((configRow: any, n: number) => {
+      // 配置表，要匹配的科目名称，正则文本
+      const configSubject =
+        configRow.cells[getColByLetter(sheetConfig.configSubjectCol)]?.text;
+
+      // 获取到符合的行相关信息
+      const rowInfo = this.getCellInfoByText(
+        sheetIndex,
+        string2RegExp(configSubject)!,
+        getColByLetter(sheetConfig.findSubjectCol)
+      );
+      if (rowInfo && rowInfo.length) {
+        // 记录实际利润表中的行次
+        configRow.profitRow = rowInfo[0].ri;
+        return configRow;
+        // rowInfo.forEach((j: any) => {
+        //   const cells = j.row.cells;
+        //   // Numeral(cells[creditCol]?.text).value();
+        //   if()
+        // });
+      }
     });
   }
 

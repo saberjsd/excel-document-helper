@@ -128,24 +128,6 @@ export default function SettingRiskPage(props: any) {
           // pageSize: 20,
         }}
       />
-
-      {/* <List
-        itemLayout="horizontal"
-        dataSource={riskConfig}
-        bordered
-        size="small"
-        renderItem={(item) => (
-          <List.Item
-            actions={
-              [
-              ]
-            }
-          >
-            <span className="mes_show">表头行数：{item.headRowNumber}</span>
-            <span className="mes_show">内容行数：{item.bodyRows.length}</span>
-          </List.Item>
-        )}
-      /> */}
     </div>
   );
 }

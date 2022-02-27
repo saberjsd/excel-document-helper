@@ -15,7 +15,7 @@ export default function FilterPage(props: any) {
 
   useEffect(() => {
     const disposer = autorun(() => {
-      const { compareConfig } = StoreExcel;
+      // const { compareConfig } = StoreExcel;
       // setCompareConfig(compareConfig);
     });
 

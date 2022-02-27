@@ -25,7 +25,7 @@ export default function Content(props: any) {
     <div className={clsx('page_content', props.className)}>
       <div className="page_content_inner">
         <ExcelPage hidden={currentMenu !== MENU.EXCEL_BOARD} />
-        <FilterPage hidden={currentMenu !== MENU.EXCEL_FILTER} />
+        {/* <FilterPage hidden={currentMenu !== MENU.EXCEL_FILTER} /> */}
         <SettingProfitPage hidden={currentMenu !== MENU.SETTINGS_PROFIT} />
         <SettingRiskPage hidden={currentMenu !== MENU.SETTINGS_RISK} />
       </div>

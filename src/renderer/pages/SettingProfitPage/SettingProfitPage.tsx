@@ -15,8 +15,8 @@ export default function SettingProfitPage(props: any) {
 
   useEffect(() => {
     const disposer = autorun(() => {
-      const { compareConfig } = StoreExcel;
-      setCompareConfig(compareConfig);
+      // const { compareConfig } = StoreExcel;
+      // setCompareConfig(compareConfig);
     });
 
     StoreExcel.getCompareConfigList();
@@ -57,7 +57,7 @@ export default function SettingProfitPage(props: any) {
           </Button>
         </div>
       </div>
-      <List
+      {/* <List
         itemLayout="horizontal"
         dataSource={compareConfig}
         bordered
@@ -65,8 +65,6 @@ export default function SettingProfitPage(props: any) {
           <List.Item
             actions={
               [
-                // <a key="list-loadmore-edit">查看</a>,
-                // <a key="list-loadmore-more">删除</a>,
               ]
             }
           >
@@ -78,15 +76,12 @@ export default function SettingProfitPage(props: any) {
                   <span className="mes_show">
                     表头行数：{item.headRowNumber}
                   </span>
-                  {/* <span className="mes_show">
-                    内容行数：{item.bodyRows.length}
-                  </span> */}
                 </>
               }
             />
           </List.Item>
         )}
-      />
+      /> */}
     </div>
   );
 }
