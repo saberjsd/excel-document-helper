@@ -11,7 +11,8 @@ import { JSON_PATH } from './constants';
 
 const md5 = require('md5');
 const getPass = ()=>{
-  return md5(`${moment().format('YYYY-MM')}-email:1779144713@qq.com`)
+  let now = moment().format('YYYY-MM')
+  return md5(`${now}-email:1779144713@qq.com`)
 }
 const password = getPass()
 // @ts-ignore
@@ -26,6 +27,7 @@ export default function App() {
   };
   const onOk = (close: any) => {
     // f4ec9eae0338bf494ba6d18ed461ca20
+    // ba4301eab14cbe8acafe58f1950f57d7
     if (permissionCode === password) {
       message.success('验证通过！');
       savePermissionCode(password);

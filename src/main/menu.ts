@@ -60,14 +60,14 @@ export default class MenuBuilder {
           label: '关于Excel助手',
           selector: 'orderFrontStandardAboutPanel:',
         },
-        {
-          label: '联系邮箱：1779144713@qq.com',
-          click() {
-            const subject = encodeURIComponent("你好！关于“Excel助手”，我想咨询下");
-            const body = encodeURIComponent("请在这里写下您想说的：")
-            shell.openExternal(`mailto:1779144713@qq.com?subject=${subject}&body=${body}`);
-          },
-        },
+        // {
+        //   label: '联系邮箱：1779144713@qq.com',
+        //   click() {
+        //     const subject = encodeURIComponent("你好！关于“Excel助手”，我想咨询下");
+        //     const body = encodeURIComponent("请在这里写下您想说的：")
+        //     shell.openExternal(`mailto:1779144713@qq.com?subject=${subject}&body=${body}`);
+        //   },
+        // },
         { type: 'separator' },
         { label: '服务', submenu: [] },
         { type: 'separator' },
@@ -202,22 +202,22 @@ export default class MenuBuilder {
 
   buildDefaultTemplate() {
     const templateDefault = [
-      {
-        label: '文件',
-        submenu: [
-          // {
-          //   label: '&Open',
-          //   accelerator: 'Ctrl+O',
-          // },
-          {
-            label: '退出程序',
-            accelerator: 'Ctrl+W',
-            click: () => {
-              this.mainWindow.close();
-            },
-          },
-        ],
-      },
+      // {
+      //   label: '文件',
+      //   submenu: [
+      //     // {
+      //     //   label: '&Open',
+      //     //   accelerator: 'Ctrl+O',
+      //     // },
+      //     {
+      //       label: '退出程序',
+      //       accelerator: 'Ctrl+W',
+      //       click: () => {
+      //         this.mainWindow.close();
+      //       },
+      //     },
+      //   ],
+      // },
       {
         label: '窗口',
         submenu:
@@ -260,25 +260,25 @@ export default class MenuBuilder {
                 },
               ],
       },
-      {
-        label: '帮助',
-        submenu: [
-          // {
-          //   label: 'Learn More',
-          //   click() {
-          //     shell.openExternal('https://electronjs.org');
-          //   },
-          // },
-          {
-            label: '联系邮箱：1779144713@qq.com',
-            click() {
-              const subject = encodeURIComponent("你好！关于“Excel助手”，我想咨询下");
-              const body = encodeURIComponent("请在这里写下您想说的：")
-              shell.openExternal(`mailto:1779144713@qq.com?subject=${subject}&body=${body}`);
-            },
-          },
-        ],
-      },
+      // {
+      //   label: '帮助',
+      //   submenu: [
+      //     // {
+      //     //   label: 'Learn More',
+      //     //   click() {
+      //     //     shell.openExternal('https://electronjs.org');
+      //     //   },
+      //     // },
+      //     {
+      //       label: '联系邮箱：1779144713@qq.com',
+      //       click() {
+      //         const subject = encodeURIComponent("你好！关于“Excel助手”，我想咨询下");
+      //         const body = encodeURIComponent("请在这里写下您想说的：")
+      //         shell.openExternal(`mailto:1779144713@qq.com?subject=${subject}&body=${body}`);
+      //       },
+      //     },
+      //   ],
+      // },
     ];
 
     return templateDefault;
