@@ -107,10 +107,15 @@ a:hover {
   }
 }
 
-.x-spreadsheet-menu > li {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.x-spreadsheet-menu {
+  > li {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  > li:first-child {
+    overflow: unset;
+  }
 }
 
 .ant-btn {
