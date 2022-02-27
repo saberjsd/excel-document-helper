@@ -57,7 +57,7 @@ export default function Sidebar(props: any) {
       className="sidebar_page"
       trigger={null}
       collapsible
-      collapsedWidth={60}
+      collapsedWidth={0}
       collapsed={collapsed}
     >
       <div

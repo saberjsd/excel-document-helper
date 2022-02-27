@@ -201,7 +201,7 @@ export default class MenuBuilder {
   }
 
   buildDefaultTemplate() {
-    const templateDefault = [
+    const templateDefault: any[] = [
       // {
       //   label: '文件',
       //   submenu: [
@@ -218,48 +218,48 @@ export default class MenuBuilder {
       //     },
       //   ],
       // },
-      {
-        label: '窗口',
-        submenu:
-          process.env.NODE_ENV === 'development' ||
-          process.env.DEBUG_PROD === 'true'
-            ? [
-                {
-                  label: '&Reload',
-                  accelerator: 'Ctrl+R',
-                  click: () => {
-                    this.mainWindow.webContents.reload();
-                  },
-                },
-                {
-                  label: 'Toggle &Full Screen',
-                  accelerator: 'F11',
-                  click: () => {
-                    this.mainWindow.setFullScreen(
-                      !this.mainWindow.isFullScreen()
-                    );
-                  },
-                },
-                {
-                  label: 'Toggle &Developer Tools',
-                  accelerator: 'Alt+Ctrl+I',
-                  click: () => {
-                    this.mainWindow.webContents.toggleDevTools();
-                  },
-                },
-              ]
-            : [
-                {
-                  label: '切换全屏',
-                  accelerator: 'F11',
-                  click: () => {
-                    this.mainWindow.setFullScreen(
-                      !this.mainWindow.isFullScreen()
-                    );
-                  },
-                },
-              ],
-      },
+      // {
+      //   label: '窗口',
+      //   submenu:
+      //     process.env.NODE_ENV === 'development' ||
+      //     process.env.DEBUG_PROD === 'true'
+      //       ? [
+      //           {
+      //             label: '&Reload',
+      //             accelerator: 'Ctrl+R',
+      //             click: () => {
+      //               this.mainWindow.webContents.reload();
+      //             },
+      //           },
+      //           {
+      //             label: 'Toggle &Full Screen',
+      //             accelerator: 'F11',
+      //             click: () => {
+      //               this.mainWindow.setFullScreen(
+      //                 !this.mainWindow.isFullScreen()
+      //               );
+      //             },
+      //           },
+      //           {
+      //             label: 'Toggle &Developer Tools',
+      //             accelerator: 'Alt+Ctrl+I',
+      //             click: () => {
+      //               this.mainWindow.webContents.toggleDevTools();
+      //             },
+      //           },
+      //         ]
+      //       : [
+      //           {
+      //             label: '切换全屏',
+      //             accelerator: 'F11',
+      //             click: () => {
+      //               this.mainWindow.setFullScreen(
+      //                 !this.mainWindow.isFullScreen()
+      //               );
+      //             },
+      //           },
+      //         ],
+      // },
       // {
       //   label: '帮助',
       //   submenu: [
