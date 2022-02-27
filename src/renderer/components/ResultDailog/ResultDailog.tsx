@@ -114,7 +114,7 @@ export default function ResultDailog(props: any) {
                   onClick={saveFilterData}
                   loading={filterLoading}
                 >
-                  同步结果到序时账
+                  同步结果到序时账和余额表
                 </Button>
               </>
             )}

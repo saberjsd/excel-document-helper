@@ -37,21 +37,26 @@ export default function SettingRiskPage(props: any) {
 
   const columns = [
     {
-      title: '科目关键字',
+      title: '余额表-科目关键字',
       dataIndex: 'findSubjectReg',
       key: 'findSubjectReg',
       width: 150,
-      render: (text: any) => <a>{text}</a>,
+      // render: (text: any) => <a>{text}</a>,
     },
     {
-      title: '摘要关键字',
+      title: '余额表-风险点',
+      dataIndex: 'outSubjectText',
+      key: 'outSubjectText',
+    },
+    {
+      title: '序时账-摘要关键字',
       dataIndex: 'findSummaryReg',
       key: 'findSummaryReg',
     },
     {
-      title: '风险点',
-      dataIndex: 'outText',
-      key: 'outText',
+      title: '序时账-风险点',
+      dataIndex: 'outSummaryText',
+      key: 'outSummaryText',
     },
     // {
     //   title: 'Tags',

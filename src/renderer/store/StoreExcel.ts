@@ -103,17 +103,19 @@ const StoreExcel = observable({
   },
 
   // 将结果展示到弹窗
-  showResultSheet(sheetData?: any, isReset?: boolean) {
+  showResultSheet(sheetList?: any[], isReset?: boolean) {
     const saveData = () => {
-      if (sheetData) {
-        sheetData.cid = cuid();
-        // 筛选结果默认冻结第一行
-        sheetData.freeze = 'A2';
+      if (sheetList && sheetList.length) {
+        sheetList.forEach(sheetData=>{
+          sheetData.cid = cuid();
+          // 筛选结果默认冻结第一行
+          sheetData.freeze = 'A2';
+        })
         // 直接打开弹窗
         if (isReset) {
-          resultSheets = [sheetData];
+          resultSheets = sheetList;
         } else {
-          resultSheets.unshift(sheetData);
+          resultSheets = sheetList.concat(resultSheets);
           if (resultSheets.length >= 10) {
             resultSheets.length === 10;
           }
@@ -234,7 +236,7 @@ const StoreExcel = observable({
 
     this.showDrawer = false;
 
-    this.showResultSheet(sdata);
+    this.showResultSheet([sdata]);
   },
 
   // 三表勾稽
@@ -325,14 +327,29 @@ const StoreExcel = observable({
 
   checkRisk() {
     this.resultType = FeatureType.CHECK_RICK;
-    // const riskConfig = this.excelInstance.loadRiskConfig();
-    const outSheet = this.excelInstance.getRiskRows(this.riskConfig);
-    this.showResultSheet(outSheet);
+    const outBalanceSheet = this.excelInstance.getRiskRows(this.riskConfig, {
+      sheetName: '余额表',
+      sheetType: "balanceSheet",
+      findSubjectCol: 'B',
+      // findSummaryCol: 'B',
+      outCol: 'I',
+    });
+    const outBillSheet = this.excelInstance.getRiskRows(this.riskConfig, {
+      sheetName: '序时账',
+      sheetType: "billSheet",
+      // findSubjectCol: 'G',
+      findSummaryCol: 'H',
+      outCol: 'P',
+    });
+    this.showResultSheet([outBillSheet,outBalanceSheet]);
   },
   // 同步风险结果
   saveRisk() {
     const cid = this.resultExcelInstance.datas[0].cid;
-    this.syncData(cid, { useOriginRow: true });
+    this.syncData(cid, { useOriginRow: true, targetSheet: "序时账" });
+    // @ts-ignore
+    const cid2 = this.resultExcelInstance.datas[1].cid;
+    this.syncData(cid2, { useOriginRow: true, targetSheet: "余额表" });
     this.toggleDailog(false);
   },
   // 同步筛选结果
@@ -351,7 +368,7 @@ const StoreExcel = observable({
     const sourceSheet = this.resultExcelInstance.findSheetByCid(cid);
     if (sourceSheet) {
       const outSheetData = sourceSheet.getData();
-      const targetSheet = this.excelInstance.findSheetByName('序时账');
+      const targetSheet = this.excelInstance.findSheetByName(options.targetSheet || "序时账");
       Object.entries(outSheetData.rows).forEach(([ri, row]) => {
         // const resRow:any = cloneDeep(row);
         const resRow: any = row;
@@ -454,22 +471,23 @@ const StoreExcel = observable({
     this.riskConfigSheets = sheets;
 
     const readRiskConfig = {
-      sheetName: '风险排查样式',
       headRowNumber: 1,
       findSubjectCol: 'A',
-      findSummaryCol: 'B',
-      outCol: 'C',
+      outSubjectCol: 'B',
+      findSummaryCol: 'C',
+      outSummaryCol: 'D',
     };
 
     const riskConfig: any[] = [];
     const findSubjectIndex = getColByLetter(readRiskConfig.findSubjectCol);
     const findSummaryIndex = getColByLetter(readRiskConfig.findSummaryCol);
-    const outColIndex = getColByLetter(readRiskConfig.outCol);
+    const outSubjectColIndex = getColByLetter(readRiskConfig.outSubjectCol);
+    const outSummaryColIndex = getColByLetter(readRiskConfig.outSummaryCol);
 
     sheets.forEach((m: any) => {
       forEachCellByCols(
         m.rows,
-        [findSubjectIndex, findSummaryIndex, outColIndex],
+        [findSubjectIndex, findSummaryIndex, outSubjectColIndex, outSummaryColIndex],
         (outCols, ri) => {
           // 去掉首行
           if (Number(ri) < readRiskConfig.headRowNumber) {
@@ -488,7 +506,8 @@ const StoreExcel = observable({
           riskConfig.push({
             findSubjectReg,
             findSummaryReg,
-            outText: outCols[outColIndex]?.text,
+            outSubjectText: outCols[outSubjectColIndex]?.text,
+            outSummaryText: outCols[outSummaryColIndex]?.text,
           });
         }
       );
