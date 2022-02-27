@@ -11,12 +11,12 @@ import { writeExcel } from 'renderer/utils/excelHelper';
 import './styles.scss';
 
 export default function SettingProfitPage(props: any) {
-  const [compareConfig, setCompareConfig] = useState<any[]>([]);
+  const [compareConfig, setCompareConfig] = useState<any>({});
 
   useEffect(() => {
     const disposer = autorun(() => {
-      // const { compareConfig } = StoreExcel;
-      // setCompareConfig(compareConfig);
+      const { compareConfig } = StoreExcel;
+      setCompareConfig(compareConfig);
     });
 
     StoreExcel.getCompareConfigList();
@@ -57,9 +57,9 @@ export default function SettingProfitPage(props: any) {
           </Button>
         </div>
       </div>
-      {/* <List
+      <List
         itemLayout="horizontal"
-        dataSource={compareConfig}
+        dataSource={[compareConfig]}
         bordered
         renderItem={(item) => (
           <List.Item
@@ -81,7 +81,7 @@ export default function SettingProfitPage(props: any) {
             />
           </List.Item>
         )}
-      /> */}
+      />
     </div>
   );
 }
