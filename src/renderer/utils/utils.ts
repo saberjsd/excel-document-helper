@@ -79,10 +79,10 @@ export const isEmptyText = (value: any) => {
 };
 
 export const getMonthFromString = (str: string) => {
-  let out = ""
-  if(!str) return out
-  out += moment(str).month()
-  return out
+  let out = '';
+  if (!str) return out;
+  out += moment(str).month();
+  return out;
 };
 
 /**
@@ -90,9 +90,18 @@ export const getMonthFromString = (str: string) => {
  * @param str
  * @returns
  */
-export const string2RegExp = (str: string)=>{
-  if(!str || !str.trim()) return null
+export const string2RegExp = (str: string) => {
+  if (!str || !str.trim()) return null;
   // TODO: 其他符号转义
-  const needRepalce = /(\[|\\|\^|\$|\.|\||\?|\*|\+|\(|\))/
-  return new RegExp(str.replaceAll("\\","\\\\"))
-}
+  const needRepalce = /(\[|\\|\^|\$|\.|\||\?|\*|\+|\(|\))/;
+  return new RegExp(str.replaceAll('\\', '\\\\'));
+};
+
+/**
+ * 替换字符串中的转义符
+ * @param str
+ * @returns
+ */
+export const safeString = (str: string) => {
+  return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_');
+};

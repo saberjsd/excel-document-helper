@@ -1,7 +1,7 @@
 import cuid from 'cuid';
 import moment from 'moment';
 import StoreRoot from 'renderer/store/StoreRoot';
-import { selectFile } from './utils';
+import { safeString, selectFile } from './utils';
 
 /**
  * 读取Excel
@@ -82,6 +82,9 @@ export const readExcel = async () => {
  * @param sheets
  */
 export const writeExcel = (sheets: any[]) => {
+  sheets.forEach(m=>{
+    m.name = safeString(m.name)
+  })
   // @ts-ignore
   var new_wb = XLSXspread.xtos(sheets);
   /* write file and trigger a download */

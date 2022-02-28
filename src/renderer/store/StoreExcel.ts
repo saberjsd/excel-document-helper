@@ -6,6 +6,7 @@ import { FeatureType, JSON_PATH, SORT_DIRECTION } from 'renderer/constants';
 import {
   getColByLetter,
   getLetterByCol,
+  safeString,
   string2RegExp,
 } from 'renderer/utils/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
@@ -218,7 +219,7 @@ const StoreExcel = observable({
     });
     // debugger
     const sdata = {
-      name: `筛选“${str}”结果`,
+      name: `筛选“${safeString(str)}”结果`,
       // 列的属性也带上
       cols: cloneDeep(sheetData.cols),
       rows: { len: headRows.length + groupRows.length },
