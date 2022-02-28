@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import { mapCol } from 'renderer/utils/utils';
 import cuid from 'cuid';
+import SearchSelect from 'renderer/components/SearchSelect';
 const { Option } = Select;
 
 interface ItemProps {
@@ -124,7 +125,7 @@ export default function ExcelPage(props: any) {
         <div className="filter_wrap">
           <div className="filter_wrap_line">
             <span className="btn_label">科目名称：</span>
-            <Select
+            <SearchSelect
               className="filter_select_key"
               mode="multiple"
               value={filterKeys}
@@ -134,8 +135,8 @@ export default function ExcelPage(props: any) {
                 StoreExcel.filterKeys = newValue;
               }}
               placeholder="输入或者选择筛选条件"
-              maxTagCount="responsive"
-              getPopupContainer={(triggerNode)=>triggerNode}
+              // maxTagCount="responsive"
+              getPopupContainer={(triggerNode: any)=>triggerNode}
             />
           </div>
           <div className="filter_wrap_line">
