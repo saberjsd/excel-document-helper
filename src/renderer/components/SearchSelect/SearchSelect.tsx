@@ -16,7 +16,7 @@ export default function SearchSelect({ options, ...props }: any) {
 
   return (
     <Select
-      labelInValue
+      // labelInValue
       filterOption={false}
       onSearch={debounceFetcher}
       // notFoundContent={fetching ? <Spin size="small" /> : null}
