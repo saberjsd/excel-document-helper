@@ -281,9 +281,10 @@ export default class MySpreadsheet extends Spreadsheet {
     findCol,
     groupCol,
     groupMonthCol,
+    headRowNumber,
     sortDirection = SORT_DIRECTION.DESC,
     sortCol,
-    filterList,
+    filterList = [],
   }: {
     findReg: RegExp;
     sheetIndex: number;
@@ -292,41 +293,43 @@ export default class MySpreadsheet extends Spreadsheet {
     groupCol: number;
     // 分组条件：月份
     groupMonthCol: number;
+    headRowNumber: number;
     // 组间排序方向
     sortDirection?: SORT_DIRECTION;
     // 组间排序依据列次
     sortCol?: number;
-    filterList?: any[];
+    filterList: any[];
   }) {
     // console.time("11111")
-    const findRows: any[] = this.getCellInfoByText(
-      sheetIndex,
-      findReg,
-      findCol
-    );
-    let groupKeys: any[] = findRows.map((m) => {
-      const month = getMonthFromString(m.row?.cells[groupMonthCol]?.text);
-      const id = m.row?.cells[groupCol]?.text;
-      return `${id}-${month}`;
-    });
-    groupKeys = Array.from(new Set(groupKeys));
+    // const findRows: any[] = this.getCellInfoByText(
+    //   sheetIndex,
+    //   findReg,
+    //   findCol
+    // );
+    // let groupKeys: any[] = findRows.map((m) => {
+    //   const month = getMonthFromString(m.row?.cells[groupMonthCol]?.text);
+    //   const id = m.row?.cells[groupCol]?.text;
+    //   return `${id}-${month}`;
+    // });
+    // groupKeys = Array.from(new Set(groupKeys));
     let outRows: any = [];
     // console.timeEnd("11111")
     // console.time("22222")
 
     const { rows } = this.datas[sheetIndex];
     const sourceRows = Object.entries<any>(rows._);
-
+    // 分组后的数据
     const map: any = {};
 
     sourceRows.forEach(([ri, row]) => {
+      if(Number(ri) < headRowNumber) return
       const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
       const id = row?.cells[groupCol]?.text;
       const mid = `${id}-${month}`;
       // const curKey = groupKeys.shift();
       if (mid) {
-        const findIndex = groupKeys.findIndex((m) => m === mid);
-        if (findIndex < 0) return;
+        // const findIndex = groupKeys.findIndex((m) => m === mid);
+        // if (findIndex < 0) return;
         const item = cloneDeep(row);
         // Object.entries(item.cells).forEach(([ci, cell]) => {
         //   // @ts-ignore
@@ -344,7 +347,7 @@ export default class MySpreadsheet extends Spreadsheet {
     });
 
     const mapArr = Object.entries<any>(map);
-    if (sortCol !== undefined) {
+    if (sortCol !== undefined && findReg) {
       mapArr.sort(([keyA, rowsA], [keyB, rowsB]) => {
         const sortRowA = rowsA.find((m: any) =>
           findReg.test(m?.cells[findCol]?.text)
@@ -364,21 +367,47 @@ export default class MySpreadsheet extends Spreadsheet {
 
     // 间隔颜色
     let nextStyle = 0;
+    // mapArr.forEach(([key, rows]) => {
+    //   // 更多过滤条件
+    //   if (filterList && filterList.length) {
+    //     rows = rows.filter((j: any) => {
+    //       return filterList.every((m) => {
+    //         if (m.col && m.value) {
+    //           const val = j.cells[getColByLetter(m.col)]?.text;
+    //           return string2RegExp(m.value)?.test(val);
+    //         } else {
+    //           return true;
+    //         }
+    //       });
+    //     });
+    //   }
+    //   if (rows.length) {
+    //     rows.forEach((m: any) => {
+    //       Object.entries(m.cells).forEach(([ci, cell]) => {
+    //         // @ts-ignore
+    //         cell.style = nextStyle;
+    //       });
+    //     });
+    //     nextStyle = Number(!nextStyle);
+    //   }
+    //   outRows = outRows.concat(rows);
+    // });
     mapArr.forEach(([key, rows]) => {
+      let hasFiltered = true;
       // 更多过滤条件
       if (filterList && filterList.length) {
-        rows = rows.filter((j: any) => {
+        hasFiltered = rows.some((j: any) => {
           return filterList.every((m) => {
             if (m.col && m.value) {
-              const val = j.cells[getColByLetter(m.col)]?.text;
-              return string2RegExp(m.value)?.test(val);
+              const val = j.cells[m.col]?.text;
+              return m.value.test(val);
             } else {
               return true;
             }
           });
         });
       }
-      if (rows.length) {
+      if(hasFiltered && rows.length){
         rows.forEach((m: any) => {
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore
@@ -386,8 +415,8 @@ export default class MySpreadsheet extends Spreadsheet {
           });
         });
         nextStyle = Number(!nextStyle);
+        outRows = outRows.concat(rows);
       }
-      outRows = outRows.concat(rows);
     });
 
     // console.timeEnd("22222")

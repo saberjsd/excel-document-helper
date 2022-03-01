@@ -132,3 +132,8 @@ a:hover {
   top: calc(50% - 16px);
   right: 0px;
 }
+
+// 提高下拉菜单的层级
+.ant-select-dropdown{
+  z-index: 4000;
+}

@@ -26,8 +26,6 @@ interface ItemProps {
 export default function Header(props: any) {
   const [currentMenu, setCurrentMenu] = useState('');
   const [compareIsSum, setCompareIsSum] = useState(0);
-  const [filterKeys, setFilterKeys] = useState<any[]>([]);
-  const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
   const [showDrawer, setShowDrawer] = useState(false);
 
   useEffect(() => {
@@ -35,14 +33,10 @@ export default function Header(props: any) {
       const { currentMenu } = StoreRoot;
       const {
         compareIsSum,
-        filterOptions,
-        filterKeys,
         showDrawer,
       } = StoreExcel;
       setCurrentMenu(currentMenu);
       setCompareIsSum(compareIsSum);
-      setFilterOptions(filterOptions);
-      setFilterKeys(filterKeys);
       setShowDrawer(showDrawer);
     });
 
@@ -85,13 +79,8 @@ export default function Header(props: any) {
     // StoreExcel.toggleDailog(true);
   };
 
-  const showFilter = (filterKeys: string[]) => {
-    if (filterKeys && filterKeys.length) {
-      StoreExcel.filterExcel(filterKeys);
-    } else {
-      StoreExcel.showResultSheet();
-    }
-    // StoreExcel.toggleDailog(true);
+  const showFilter = () => {
+    StoreExcel.showResultSheet();
   };
 
   const openDrawer = () => {
@@ -163,7 +152,7 @@ export default function Header(props: any) {
             <Button
               // type="primary"
               icon={<HistoryOutlined />}
-              onClick={() => showFilter([])}
+              onClick={() => showFilter()}
               // style={{ marginRight: 16 }}
             >
               查看历史
@@ -180,42 +169,6 @@ export default function Header(props: any) {
           </>
         )}
 
-        {currentMenu === MENU.EXCEL_FILTER && (
-          <>
-            <div className="header_filter_wrap">
-              <Button
-                type="primary"
-                icon={<HistoryOutlined />}
-                onClick={() => showFilter([])}
-                style={{ marginRight: 16 }}
-              >
-                查看历史结果
-              </Button>
-
-              {/* <Input.Group compact> */}
-              <Select
-                className="header_filter"
-                mode="multiple"
-                value={filterKeys}
-                options={filterOptions}
-                onChange={(newValue: string[]) => {
-                  // setFilterKeys(newValue);
-                  StoreExcel.filterKeys = newValue;
-                }}
-                placeholder="输入或者选择筛选条件"
-                maxTagCount="responsive"
-              />
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={() => showFilter(StoreExcel.filterKeys)}
-              >
-                点击筛选
-              </Button>
-              {/* </Input.Group> */}
-            </div>
-          </>
-        )}
       </div>
       <Button
         className="mini_drawer_btn"

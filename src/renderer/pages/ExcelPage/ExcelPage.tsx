@@ -55,11 +55,11 @@ export default function ExcelPage(props: any) {
   };
 
   const showFilter = (filterKeys: string[]) => {
-    if (filterKeys && filterKeys.length) {
-      StoreExcel.filterExcel(filterKeys);
-    } else {
-      StoreExcel.showResultSheet();
-    }
+    StoreExcel.filterExcel(filterKeys);
+    // if (filterKeys && filterKeys.length) {
+    // } else {
+    //   StoreExcel.showResultSheet();
+    // }
     // StoreExcel.toggleDailog(true);
   };
 
@@ -136,7 +136,9 @@ export default function ExcelPage(props: any) {
               }}
               placeholder="输入或者选择筛选条件"
               // maxTagCount="responsive"
-              getPopupContainer={(triggerNode: any)=>triggerNode}
+              // getPopupContainer={(triggerNode: any) =>
+              //   triggerNode && triggerNode.parentNode
+              // }
             />
           </div>
           <div className="filter_wrap_line">
@@ -147,7 +149,9 @@ export default function ExcelPage(props: any) {
                 allowClear
                 placeholder="请选择金额列次"
                 style={{ width: '160px' }}
-                getPopupContainer={(triggerNode)=>triggerNode}
+                // getPopupContainer={(triggerNode) =>
+                //   triggerNode && triggerNode.parentNode
+                // }
               >
                 {headColOptions.map((m) => (
                   <Select.Option value={m.value} key={m.value}>
@@ -173,7 +177,9 @@ export default function ExcelPage(props: any) {
                   allowClear
                   placeholder="筛选列次"
                   style={{ width: '160px' }}
-                  getPopupContainer={(triggerNode)=>triggerNode}
+                  // getPopupContainer={(triggerNode) =>
+                  //   triggerNode && triggerNode.parentNode
+                  // }
                 >
                   {headColOptions.map((m) => (
                     <Select.Option value={m.value} key={m.value}>

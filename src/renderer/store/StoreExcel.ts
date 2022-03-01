@@ -107,11 +107,11 @@ const StoreExcel = observable({
   showResultSheet(sheetList?: any[], isReset?: boolean) {
     const saveData = () => {
       if (sheetList && sheetList.length) {
-        sheetList.forEach(sheetData=>{
+        sheetList.forEach((sheetData) => {
           sheetData.cid = cuid();
           // 筛选结果默认冻结第一行
           sheetData.freeze = 'A2';
-        })
+        });
         // 直接打开弹窗
         if (isReset) {
           resultSheets = sheetList;
@@ -194,11 +194,27 @@ const StoreExcel = observable({
    * 科目筛选功能
    * @param filterKeys
    */
-  filterExcel(filterKeys: string[]) {
+  filterExcel(filterKeys: string[] = []) {
     this.resultType = FeatureType.FILTER_EXCEL;
     // 替换转义符
     const str = filterKeys.join('|');
     const findReg = string2RegExp(str)!;
+    // 提前处理筛选条件
+    let filterList = (this.filterColConfig || []).map((m) => {
+      return {
+        key: m.key,
+        col: getColByLetter(m.col),
+        value: string2RegExp(m.value),
+      };
+    });
+    // 科目名称筛选
+    if (filterKeys.length) {
+      filterList.push({
+        key: cuid(),
+        col:getColByLetter(filterConfig.findCol),
+        value: findReg,
+      })
+    }
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
@@ -215,7 +231,8 @@ const StoreExcel = observable({
       groupMonthCol: getColByLetter(filterConfig.groupMonthCol),
       sortCol: getColByLetter(this.filterSortCol),
       sortDirection: this.filterSortDirection,
-      filterList: this.filterColConfig,
+      filterList,
+      headRowNumber: filterConfig.headRowNumber,
     });
     // debugger
     const sdata = {
@@ -330,27 +347,27 @@ const StoreExcel = observable({
     this.resultType = FeatureType.CHECK_RICK;
     const outBalanceSheet = this.excelInstance.getRiskRows(this.riskConfig, {
       sheetName: '余额表',
-      sheetType: "balanceSheet",
+      sheetType: 'balanceSheet',
       findSubjectCol: 'B',
       // findSummaryCol: 'B',
       outCol: 'I',
     });
     const outBillSheet = this.excelInstance.getRiskRows(this.riskConfig, {
       sheetName: '序时账',
-      sheetType: "billSheet",
+      sheetType: 'billSheet',
       // findSubjectCol: 'G',
       findSummaryCol: 'H',
       outCol: 'P',
     });
-    this.showResultSheet([outBillSheet,outBalanceSheet]);
+    this.showResultSheet([outBillSheet, outBalanceSheet]);
   },
   // 同步风险结果
   saveRisk() {
     const cid = this.resultExcelInstance.datas[0].cid;
-    this.syncData(cid, { useOriginRow: true, targetSheet: "序时账" });
+    this.syncData(cid, { useOriginRow: true, targetSheet: '序时账' });
     // @ts-ignore
     const cid2 = this.resultExcelInstance.datas[1].cid;
-    this.syncData(cid2, { useOriginRow: true, targetSheet: "余额表" });
+    this.syncData(cid2, { useOriginRow: true, targetSheet: '余额表' });
     this.toggleDailog(false);
   },
   // 同步筛选结果
@@ -369,7 +386,9 @@ const StoreExcel = observable({
     const sourceSheet = this.resultExcelInstance.findSheetByCid(cid);
     if (sourceSheet) {
       const outSheetData = sourceSheet.getData();
-      const targetSheet = this.excelInstance.findSheetByName(options.targetSheet || "序时账");
+      const targetSheet = this.excelInstance.findSheetByName(
+        options.targetSheet || '序时账'
+      );
       Object.entries(outSheetData.rows).forEach(([ri, row]) => {
         // const resRow:any = cloneDeep(row);
         const resRow: any = row;
@@ -424,8 +443,8 @@ const StoreExcel = observable({
 
   _convertCompareConfig(sheets: any[]) {
     this.compareConfigSheets = sheets;
-    const m = sheets[0]
-    if(!m) return
+    const m = sheets[0];
+    if (!m) return;
     const defaultConfig = cloneDeep(compareDefaultConfig);
     const { len } = m.rows;
     const headRows: any[] = [];
@@ -488,7 +507,12 @@ const StoreExcel = observable({
     sheets.forEach((m: any) => {
       forEachCellByCols(
         m.rows,
-        [findSubjectIndex, findSummaryIndex, outSubjectColIndex, outSummaryColIndex],
+        [
+          findSubjectIndex,
+          findSummaryIndex,
+          outSubjectColIndex,
+          outSummaryColIndex,
+        ],
         (outCols, ri) => {
           // 去掉首行
           if (Number(ri) < readRiskConfig.headRowNumber) {

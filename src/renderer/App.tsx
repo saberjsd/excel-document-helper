@@ -9,6 +9,8 @@ import moment from 'moment';
 import JsonStorage from './store/JsonStorage';
 import { JSON_PATH } from './constants';
 
+window["moment"] = moment
+
 const md5 = require('md5');
 const getPass = ()=>{
   let now = moment().format('YYYY-MM')
