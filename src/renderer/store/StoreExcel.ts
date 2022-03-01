@@ -205,10 +205,11 @@ const StoreExcel = observable({
     const findReg = string2RegExp(str)!;
     // 提前处理筛选条件
     let filterList = (this.filterColConfig || []).map((m) => {
+      const regStr = m.filterType === "equal" ? `\^(${m.value})\$` : m.value
       return {
         key: m.key,
         col: getColByLetter(m.col),
-        value: string2RegExp(m.value),
+        value: string2RegExp(regStr),
       };
     });
     // 科目名称筛选

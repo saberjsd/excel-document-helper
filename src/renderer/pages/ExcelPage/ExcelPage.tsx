@@ -20,12 +20,25 @@ interface ItemProps {
   value: string;
 }
 
+const filterTypeOptions = [
+  {
+    label: '包含',
+    value: 'includes',
+  },
+  {
+    label: '全字匹配',
+    value: 'equal',
+  },
+];
+
 export default function ExcelPage(props: any) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [filterKeys, setFilterKeys] = useState<any[]>([]);
   const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
   const [filterSubjectIdKeys, setFilterSubjectIdKeys] = useState<any[]>([]);
-  const [filterSubjectIdOptions, setFilterSubjectIdOptions] = useState<ItemProps[]>([]);
+  const [filterSubjectIdOptions, setFilterSubjectIdOptions] = useState<
+    ItemProps[]
+  >([]);
   const [filterColConfig, setFilterColConfig] = useState<any[]>([]);
   const [headColOptions, setHeadColOptions] = useState<any[]>([]);
 
@@ -205,7 +218,24 @@ export default function ExcelPage(props: any) {
                     </Select.Option>
                   ))}
                 </Select>
-                <span className="btn_gap">包含</span>
+                {/* <span className="btn_gap">包含</span> */}
+                <Select
+                  defaultValue="includes"
+                  style={{ width: 120 }}
+                  onChange={(val) =>
+                    changeFilterConfig({
+                      key: j.key,
+                      findKey: 'filterType',
+                      value: val,
+                    })
+                  }
+                >
+                  {filterTypeOptions.map((m) => (
+                    <Select.Option value={m.value} key={m.value}>
+                      {m.label}
+                    </Select.Option>
+                  ))}
+                </Select>
                 <Input
                   value={j.value}
                   onChange={(e) =>
