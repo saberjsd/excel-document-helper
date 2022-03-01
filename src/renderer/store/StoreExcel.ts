@@ -21,6 +21,7 @@ const filterConfig = {
   headRowNumber: 1,
   sheetName: '序时帐',
   findCol: 'G',
+  findSubjectIdCol: 'F',
   // 分组的凭证号
   groupCol: 'E',
   // 分组的月
@@ -55,10 +56,14 @@ const StoreExcel = observable({
   riskConfigSheets: [] as any[],
 
   // ----- 科目筛选相关 ------
-  // 科目多条件筛选数据
+  // 科目多条件筛选下拉数据
   filterOptions: [] as any[],
   // 已经选择的科目名称
   filterKeys: [] as any[],
+  // 科目代码筛选下拉数据
+  filterSubjectIdOptions: [] as any[],
+  // 已经选择的科目代码
+  filterSubjectIdKeys: [] as any[],
   // 筛选排序
   filterSortCol: '',
   //
@@ -192,12 +197,11 @@ const StoreExcel = observable({
 
   /**
    * 科目筛选功能
-   * @param filterKeys
    */
-  filterExcel(filterKeys: string[] = []) {
+  filterExcel() {
     this.resultType = FeatureType.FILTER_EXCEL;
     // 替换转义符
-    const str = filterKeys.join('|');
+    const str = this.filterKeys.join('|');
     const findReg = string2RegExp(str)!;
     // 提前处理筛选条件
     let filterList = (this.filterColConfig || []).map((m) => {
@@ -208,12 +212,20 @@ const StoreExcel = observable({
       };
     });
     // 科目名称筛选
-    if (filterKeys.length) {
+    if (this.filterKeys.length) {
       filterList.push({
         key: cuid(),
-        col:getColByLetter(filterConfig.findCol),
+        col: getColByLetter(filterConfig.findCol),
         value: findReg,
-      })
+      });
+    }
+    // 科目代码筛选
+    if (this.filterSubjectIdKeys.length) {
+      filterList.push({
+        key: cuid(),
+        col: getColByLetter(filterConfig.findSubjectIdCol),
+        value: string2RegExp(this.filterSubjectIdKeys.join("|")),
+      });
     }
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
@@ -563,10 +575,12 @@ const StoreExcel = observable({
    */
   getFliterOptions() {
     const findColIndex = getColByLetter(filterConfig.findCol);
+    const findSubjectIdColIndex = getColByLetter(filterConfig.findSubjectIdCol);
     const filterOptions: any[] = [];
+    const filterSubjectIdOptions: any[] = [];
     this.excelInstance.forEachCellByCols(
       '序时账',
-      [findColIndex],
+      [findColIndex, findSubjectIdColIndex],
       (cellsInfo, ri) => {
         // 忽略首行
         if (Number(ri) < filterConfig.headRowNumber) {
@@ -580,9 +594,17 @@ const StoreExcel = observable({
             value: text,
           });
         }
+        const subjectId = cellsInfo[findSubjectIdColIndex]?.text;
+        if (!filterSubjectIdOptions.find((m) => m.value === subjectId)) {
+          filterSubjectIdOptions.push({
+            label: subjectId,
+            value: subjectId,
+          });
+        }
       }
     );
     this.filterOptions = filterOptions;
+    this.filterSubjectIdOptions = filterSubjectIdOptions;
   },
 });
 

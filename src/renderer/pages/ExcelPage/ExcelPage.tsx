@@ -24,6 +24,8 @@ export default function ExcelPage(props: any) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [filterKeys, setFilterKeys] = useState<any[]>([]);
   const [filterOptions, setFilterOptions] = useState<ItemProps[]>([]);
+  const [filterSubjectIdKeys, setFilterSubjectIdKeys] = useState<any[]>([]);
+  const [filterSubjectIdOptions, setFilterSubjectIdOptions] = useState<ItemProps[]>([]);
   const [filterColConfig, setFilterColConfig] = useState<any[]>([]);
   const [headColOptions, setHeadColOptions] = useState<any[]>([]);
 
@@ -35,11 +37,15 @@ export default function ExcelPage(props: any) {
         filterOptions,
         filterKeys,
         filterColConfig,
+        filterSubjectIdKeys,
+        filterSubjectIdOptions,
         headColOptions,
       } = StoreExcel;
       setShowDrawer(showDrawer);
       setFilterOptions(filterOptions);
       setFilterKeys(filterKeys);
+      setFilterSubjectIdOptions(filterSubjectIdOptions);
+      setFilterSubjectIdKeys(filterSubjectIdKeys);
       setFilterColConfig(filterColConfig);
       setHeadColOptions(headColOptions);
     });
@@ -54,12 +60,8 @@ export default function ExcelPage(props: any) {
     StoreExcel.showDrawer = !StoreExcel.showDrawer;
   };
 
-  const showFilter = (filterKeys: string[]) => {
-    StoreExcel.filterExcel(filterKeys);
-    // if (filterKeys && filterKeys.length) {
-    // } else {
-    //   StoreExcel.showResultSheet();
-    // }
+  const showFilter = () => {
+    StoreExcel.filterExcel();
     // StoreExcel.toggleDailog(true);
   };
 
@@ -115,7 +117,7 @@ export default function ExcelPage(props: any) {
               type="primary"
               danger
               icon={<SearchOutlined />}
-              onClick={() => showFilter(StoreExcel.filterKeys)}
+              onClick={() => showFilter()}
             >
               点击筛选
             </Button>
@@ -124,6 +126,23 @@ export default function ExcelPage(props: any) {
       >
         <div className="filter_wrap">
           <div className="filter_wrap_line">
+            <span className="btn_label">科目代码：</span>
+            <SearchSelect
+              className="filter_select_key"
+              mode="multiple"
+              value={filterSubjectIdKeys}
+              options={filterSubjectIdOptions}
+              onChange={(newValue: string[]) => {
+                StoreExcel.filterSubjectIdKeys = newValue;
+              }}
+              placeholder="输入或者选择筛选条件"
+              // maxTagCount="responsive"
+              // getPopupContainer={(triggerNode: any) =>
+              //   triggerNode && triggerNode.parentNode
+              // }
+            />
+          </div>
+          <div className="filter_wrap_line">
             <span className="btn_label">科目名称：</span>
             <SearchSelect
               className="filter_select_key"
@@ -131,7 +150,6 @@ export default function ExcelPage(props: any) {
               value={filterKeys}
               options={filterOptions}
               onChange={(newValue: string[]) => {
-                // setFilterKeys(newValue);
                 StoreExcel.filterKeys = newValue;
               }}
               placeholder="输入或者选择筛选条件"
