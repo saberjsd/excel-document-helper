@@ -1,5 +1,7 @@
 import { isEmpty } from 'lodash';
 import moment from 'moment';
+// sheet名自增索引，防止重名
+let sheetIndex = 0;
 
 export const mapCol = [
   'A',
@@ -103,5 +105,5 @@ export const string2RegExp = (str: string) => {
  * @returns
  */
 export const safeString = (str: string) => {
-  return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_');
+  return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0,20) + ++sheetIndex;
 };
