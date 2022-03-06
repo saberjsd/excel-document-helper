@@ -271,11 +271,38 @@ export default class MySpreadsheet extends Spreadsheet {
   }
 
   /**
+   * 获得序时账分组
+   * @param sourceRows
+   * @param options
+   * @returns
+   */
+  _getGroupMap(sourceRows: [any, any][], options: any = {}) {
+    // 分组后的数据
+    const map: any = {};
+    sourceRows.forEach(([ri, row]) => {
+      if (Number(ri) < options.headRowNumber) return;
+      const month = getMonthFromString(row?.cells[options.groupMonthCol]?.text);
+      const id = row?.cells[options.groupCol]?.text;
+      const mid = `${id}-${month}`;
+      if (mid) {
+        const item = cloneDeep(row);
+        // 记录原来的行号，方便数据回写
+        item.originRow = ri;
+        if (!map[mid]) {
+          map[mid] = [item];
+        } else {
+          map[mid].push(item);
+        }
+      }
+    });
+    return map;
+  }
+  /**
    * 获取findCol列的值等于text的行，然后以groupCol列的值分组
    * @param param0
    * @returns
    */
-  getGroupRows({
+  getFilterGroupRows({
     sheetIndex,
     findReg,
     findCol,
@@ -300,50 +327,15 @@ export default class MySpreadsheet extends Spreadsheet {
     sortCol?: number;
     filterList: any[];
   }) {
-    // console.time("11111")
-    // const findRows: any[] = this.getCellInfoByText(
-    //   sheetIndex,
-    //   findReg,
-    //   findCol
-    // );
-    // let groupKeys: any[] = findRows.map((m) => {
-    //   const month = getMonthFromString(m.row?.cells[groupMonthCol]?.text);
-    //   const id = m.row?.cells[groupCol]?.text;
-    //   return `${id}-${month}`;
-    // });
-    // groupKeys = Array.from(new Set(groupKeys));
     let outRows: any = [];
-    // console.timeEnd("11111")
-    // console.time("22222")
 
     const { rows } = this.datas[sheetIndex];
     const sourceRows = Object.entries<any>(rows._);
     // 分组后的数据
-    const map: any = {};
-
-    sourceRows.forEach(([ri, row]) => {
-      if(Number(ri) < headRowNumber) return
-      const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
-      const id = row?.cells[groupCol]?.text;
-      const mid = `${id}-${month}`;
-      // const curKey = groupKeys.shift();
-      if (mid) {
-        // const findIndex = groupKeys.findIndex((m) => m === mid);
-        // if (findIndex < 0) return;
-        const item = cloneDeep(row);
-        // Object.entries(item.cells).forEach(([ci, cell]) => {
-        //   // @ts-ignore
-        //   cell.style = findIndex % 2;
-        // });
-        // 记录原来的行号，方便数据回写
-        item.originRow = ri;
-
-        if (!map[mid]) {
-          map[mid] = [item];
-        } else {
-          map[mid].push(item);
-        }
-      }
+    const map: any = this._getGroupMap(sourceRows, {
+      headRowNumber,
+      groupCol,
+      groupMonthCol,
     });
 
     const mapArr = Object.entries<any>(map);
@@ -367,31 +359,6 @@ export default class MySpreadsheet extends Spreadsheet {
 
     // 间隔颜色
     let nextStyle = 0;
-    // mapArr.forEach(([key, rows]) => {
-    //   // 更多过滤条件
-    //   if (filterList && filterList.length) {
-    //     rows = rows.filter((j: any) => {
-    //       return filterList.every((m) => {
-    //         if (m.col && m.value) {
-    //           const val = j.cells[getColByLetter(m.col)]?.text;
-    //           return string2RegExp(m.value)?.test(val);
-    //         } else {
-    //           return true;
-    //         }
-    //       });
-    //     });
-    //   }
-    //   if (rows.length) {
-    //     rows.forEach((m: any) => {
-    //       Object.entries(m.cells).forEach(([ci, cell]) => {
-    //         // @ts-ignore
-    //         cell.style = nextStyle;
-    //       });
-    //     });
-    //     nextStyle = Number(!nextStyle);
-    //   }
-    //   outRows = outRows.concat(rows);
-    // });
     mapArr.forEach(([key, rows]) => {
       let hasFiltered = true;
       // 更多过滤条件
@@ -407,7 +374,7 @@ export default class MySpreadsheet extends Spreadsheet {
           });
         });
       }
-      if(hasFiltered && rows.length){
+      if (hasFiltered && rows.length) {
         rows.forEach((m: any) => {
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore
@@ -419,9 +386,92 @@ export default class MySpreadsheet extends Spreadsheet {
       }
     });
 
-    // console.timeEnd("22222")
     // console.log("outRows",outRows)
     return outRows;
+  }
+
+  setOppositeSubjects({
+    sheetIndex,
+    groupCol,
+    groupMonthCol,
+    subjectCol,
+    debitCol,
+    creditCol,
+    oppositeCol,
+    headRowNumber,
+  }: {
+    sheetIndex: number;
+    // 分组条件：凭证号
+    groupCol: number;
+    // 分组条件：月份
+    groupMonthCol: number;
+    subjectCol: number;
+    // 借方
+    debitCol: number,
+    // 贷方
+    creditCol: number,
+    // 对方科目列次
+    oppositeCol: number;
+    headRowNumber: number;
+  }) {
+    let outRows: any = [];
+    const { rows } = this.datas[sheetIndex];
+    const sourceRows = Object.entries<any>(rows._);
+
+    // 分组后的数据
+    const map: any = {};
+    sourceRows.forEach(([ri, row]) => {
+      if (Number(ri) < headRowNumber) return;
+      const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
+      const id = row?.cells[groupCol]?.text;
+      const subjectText =  row?.cells[subjectCol]?.text;
+      // const debitText = row?.cells[debitCol]?.text;
+      // const creditText = row?.cells[creditCol]?.text;
+      const mid = `${id}-${month}`;
+      if (mid) {
+        // const item = row;
+        const isDebit = !isEmptyText(row?.cells[debitCol]?.text)
+
+        // if(row && row.cells){
+        //   row.cells[oppositeCol] = {
+        //     text: subjectText
+        //   }
+        // }
+        if (!map[mid]) {
+          map[mid] = {
+            rows: [],
+            debitText: [],
+            creditText: [],
+          };
+        }
+        map[mid].rows.push(row);
+        if(isDebit){
+          if(!map[mid].debitText.includes(subjectText)){
+            map[mid].debitText.push(subjectText);
+          }
+        } else {
+          if(!map[mid].creditText.includes(subjectText)){
+            map[mid].creditText.push(subjectText);
+          }
+        }
+
+      }
+    });
+
+    // console.log("==== opposite map:", map)
+
+    const mapArr = Object.entries<any>(map);
+    mapArr.forEach(([key, rowInfo]) => {
+      rowInfo.rows.forEach((row:any)=>{
+        const isDebit = !isEmptyText(row?.cells[debitCol]?.text)
+        row.cells[oppositeCol] = {
+          text: isDebit ? rowInfo.creditText.join("、") : rowInfo.debitText.join("、")
+        }
+      })
+      // outRows = outRows.concat(rowInfo);
+    });
+
+    return outRows
   }
 
   // excel数据转二维数组

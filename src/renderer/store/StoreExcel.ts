@@ -26,6 +26,10 @@ const filterConfig = {
   groupCol: 'E',
   // 分组的月
   groupMonthCol: 'B',
+  debitCol: 'J',
+  creditCol: 'K',
+  // 对方科目列
+  oppositeCol: 'P',
 };
 
 const StoreExcel = observable({
@@ -205,7 +209,7 @@ const StoreExcel = observable({
     const findReg = string2RegExp(str)!;
     // 提前处理筛选条件
     let filterList = (this.filterColConfig || []).map((m) => {
-      const regStr = m.filterType === "equal" ? `\^(${m.value})\$` : m.value
+      const regStr = m.filterType === 'equal' ? `\^(${m.value})\$` : m.value;
       return {
         key: m.key,
         col: getColByLetter(m.col),
@@ -225,7 +229,7 @@ const StoreExcel = observable({
       filterList.push({
         key: cuid(),
         col: getColByLetter(filterConfig.findSubjectIdCol),
-        value: string2RegExp(this.filterSubjectIdKeys.join("|")),
+        value: string2RegExp(this.filterSubjectIdKeys.join('|')),
       });
     }
 
@@ -236,7 +240,7 @@ const StoreExcel = observable({
     // 表头数据
     const headRows = this.excelInstance.getHeadRows(sheetIndex);
     // 打组数据
-    const groupRows = this.excelInstance.getGroupRows({
+    const groupRows = this.excelInstance.getFilterGroupRows({
       sheetIndex,
       findReg,
       findCol: getColByLetter(filterConfig.findCol),
@@ -268,6 +272,23 @@ const StoreExcel = observable({
     this.showDrawer = false;
 
     this.showResultSheet([sdata]);
+  },
+
+  addOppositeSubject() {
+    this.excelInstance.setOppositeSubjects({
+      sheetIndex: this.excelInstance.getSheetIndexByName(
+        filterConfig.sheetName
+      ),
+      subjectCol: getColByLetter(filterConfig.findCol),
+      groupCol: getColByLetter(filterConfig.groupCol),
+      groupMonthCol: getColByLetter(filterConfig.groupMonthCol),
+      debitCol: getColByLetter(filterConfig.debitCol),
+      creditCol: getColByLetter(filterConfig.creditCol),
+      oppositeCol: getColByLetter(filterConfig.oppositeCol),
+      headRowNumber: filterConfig.headRowNumber,
+    });
+    // @ts-ignore
+    this.excelInstance.reRender()
   },
 
   // 三表勾稽
