@@ -74,6 +74,8 @@ const StoreExcel = observable({
   filterSortDirection: SORT_DIRECTION.DESC as SORT_DIRECTION,
   // 列次筛选条件
   filterColConfig: [] as any[],
+  // 是否对比高亮借贷金额异常数据
+  filterCompare: true,
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -250,6 +252,8 @@ const StoreExcel = observable({
       sortDirection: this.filterSortDirection,
       filterList,
       headRowNumber: filterConfig.headRowNumber,
+      debitCol: getColByLetter(filterConfig.debitCol),
+      creditCol: getColByLetter(filterConfig.creditCol),
     });
     // debugger
     const sdata = {
@@ -257,7 +261,12 @@ const StoreExcel = observable({
       // 列的属性也带上
       cols: cloneDeep(sheetData.cols),
       rows: { len: headRows.length + groupRows.length },
-      styles: [{ bgcolor: '#fce5d5' }, { bgcolor: '#e3efd9' }],
+      styles: [
+        { bgcolor: '#fce5d5' },
+        { bgcolor: '#e3efd9' },
+        { bgcolor: '#fce5d5', color: "#ff0000" },
+        { bgcolor: '#e3efd9', color: "#ff0000" },
+      ],
     };
 
     headRows.forEach((m, n) => {

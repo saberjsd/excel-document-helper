@@ -1,4 +1,4 @@
-import { Button, Drawer, Input, Select, Space } from 'antd';
+import { Button, Drawer, Input, Select, Space, Switch } from 'antd';
 import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import StoreExcel from 'renderer/store/StoreExcel';
@@ -41,6 +41,7 @@ export default function ExcelPage(props: any) {
   >([]);
   const [filterColConfig, setFilterColConfig] = useState<any[]>([]);
   const [headColOptions, setHeadColOptions] = useState<any[]>([]);
+  const [filterCompare, setfilterCompare] = useState(true);
 
   useEffect(() => {
     StoreExcel.init();
@@ -53,6 +54,7 @@ export default function ExcelPage(props: any) {
         filterSubjectIdKeys,
         filterSubjectIdOptions,
         headColOptions,
+        filterCompare,
       } = StoreExcel;
       setShowDrawer(showDrawer);
       setFilterOptions(filterOptions);
@@ -61,6 +63,7 @@ export default function ExcelPage(props: any) {
       setFilterSubjectIdKeys(filterSubjectIdKeys);
       setFilterColConfig(filterColConfig);
       setHeadColOptions(headColOptions);
+      setfilterCompare(filterCompare);
     });
 
     return disposer;
@@ -86,6 +89,9 @@ export default function ExcelPage(props: any) {
   };
   const changeFilterConfig = (prams: any) => {
     StoreExcel.changeFilterConfig(prams);
+  };
+  const onSwitchChange = (val: any) => {
+    StoreExcel.filterCompare = val;
   };
 
   return (
@@ -138,6 +144,15 @@ export default function ExcelPage(props: any) {
         }
       >
         <div className="filter_wrap">
+          <div className="filter_wrap_line">
+            <span className="btn_label">是否对比高亮借贷金额：</span>
+            <Switch
+              checked={filterCompare}
+              checkedChildren="是"
+              unCheckedChildren="否"
+              onChange={onSwitchChange}
+            />
+          </div>
           <div className="filter_wrap_line">
             <span className="btn_label">科目代码：</span>
             <SearchSelect
@@ -252,7 +267,7 @@ export default function ExcelPage(props: any) {
                 <Button
                   danger
                   onClick={() => deleteFilterConfig(j.key)}
-                  style={{ marginLeft: '8px' }}
+                  style={{ marginLeft: '12px' }}
                 >
                   删除
                 </Button>

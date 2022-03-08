@@ -312,6 +312,8 @@ export default class MySpreadsheet extends Spreadsheet {
     sortDirection = SORT_DIRECTION.DESC,
     sortCol,
     filterList = [],
+    debitCol,
+    creditCol,
   }: {
     findReg: RegExp;
     sheetIndex: number;
@@ -326,6 +328,10 @@ export default class MySpreadsheet extends Spreadsheet {
     // 组间排序依据列次
     sortCol?: number;
     filterList: any[];
+    // 借方
+    debitCol: number,
+    // 贷方
+    creditCol: number,
   }) {
     let outRows: any = [];
 
@@ -374,13 +380,29 @@ export default class MySpreadsheet extends Spreadsheet {
           });
         });
       }
+      let debitSum = 0
+      let creditSum = 0
+      // 展平数据
       if (hasFiltered && rows.length) {
         rows.forEach((m: any) => {
+          const debitText = m?.cells[debitCol]?.text;
+          const creditText = m?.cells[creditCol]?.text;
+          debitSum += Numeral(debitText).value()
+          creditSum += Numeral(creditText).value()
           Object.entries(m.cells).forEach(([ci, cell]) => {
-            // @ts-ignore
+            // @ts-ignore 设置分组样式
             cell.style = nextStyle;
+
           });
         });
+        if(Numeral(debitSum).value() !== Numeral(creditSum).value()){
+          rows.forEach((m: any) => {
+            Object.entries(m.cells).forEach(([ci, cell]) => {
+              // @ts-ignore 设置分组样式
+              cell.style = nextStyle + 2;
+            });
+          });
+        }
         nextStyle = Number(!nextStyle);
         outRows = outRows.concat(rows);
       }
