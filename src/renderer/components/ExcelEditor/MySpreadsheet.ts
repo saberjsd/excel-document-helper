@@ -16,6 +16,7 @@ import StoreRoot from 'renderer/store/StoreRoot';
 import cuid from 'cuid';
 import { readExcel, writeExcel } from 'renderer/utils/excelHelper';
 import { SORT_DIRECTION } from 'renderer/constants';
+import { FilterItem, FilterList } from 'renderer/type';
 const Numeral = require('numeral');
 // import { stox, xtos } from './sheetConvert';
 // import { XLSXspread } from "./xlsxspread.min.js"
@@ -314,6 +315,7 @@ export default class MySpreadsheet extends Spreadsheet {
     filterList = [],
     debitCol,
     creditCol,
+    filterCompare
   }: {
     findReg: RegExp;
     sheetIndex: number;
@@ -327,11 +329,12 @@ export default class MySpreadsheet extends Spreadsheet {
     sortDirection?: SORT_DIRECTION;
     // 组间排序依据列次
     sortCol?: number;
-    filterList: any[];
+    filterList: FilterList[];
     // 借方
-    debitCol: number,
+    debitCol: number;
     // 贷方
-    creditCol: number,
+    creditCol: number;
+    filterCompare: boolean;
   }) {
     let outRows: any = [];
 
@@ -365,44 +368,84 @@ export default class MySpreadsheet extends Spreadsheet {
 
     // 间隔颜色
     let nextStyle = 0;
+    // // 借贷方求和
+    // let debitSum = 0;
+    // let creditSum = 0;
+
     mapArr.forEach(([key, rows]) => {
-      let hasFiltered = true;
+      // 组内默认是或者，所以默认值为false
+      let hasFiltered = false;
+      // 借贷方求和
+      let debitSum = 0;
+      let creditSum = 0;
       // 更多过滤条件
       if (filterList && filterList.length) {
-        hasFiltered = rows.some((j: any) => {
-          return filterList.every((m) => {
-            if (m.col && m.value) {
-              const val = j.cells[m.col]?.text;
-              return m.value.test(val);
+        // 组内遍历每行
+        rows.forEach((row: any) => {
+          let isMatch = true;
+          let isSum = false
+          row.creditSum = 0
+          row.debitSum = 0
+          filterList.forEach((item) => {
+            isMatch = true;
+            item.children.forEach((m) => {
+              // 行内匹配
+              if (m.col && m.value) {
+                const val = row.cells[m.col]?.text;
+                if (m.relation === 'or') {
+                  isMatch = isMatch || m.value.test(val);
+                } else {
+                  isMatch = isMatch && m.value.test(val);
+                }
+
+                if (!isSum && isMatch) {
+                  if (m.direction === 'credit') {
+                    const creditText = row?.cells[creditCol]?.text;
+                    creditSum = Numeral(creditText).add(creditSum).value();
+                    row.isMatch = true
+                  } else {
+                    // 默认是借方
+                    const debitText = row?.cells[debitCol]?.text;
+                    debitSum += Numeral(debitText).add(creditSum).value();
+                    row.isMatch = true
+                  }
+                  isSum = true
+                }
+              } else {
+                isMatch = true;
+              }
+            });
+            // 组内匹配
+            if (item.relation === 'or') {
+              hasFiltered = hasFiltered || isMatch;
             } else {
-              return true;
+              hasFiltered = hasFiltered && isMatch;
             }
           });
         });
       }
-      let debitSum = 0
-      let creditSum = 0
+
       // 展平数据
       if (hasFiltered && rows.length) {
         rows.forEach((m: any) => {
-          const debitText = m?.cells[debitCol]?.text;
-          const creditText = m?.cells[creditCol]?.text;
-          debitSum += Numeral(debitText).value()
-          creditSum += Numeral(creditText).value()
+          const isEqual = Numeral(debitSum).value().toFixed(2) !== Numeral(creditSum).value().toFixed(2)
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore 设置分组样式
             cell.style = nextStyle;
-
+            if (filterCompare && isEqual && m.isMatch) {
+              // @ts-ignore 设置异常数据样式
+              cell.style = nextStyle + 2;
+            }
           });
         });
-        if(Numeral(debitSum).value() !== Numeral(creditSum).value()){
-          rows.forEach((m: any) => {
-            Object.entries(m.cells).forEach(([ci, cell]) => {
-              // @ts-ignore 设置分组样式
-              cell.style = nextStyle + 2;
-            });
-          });
-        }
+        // if(Numeral(debitSum).value() !== Numeral(creditSum).value()){
+        //   rows.forEach((m: any) => {
+        //     Object.entries(m.cells).forEach(([ci, cell]) => {
+        //       // @ts-ignore 设置分组样式
+        //       cell.style = nextStyle + 2;
+        //     });
+        //   });
+        // }
         nextStyle = Number(!nextStyle);
         outRows = outRows.concat(rows);
       }
@@ -429,9 +472,9 @@ export default class MySpreadsheet extends Spreadsheet {
     groupMonthCol: number;
     subjectCol: number;
     // 借方
-    debitCol: number,
+    debitCol: number;
     // 贷方
-    creditCol: number,
+    creditCol: number;
     // 对方科目列次
     oppositeCol: number;
     headRowNumber: number;
@@ -446,13 +489,13 @@ export default class MySpreadsheet extends Spreadsheet {
       if (Number(ri) < headRowNumber) return;
       const month = getMonthFromString(row?.cells[groupMonthCol]?.text);
       const id = row?.cells[groupCol]?.text;
-      const subjectText =  row?.cells[subjectCol]?.text;
+      const subjectText = row?.cells[subjectCol]?.text;
       // const debitText = row?.cells[debitCol]?.text;
       // const creditText = row?.cells[creditCol]?.text;
       const mid = `${id}-${month}`;
       if (mid) {
         // const item = row;
-        const isDebit = !isEmptyText(row?.cells[debitCol]?.text)
+        const isDebit = !isEmptyText(row?.cells[debitCol]?.text);
 
         // if(row && row.cells){
         //   row.cells[oppositeCol] = {
@@ -467,16 +510,15 @@ export default class MySpreadsheet extends Spreadsheet {
           };
         }
         map[mid].rows.push(row);
-        if(isDebit){
-          if(!map[mid].debitText.includes(subjectText)){
+        if (isDebit) {
+          if (!map[mid].debitText.includes(subjectText)) {
             map[mid].debitText.push(subjectText);
           }
         } else {
-          if(!map[mid].creditText.includes(subjectText)){
+          if (!map[mid].creditText.includes(subjectText)) {
             map[mid].creditText.push(subjectText);
           }
         }
-
       }
     });
 
@@ -484,16 +526,18 @@ export default class MySpreadsheet extends Spreadsheet {
 
     const mapArr = Object.entries<any>(map);
     mapArr.forEach(([key, rowInfo]) => {
-      rowInfo.rows.forEach((row:any)=>{
-        const isDebit = !isEmptyText(row?.cells[debitCol]?.text)
+      rowInfo.rows.forEach((row: any) => {
+        const isDebit = !isEmptyText(row?.cells[debitCol]?.text);
         row.cells[oppositeCol] = {
-          text: isDebit ? rowInfo.creditText.join("、") : rowInfo.debitText.join("、")
-        }
-      })
+          text: isDebit
+            ? rowInfo.creditText.join('、')
+            : rowInfo.debitText.join('、'),
+        };
+      });
       // outRows = outRows.concat(rowInfo);
     });
 
-    return outRows
+    return outRows;
   }
 
   // excel数据转二维数组

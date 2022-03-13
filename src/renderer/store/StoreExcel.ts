@@ -13,6 +13,7 @@ import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig } from './compareReadConfig';
 import JsonStorage from './JsonStorage';
+import { FilterItem, FilterList } from 'renderer/type';
 const Numeral = require('numeral');
 
 let resultSheets: any[] = [];
@@ -70,12 +71,14 @@ const StoreExcel = observable({
   filterSubjectIdKeys: [] as any[],
   // 筛选排序
   filterSortCol: '',
-  //
+  // 筛选排序方向
   filterSortDirection: SORT_DIRECTION.DESC as SORT_DIRECTION,
   // 列次筛选条件
-  filterColConfig: [] as any[],
+  filterColConfig: [] as FilterList[],
   // 是否对比高亮借贷金额异常数据
   filterCompare: true,
+  // // 是否去掉借贷金额为空的组
+  // filterRemoveEmpty: true,
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -85,7 +88,8 @@ const StoreExcel = observable({
       }
     }
     this.excelInstance = new MySpreadsheet(`#${this.excelId}`);
-    this.addFilterConfig();
+    // this.addFilterConfig();
+    this.addFilterGroup();
     // @ts-ignore
     window['FTExcel'] = this.excelInstance;
   },
@@ -173,32 +177,108 @@ const StoreExcel = observable({
   /**
    * 更多筛选配置更新
    */
-  addFilterConfig() {
+  addFilterGroup() {
     this.filterColConfig = this.filterColConfig.concat({
-      key: cuid(),
-      col: undefined,
-      value: '',
+      groupId: cuid(),
+      relation: 'or',
+      children: [
+        {
+          key: cuid(),
+          col: undefined,
+          value: '',
+        },
+      ],
     });
   },
-  deleteFilterConfig(key: string) {
-    this.filterColConfig = this.filterColConfig.filter((m, n) => m.key !== key);
+  addFilterConfig(groupId: string) {
+    this.filterColConfig = this.filterColConfig.map((m) => {
+      if (m.groupId === groupId) {
+        m.children = m.children.concat({
+          key: cuid(),
+          col: undefined,
+          value: '',
+        });
+      }
+      return m;
+    });
+  },
+  deleteFilterGroup(groupId: string) {
+    this.filterColConfig = this.filterColConfig.filter(
+      (m) => m.groupId !== groupId
+    );
+  },
+  deleteFilterConfig(groupId: string, key: string) {
+    // const find = this.filterColConfig.find((m) => m.groupId === groupId);
+    // if (find) {
+    //   find.children = find.children.filter((m) => m.key != key);
+    // }
+    this.filterColConfig = this.filterColConfig.map((m) => {
+      if (m.groupId === groupId) {
+        m.children = m.children.filter((m) => m.key != key);
+      }
+      return m;
+    });
+  },
+  changeFilterGroup({
+    findKey,
+    value,
+    groupId,
+  }: {
+    findKey: any;
+    value: any;
+    groupId: string;
+  }) {
+    // const find = this.filterColConfig.find((m) => m.groupId === groupId);
+    // if (find) {
+    //   const arr = [...find.children];
+    //   arr.forEach((m) => {
+    //     if (m.key === key) {
+    //       m[findKey] = value;
+    //     }
+    //   });
+    //   find.children = arr;
+    // }
+    this.filterColConfig = this.filterColConfig.map((m) => {
+      if (m.groupId === groupId) {
+        // @ts-ignore
+        m[findKey] = value;
+      }
+      return m;
+    });
   },
   changeFilterConfig({
     key,
     findKey,
     value,
+    groupId,
   }: {
     key: any;
     findKey: 'col' | 'value';
     value: any;
+    groupId: string;
   }) {
-    const arr = [...this.filterColConfig];
-    arr.forEach((m) => {
-      if (m.key === key) {
-        m[findKey] = value;
+    // const find = this.filterColConfig.find((m) => m.groupId === groupId);
+    // if (find) {
+    //   const arr = [...find.children];
+    //   arr.forEach((m) => {
+    //     if (m.key === key) {
+    //       m[findKey] = value;
+    //     }
+    //   });
+    //   find.children = arr;
+    // }
+    this.filterColConfig = this.filterColConfig.map((m) => {
+      if (m.groupId === groupId) {
+        const arr = [...m.children];
+        arr.forEach((m) => {
+          if (m.key === key) {
+            m[findKey] = value;
+          }
+        });
+        m.children = arr;
       }
+      return m;
     });
-    this.filterColConfig = arr;
   },
 
   /**
@@ -207,33 +287,75 @@ const StoreExcel = observable({
   filterExcel() {
     this.resultType = FeatureType.FILTER_EXCEL;
     // 替换转义符
-    const str = this.filterKeys.join('|');
-    const findReg = string2RegExp(str)!;
+    // const str = this.filterKeys.join('|');
+    // const findReg = string2RegExp(str)!;
+    const str = '';
+    const findReg = string2RegExp('') as any;
+
     // 提前处理筛选条件
-    let filterList = (this.filterColConfig || []).map((m) => {
-      const regStr = m.filterType === 'equal' ? `\^(${m.value})\$` : m.value;
+    let filterList = this.filterColConfig.map((j) => {
+      const children = j.children.map((m) => {
+        let regStr = m.value;
+        if (m.filterType === 'equal') {
+          regStr = `\^(${m.value})\$`;
+        } else if (m.filterType === 'notEmpty') {
+          regStr = `.+`;
+        }
+        return {
+          ...m,
+          key: m.key,
+          col: getColByLetter(m.col),
+          value: string2RegExp(regStr),
+        };
+      }) as any[];
+
+      // 科目名称筛选
+      if (j.filterKeys && j.filterKeys.length) {
+        children.push({
+          key: cuid(),
+          col: getColByLetter(filterConfig.findCol),
+          value: string2RegExp(j.filterKeys.join('|')),
+        });
+      }
+      // 科目代码筛选
+      if (j.filterSubjectIdKeys && j.filterSubjectIdKeys.length) {
+        children.push({
+          key: cuid(),
+          col: getColByLetter(filterConfig.findSubjectIdCol),
+          value: string2RegExp(j.filterSubjectIdKeys.join('|')),
+        });
+      }
+
       return {
-        key: m.key,
-        col: getColByLetter(m.col),
-        value: string2RegExp(regStr),
+        ...j,
+        children,
       };
-    });
-    // 科目名称筛选
-    if (this.filterKeys.length) {
-      filterList.push({
-        key: cuid(),
-        col: getColByLetter(filterConfig.findCol),
-        value: findReg,
-      });
-    }
-    // 科目代码筛选
-    if (this.filterSubjectIdKeys.length) {
-      filterList.push({
-        key: cuid(),
-        col: getColByLetter(filterConfig.findSubjectIdCol),
-        value: string2RegExp(this.filterSubjectIdKeys.join('|')),
-      });
-    }
+    }) as any[];
+    // // 提前处理筛选条件
+    // let filterList = (this.filterColConfig || []).map((m) => {
+    //   const regStr = m.filterType === 'equal' ? `\^(${m.value})\$` : m.value;
+    //   return {
+    //     key: m.key,
+    //     col: getColByLetter(m.col),
+    //     value: string2RegExp(regStr),
+    //   };
+    // }) as any[];
+    // // 科目名称筛选
+    // if (this.filterKeys.length) {
+    //   filterList.push({
+    //     key: cuid(),
+    //     col: getColByLetter(filterConfig.findCol),
+    //     value: findReg,
+    //   });
+    // }
+    // // 科目代码筛选
+    // if (this.filterSubjectIdKeys.length) {
+    //   filterList.push({
+    //     key: cuid(),
+    //     col: getColByLetter(filterConfig.findSubjectIdCol),
+    //     value: string2RegExp(this.filterSubjectIdKeys.join('|')),
+    //   });
+    // }
 
     const sheetIndex = this.excelInstance.getSheetIndexByName(
       filterConfig.sheetName
@@ -254,6 +376,7 @@ const StoreExcel = observable({
       headRowNumber: filterConfig.headRowNumber,
       debitCol: getColByLetter(filterConfig.debitCol),
       creditCol: getColByLetter(filterConfig.creditCol),
+      filterCompare: this.filterCompare,
     });
     // debugger
     const sdata = {
@@ -262,10 +385,14 @@ const StoreExcel = observable({
       cols: cloneDeep(sheetData.cols),
       rows: { len: headRows.length + groupRows.length },
       styles: [
-        { bgcolor: '#fce5d5' },
-        { bgcolor: '#e3efd9' },
-        { bgcolor: '#fce5d5', color: "#ff0000" },
-        { bgcolor: '#e3efd9', color: "#ff0000" },
+        // { bgcolor: '#fce5d5' },
+        // { bgcolor: '#e3efd9' },
+        // { bgcolor: '#fce5d5', color: '#ff0000' },
+        // { bgcolor: '#e3efd9', color: '#ff0000' },
+        { bgcolor: '#e7e5e6' },
+        { bgcolor: '#ffffff' },
+        { bgcolor: '#e7e5e6', color: '#ff0000' },
+        { bgcolor: '#ffffff', color: '#ff0000' },
       ],
     };
 
@@ -297,7 +424,7 @@ const StoreExcel = observable({
       headRowNumber: filterConfig.headRowNumber,
     });
     // @ts-ignore
-    this.excelInstance.reRender()
+    this.excelInstance.reRender();
   },
 
   // 三表勾稽
