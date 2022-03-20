@@ -23,6 +23,7 @@ const filterConfig = {
   sheetName: '序时帐',
   findCol: 'G',
   findSubjectIdCol: 'F',
+  findGuideCol: 'I',
   // 分组的凭证号
   groupCol: 'E',
   // 分组的月
@@ -69,6 +70,8 @@ const StoreExcel = observable({
   filterSubjectIdOptions: [] as any[],
   // 已经选择的科目代码
   filterSubjectIdKeys: [] as any[],
+  // 辅助项筛选下拉
+  filterGuideOptions: [] as any[],
   // 筛选排序
   filterSortCol: '',
   // 筛选排序方向
@@ -315,6 +318,7 @@ const StoreExcel = observable({
           key: cuid(),
           col: getColByLetter(filterConfig.findCol),
           value: string2RegExp(j.filterKeys.join('|')),
+          relation: 'and',
         });
       }
       // 科目代码筛选
@@ -323,6 +327,16 @@ const StoreExcel = observable({
           key: cuid(),
           col: getColByLetter(filterConfig.findSubjectIdCol),
           value: string2RegExp(j.filterSubjectIdKeys.join('|')),
+          relation: 'and',
+        });
+      }
+      // 科目代码筛选
+      if (j.findGuideKeys && j.findGuideKeys.length) {
+        children.push({
+          key: cuid(),
+          col: getColByLetter(filterConfig.findGuideCol),
+          value: string2RegExp(j.findGuideKeys.join('|')),
+          relation: 'and',
         });
       }
 
@@ -734,11 +748,13 @@ const StoreExcel = observable({
   getFliterOptions() {
     const findColIndex = getColByLetter(filterConfig.findCol);
     const findSubjectIdColIndex = getColByLetter(filterConfig.findSubjectIdCol);
+    const findGuideColIndex = getColByLetter(filterConfig.findGuideCol);
     const filterOptions: any[] = [];
     const filterSubjectIdOptions: any[] = [];
+    const filterGuideOptions: any[] = [];
     this.excelInstance.forEachCellByCols(
       '序时账',
-      [findColIndex, findSubjectIdColIndex],
+      [findColIndex, findSubjectIdColIndex, findGuideColIndex],
       (cellsInfo, ri) => {
         // 忽略首行
         if (Number(ri) < filterConfig.headRowNumber) {
@@ -759,10 +775,18 @@ const StoreExcel = observable({
             value: subjectId,
           });
         }
+        const guide = cellsInfo[findGuideColIndex]?.text;
+        if (!filterGuideOptions.find((m) => m.value === guide)) {
+          filterGuideOptions.push({
+            label: guide,
+            value: guide,
+          });
+        }
       }
     );
     this.filterOptions = filterOptions;
     this.filterSubjectIdOptions = filterSubjectIdOptions;
+    this.filterGuideOptions = filterGuideOptions;
   },
 });
 

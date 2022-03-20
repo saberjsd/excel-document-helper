@@ -79,6 +79,9 @@ export default function ExcelPage(props: any) {
   const [filterSubjectIdOptions, setFilterSubjectIdOptions] = useState<
     ItemProps[]
   >([]);
+  const [filterGuideOptions, setFilterGuideOptionsOptions] = useState<
+    ItemProps[]
+  >([]);
   const [filterColConfig, setFilterColConfig] = useState<FilterList[]>([]);
   const [headColOptions, setHeadColOptions] = useState<any[]>([]);
   const [filterCompare, setfilterCompare] = useState(true);
@@ -96,6 +99,7 @@ export default function ExcelPage(props: any) {
         filterColConfig,
         // filterSubjectIdKeys,
         filterSubjectIdOptions,
+        filterGuideOptions,
         headColOptions,
         filterCompare,
         filterSortDirection,
@@ -105,6 +109,7 @@ export default function ExcelPage(props: any) {
       // setFilterKeys(filterKeys);
       setFilterSubjectIdOptions(filterSubjectIdOptions);
       // setFilterSubjectIdKeys(filterSubjectIdKeys);
+      setFilterGuideOptionsOptions(filterGuideOptions);
       setFilterColConfig(filterColConfig);
       setHeadColOptions(headColOptions);
       setfilterCompare(filterCompare);
@@ -260,6 +265,24 @@ export default function ExcelPage(props: any) {
                       ))}
                     </Select> */}
                   <span>行内筛选条件</span>
+                  <Select
+                    onChange={(val) =>
+                      changeFilterGroup({
+                        findKey: 'direction',
+                        value: val,
+                        groupId: item.groupId,
+                      })
+                    }
+                    allowClear
+                    placeholder="方向"
+                    style={{ marginLeft: '12px' }}
+                  >
+                    {filterDirectionOptions.map((m) => (
+                      <Select.Option value={m.value} key={m.value}>
+                        {m.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </>
               }
               extra={
@@ -277,7 +300,7 @@ export default function ExcelPage(props: any) {
                     danger
                     icon={<DeleteOutlined />}
                   >
-                    删除当前所有行内筛选条件
+                    删除
                   </Button>
                 </>
               }
@@ -316,6 +339,23 @@ export default function ExcelPage(props: any) {
                   placeholder="输入或者选择筛选条件"
                 />
               </div>
+              <div className="filter_wrap_line">
+                <span className="btn_label">辅助项：</span>
+                <SearchSelect
+                  className="filter_select_key"
+                  mode="multiple"
+                  value={item.findGuideKeys}
+                  options={filterGuideOptions}
+                  onChange={(newValue: string[]) => {
+                    changeFilterGroup({
+                      findKey: 'findGuideKeys',
+                      value: newValue,
+                      groupId: item.groupId,
+                    });
+                  }}
+                  placeholder="输入或者选择筛选条件"
+                />
+              </div>
               {/* ----------------- */}
               {item.children.length > 0 &&
                 item.children.map((j, k) => (
@@ -341,8 +381,7 @@ export default function ExcelPage(props: any) {
                         ))}
                       </Select>
                       {/* 借贷方向 */}
-                      <Select
-                        // defaultValue="debit"
+                      {/* <Select
                         onChange={(val) =>
                           changeFilterConfig({
                             key: j.key,
@@ -359,7 +398,7 @@ export default function ExcelPage(props: any) {
                             {m.label}
                           </Select.Option>
                         ))}
-                      </Select>
+                      </Select> */}
                       {/* 筛选列次 */}
                       <Select
                         value={j.col}

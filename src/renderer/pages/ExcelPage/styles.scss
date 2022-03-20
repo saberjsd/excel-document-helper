@@ -8,6 +8,8 @@
   .filter_wrap_line {
     width: 100%;
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
 
     .btn_gap,
     .btn_label {
@@ -21,7 +23,8 @@
     }
   }
   .filter_select_key {
-    width: calc(100% - 78px);
+    // width: calc(100% - 78px);
+    flex-grow: 1;
   }
 }
 

@@ -19,5 +19,8 @@ export type FilterList = {
   relation?: 'and' | 'or';
   filterKeys?: string[];
   filterSubjectIdKeys?: string[];
+  findGuideKeys?: string[];
+  // 借贷方向，默认是忽略这个值
+  direction?: 'debit' | 'credit';
   children: FilterItem[];
 };

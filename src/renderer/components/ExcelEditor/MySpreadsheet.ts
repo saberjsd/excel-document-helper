@@ -315,7 +315,7 @@ export default class MySpreadsheet extends Spreadsheet {
     filterList = [],
     debitCol,
     creditCol,
-    filterCompare
+    filterCompare,
   }: {
     findReg: RegExp;
     sheetIndex: number;
@@ -383,11 +383,13 @@ export default class MySpreadsheet extends Spreadsheet {
         // 组内遍历每行
         rows.forEach((row: any) => {
           let isMatch = true;
-          let isSum = false
-          row.creditSum = 0
-          row.debitSum = 0
+          // 是否求和了
+          let isSum = false;
+          row.creditSum = 0;
+          row.debitSum = 0;
+          row.isMatch = false;
           filterList.forEach((item) => {
-            isMatch = true;
+            // isMatch = true;
             item.children.forEach((m) => {
               // 行内匹配
               if (m.col && m.value) {
@@ -397,24 +399,25 @@ export default class MySpreadsheet extends Spreadsheet {
                 } else {
                   isMatch = isMatch && m.value.test(val);
                 }
-
-                if (!isSum && isMatch) {
-                  if (m.direction === 'credit') {
-                    const creditText = row?.cells[creditCol]?.text;
-                    creditSum = Numeral(creditText).add(creditSum).value();
-                    row.isMatch = true
-                  } else {
-                    // 默认是借方
-                    const debitText = row?.cells[debitCol]?.text;
-                    debitSum += Numeral(debitText).add(creditSum).value();
-                    row.isMatch = true
-                  }
-                  isSum = true
-                }
-              } else {
-                isMatch = true;
               }
             });
+            // 求和
+            if (!isSum && isMatch) {
+              if (item.direction === 'credit') {
+                const creditText = row?.cells[creditCol]?.text;
+                creditSum = Numeral(creditText).add(creditSum).value();
+                // 标记是否匹配，用力来判断高亮的前提
+                row.isMatch = true;
+              } else {
+                // 默认是借方
+                const debitText = row?.cells[debitCol]?.text;
+                debitSum += Numeral(debitText).add(creditSum).value();
+                // 标记是否匹配，用力来判断高亮的前提
+                row.isMatch = true;
+              }
+              isSum = true;
+            }
+
             // 组内匹配
             if (item.relation === 'or') {
               hasFiltered = hasFiltered || isMatch;
@@ -428,11 +431,13 @@ export default class MySpreadsheet extends Spreadsheet {
       // 展平数据
       if (hasFiltered && rows.length) {
         rows.forEach((m: any) => {
-          const isEqual = Numeral(debitSum).value().toFixed(2) !== Numeral(creditSum).value().toFixed(2)
+          const isEqual =
+            Numeral(debitSum).value().toFixed(2) ===
+            Numeral(creditSum).value().toFixed(2);
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore 设置分组样式
             cell.style = nextStyle;
-            if (filterCompare && isEqual && m.isMatch) {
+            if (filterCompare && !isEqual && m.isMatch) {
               // @ts-ignore 设置异常数据样式
               cell.style = nextStyle + 2;
             }
