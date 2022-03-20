@@ -183,7 +183,7 @@ const StoreExcel = observable({
   addFilterGroup() {
     this.filterColConfig = this.filterColConfig.concat({
       groupId: cuid(),
-      relation: 'or',
+      relation: 'and',
       children: [
         {
           key: cuid(),

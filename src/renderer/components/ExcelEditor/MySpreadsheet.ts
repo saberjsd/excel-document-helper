@@ -373,58 +373,69 @@ export default class MySpreadsheet extends Spreadsheet {
     // let creditSum = 0;
 
     mapArr.forEach(([key, rows]) => {
-      // 组内默认是或者，所以默认值为false
-      let hasFiltered = false;
+      // 组内是否匹配
+      let hasFiltered = true;
       // 借贷方求和
       let debitSum = 0;
       let creditSum = 0;
+      const filterMatch: any = {};
       // 更多过滤条件
       if (filterList && filterList.length) {
         // 组内遍历每行
         rows.forEach((row: any) => {
-          let isMatch = true;
-          // 是否求和了
+          // 是否求和了，用来每行只计算一次的标识
           let isSum = false;
-          row.creditSum = 0;
-          row.debitSum = 0;
-          row.isMatch = false;
+          row.isMatched = false;
+          const debitText = row?.cells[debitCol]?.text;
+          // 当前行的借贷方向
+          const rowDirection = debitText !== undefined ? 'debit' : 'credit';
           filterList.forEach((item) => {
-            // isMatch = true;
+            // 多个行内条件是否匹配
+            let isMatch = true;
+            // 如果配置了借贷方向，需要匹配借贷方向
+            const isSameDirection =
+              !item.direction || rowDirection === item.direction;
             item.children.forEach((m) => {
               // 行内匹配
               if (m.col && m.value) {
                 const val = row.cells[m.col]?.text;
                 if (m.relation === 'or') {
-                  isMatch = isMatch || m.value.test(val);
+                  isMatch = isMatch || (m.value.test(val) && isSameDirection);
                 } else {
-                  isMatch = isMatch && m.value.test(val);
+                  isMatch = isMatch && m.value.test(val) && isSameDirection;
                 }
               }
             });
-            // 求和
+            // 求和 && 标记
             if (!isSum && isMatch) {
               if (item.direction === 'credit') {
                 const creditText = row?.cells[creditCol]?.text;
                 creditSum = Numeral(creditText).add(creditSum).value();
                 // 标记是否匹配，用力来判断高亮的前提
-                row.isMatch = true;
+                row.isMatched = true;
               } else {
                 // 默认是借方
                 const debitText = row?.cells[debitCol]?.text;
                 debitSum += Numeral(debitText).add(creditSum).value();
                 // 标记是否匹配，用力来判断高亮的前提
-                row.isMatch = true;
+                row.isMatched = true;
               }
               isSum = true;
             }
-
-            // 组内匹配
-            if (item.relation === 'or') {
-              hasFiltered = hasFiltered || isMatch;
-            } else {
-              hasFiltered = hasFiltered && isMatch;
+            // 匹配到的组内条件，记录下
+            if (isMatch) {
+              filterMatch[item.groupId] = true;
             }
           });
+        });
+
+        // 组内条件
+        filterList.forEach((item) => {
+          if (item.relation === 'or') {
+            hasFiltered = hasFiltered || !!filterMatch[item.groupId];
+          } else {
+            hasFiltered = hasFiltered && !!filterMatch[item.groupId];
+          }
         });
       }
 
@@ -437,7 +448,7 @@ export default class MySpreadsheet extends Spreadsheet {
           Object.entries(m.cells).forEach(([ci, cell]) => {
             // @ts-ignore 设置分组样式
             cell.style = nextStyle;
-            if (filterCompare && !isEqual && m.isMatch) {
+            if (filterCompare && !isEqual && m.isMatched) {
               // @ts-ignore 设置异常数据样式
               cell.style = nextStyle + 2;
             }

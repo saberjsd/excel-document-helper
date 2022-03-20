@@ -23,4 +23,6 @@ export type FilterList = {
   // 借贷方向，默认是忽略这个值
   direction?: 'debit' | 'credit';
   children: FilterItem[];
+  // 当前条件是否有匹配的行次
+  isMatch?: boolean;
 };
