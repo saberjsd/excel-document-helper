@@ -409,13 +409,13 @@ export default class MySpreadsheet extends Spreadsheet {
             // 求和 && 标记
             if (!isSum && isMatch) {
               if (item.direction === 'credit') {
-                const creditText = row?.cells[creditCol]?.text;
+                const creditText = row?.cells[creditCol]?.text || 0;
                 creditSum = Numeral(creditText).add(creditSum).value();
                 // 标记是否匹配，用力来判断高亮的前提
                 row.isMatched = true;
               } else {
                 // 默认是借方
-                const debitText = row?.cells[debitCol]?.text;
+                const debitText = row?.cells[debitCol]?.text || 0;
                 debitSum += Numeral(debitText).add(creditSum).value();
                 // 标记是否匹配，用力来判断高亮的前提
                 row.isMatched = true;
