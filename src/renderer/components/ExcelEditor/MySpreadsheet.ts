@@ -388,7 +388,7 @@ export default class MySpreadsheet extends Spreadsheet {
           row.isMatched = false;
           const debitText = row?.cells[debitCol]?.text;
           // 当前行的借贷方向
-          const rowDirection = debitText !== undefined ? 'debit' : 'credit';
+          const rowDirection = !isEmptyText(debitText) ? 'debit' : 'credit';
           filterList.forEach((item) => {
             // 多个行内条件是否匹配
             let isMatch = true;
