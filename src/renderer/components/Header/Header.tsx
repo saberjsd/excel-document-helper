@@ -7,6 +7,7 @@ import {
   FilterOutlined,
   DoubleRightOutlined,
   DoubleLeftOutlined,
+  SwitcherOutlined,
 } from '@ant-design/icons';
 import { Button, Input, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
@@ -31,10 +32,7 @@ export default function Header(props: any) {
   useEffect(() => {
     const disposer = autorun(() => {
       const { currentMenu } = StoreRoot;
-      const {
-        compareIsSum,
-        showDrawer,
-      } = StoreExcel;
+      const { compareIsSum, showDrawer } = StoreExcel;
       setCurrentMenu(currentMenu);
       setCompareIsSum(compareIsSum);
       setShowDrawer(showDrawer);
@@ -100,6 +98,11 @@ export default function Header(props: any) {
     }
   };
 
+  const addOppositeSubject = () => {
+    StoreExcel.addOppositeSubject();
+    message.success('对方科目已生成在序时账“L”列！');
+  };
+
   return (
     <header className="header_page">
       <div className="heder_left"></div>
@@ -148,6 +151,13 @@ export default function Header(props: any) {
             >
               科目筛选
             </Button>
+            <Button
+              type="primary"
+              icon={<SwitcherOutlined />}
+              onClick={addOppositeSubject}
+            >
+              生成对方科目
+            </Button>
 
             <Button
               // type="primary"
@@ -168,7 +178,6 @@ export default function Header(props: any) {
             /> */}
           </>
         )}
-
       </div>
       <Button
         className="mini_drawer_btn"

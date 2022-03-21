@@ -31,7 +31,7 @@ const filterConfig = {
   debitCol: 'J',
   creditCol: 'K',
   // 对方科目列
-  oppositeCol: 'P',
+  oppositeCol: 'L',
 };
 
 const StoreExcel = observable({
@@ -541,7 +541,7 @@ const StoreExcel = observable({
       sheetType: 'billSheet',
       // findSubjectCol: 'G',
       findSummaryCol: 'H',
-      outCol: 'P',
+      outCol: 'Q',
     });
     this.showResultSheet([outBillSheet, outBalanceSheet]);
   },
