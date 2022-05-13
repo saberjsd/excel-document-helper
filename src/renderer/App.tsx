@@ -28,8 +28,7 @@ export default function App() {
     permissionCode = e.target?.value;
   };
   const onOk = (close: any) => {
-    // f4ec9eae0338bf494ba6d18ed461ca20
-    // ba4301eab14cbe8acafe58f1950f57d7
+    // bf8904e49a024d7eaeccb53604fe4af5
     if (permissionCode === password) {
       message.success('验证通过！');
       savePermissionCode(password);

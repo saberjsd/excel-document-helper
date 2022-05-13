@@ -9,6 +9,7 @@ import {
   SnippetsOutlined,
   ToolOutlined,
   FilterOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import { Menu } from 'antd';
 import Sider from 'antd/lib/layout/Sider';
@@ -79,6 +80,9 @@ export default function Sidebar(props: any) {
         {/* <Menu.SubMenu key="excel" icon={<AppstoreOutlined />} title="表格操作"> */}
         <Menu.Item key={MENU.EXCEL_BOARD} icon={<TableOutlined />}>
           表格操作
+        </Menu.Item>
+        <Menu.Item key={MENU.FILE_HISTORY} icon={<HistoryOutlined />}>
+          文件记录
         </Menu.Item>
         {/* <Menu.Item key={MENU.EXCEL_FILTER} icon={<FilterOutlined />}>
           科目筛选

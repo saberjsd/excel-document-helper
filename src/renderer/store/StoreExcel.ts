@@ -13,7 +13,7 @@ import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig } from './compareReadConfig';
 import JsonStorage from './JsonStorage';
-import { FilterItem, FilterList } from 'renderer/type';
+import { FilterItem, FilterList, HistoryItem } from 'renderer/type';
 const Numeral = require('numeral');
 
 let resultSheets: any[] = [];
@@ -82,6 +82,12 @@ const StoreExcel = observable({
   filterCompare: true,
   // // 是否去掉借贷金额为空的组
   // filterRemoveEmpty: true,
+
+  // --------文件历史相关--------
+  // 历史导入
+  historyImport: [] as HistoryItem[],
+  // 历史保存
+  historySave: [] as HistoryItem[],
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {

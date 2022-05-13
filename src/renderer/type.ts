@@ -26,3 +26,11 @@ export type FilterList = {
   // 当前条件是否有匹配的行次
   isMatch?: boolean;
 };
+
+export type HistoryItem = {
+  id: string;
+  fileName: string;
+  filePath: string;
+  lastModify: string;
+  size: number;
+};

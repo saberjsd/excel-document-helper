@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { MENU } from 'renderer/constants';
 import ExcelPage from 'renderer/pages/ExcelPage';
 import FilterPage from 'renderer/pages/FilterPage';
+import HistoryPage from 'renderer/pages/HistoryPage';
 import SettingProfitPage from 'renderer/pages/SettingProfitPage';
 import SettingRiskPage from 'renderer/pages/SettingRiskPage';
 import StoreRoot from 'renderer/store/StoreRoot';
@@ -26,6 +27,7 @@ export default function Content(props: any) {
       <div className="page_content_inner">
         <ExcelPage hidden={currentMenu !== MENU.EXCEL_BOARD} />
         {/* <FilterPage hidden={currentMenu !== MENU.EXCEL_FILTER} /> */}
+        <HistoryPage hidden={currentMenu !== MENU.FILE_HISTORY} />
         <SettingProfitPage hidden={currentMenu !== MENU.SETTINGS_PROFIT} />
         <SettingRiskPage hidden={currentMenu !== MENU.SETTINGS_RISK} />
       </div>
