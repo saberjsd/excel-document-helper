@@ -34,6 +34,9 @@ const defaultOptions = (container: string, opts: any) => {
     // row:{
     //   len: 10000
     // },
+    col: {
+      len: 34,
+    },
     ...opts,
   };
 };
@@ -282,9 +285,16 @@ export default class MySpreadsheet extends Spreadsheet {
     const map: any = {};
     sourceRows.forEach(([ri, row]) => {
       if (Number(ri) < options.headRowNumber) return;
-      const month = getMonthFromString(row?.cells[options.groupMonthCol]?.text);
+
       const id = row?.cells[options.groupCol]?.text;
-      const mid = `${id}-${month}`;
+      let mid = id;
+      if (options.groupMonthCol) {
+        const month = getMonthFromString(
+          row?.cells[options.groupMonthCol]?.text
+        );
+        mid = `${id}-${month}`;
+      }
+
       if (mid) {
         const item = cloneDeep(row);
         // 记录原来的行号，方便数据回写
@@ -892,5 +902,15 @@ export default class MySpreadsheet extends Spreadsheet {
     console.timeEnd('process risk');
     console.log('risk outSheet', outSheet);
     return outSheet;
+  }
+
+  addSheets(sheets: any[]) {
+    if (sheets && sheets.length) {
+      sheets.forEach((m, n) => {
+        // @ts-ignore
+        const nd = this.addSheet(m.name, n === 0);
+        nd.setData(m);
+      });
+    }
   }
 }

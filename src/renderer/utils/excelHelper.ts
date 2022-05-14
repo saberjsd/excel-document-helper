@@ -63,6 +63,7 @@ export const readExcel = async () => {
   // 导入的数据都加上主键，方便后面查找修改
   console.time('insert id');
   sheets.forEach((m: any) => {
+    m.cid = cuid();
     if (m.rows) {
       Object.entries<any>(m.rows).forEach(([ri, row]) => {
         if (typeof row === 'object') {

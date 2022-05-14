@@ -103,6 +103,10 @@ export default function Header(props: any) {
     message.success('对方科目已生成在序时账“L”列！');
   };
 
+  const showCollection = () => {
+    StoreExcel.sheetConfigDailogVisible = true;
+  };
+
   return (
     <header className="header_page">
       <div className="heder_left"></div>
@@ -166,6 +170,10 @@ export default function Header(props: any) {
               // style={{ marginRight: 16 }}
             >
               查看历史
+            </Button>
+
+            <Button type="primary" onClick={showCollection}>
+              归集汇总
             </Button>
 
             {/* <Search

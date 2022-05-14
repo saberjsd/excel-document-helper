@@ -3,6 +3,7 @@ import { autorun } from 'mobx';
 import { useEffect, useState } from 'react';
 import StoreRoot from 'renderer/store/StoreRoot';
 import Content from '../Content';
+import DailogConfig from '../DailogConfig';
 import Header from '../Header';
 import ResultDailog from '../ResultDailog';
 import Sidebar from '../Sidebar';
@@ -30,6 +31,7 @@ export default function Layout(props: any) {
         </div>
 
         <ResultDailog />
+        <DailogConfig />
       </div>
     </Spin>
   );

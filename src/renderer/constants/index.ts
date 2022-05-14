@@ -28,3 +28,15 @@ export enum SORT_DIRECTION {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+
+
+export type ISheetConfig = {
+  // 底稿
+  collectionBase: any;
+  // 底稿封面
+  collectionCover: any;
+  // 辅助账
+  collectionList: any;
+  // 辅助账汇总表
+  collectionTotal: any;
+}

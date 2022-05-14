@@ -2,10 +2,16 @@ import cuid from 'cuid';
 import { cloneDeep } from 'lodash';
 import { observable } from 'mobx';
 import MySpreadsheet from 'renderer/components/ExcelEditor/MySpreadsheet';
-import { FeatureType, JSON_PATH, SORT_DIRECTION } from 'renderer/constants';
+import {
+  FeatureType,
+  ISheetConfig,
+  JSON_PATH,
+  SORT_DIRECTION,
+} from 'renderer/constants';
 import {
   getColByLetter,
   getLetterByCol,
+  indexAt,
   safeString,
   string2RegExp,
 } from 'renderer/utils/utils';
@@ -14,6 +20,7 @@ import { readExcel } from 'renderer/utils/excelHelper';
 import { compareDefaultConfig } from './compareReadConfig';
 import JsonStorage from './JsonStorage';
 import { FilterItem, FilterList } from 'renderer/type';
+import { collectionConfig } from '.';
 const Numeral = require('numeral');
 
 let resultSheets: any[] = [];
@@ -82,6 +89,15 @@ const StoreExcel = observable({
   filterCompare: true,
   // // 是否去掉借贷金额为空的组
   // filterRemoveEmpty: true,
+
+  // sheet 配置
+  sheetConfig: {
+    collectionBase: '',
+    collectionCover: '',
+    collectionList: '',
+    collectionTotal: '',
+  } as ISheetConfig,
+  sheetConfigDailogVisible: false,
 
   init() {
     if (this.excelInstance instanceof MySpreadsheet) {
@@ -787,6 +803,95 @@ const StoreExcel = observable({
     this.filterOptions = filterOptions;
     this.filterSubjectIdOptions = filterSubjectIdOptions;
     this.filterGuideOptions = filterGuideOptions;
+  },
+
+  // showSheetConfig: (callback) => {
+
+  // },
+  getSheetList() {
+    let out: any[] = this.excelInstance?.datas?.map((m) => {
+      return {
+        name: m.name,
+        cid: m.cid,
+      };
+    });
+    return out || [];
+  },
+  setSeetConfig(key: keyof ISheetConfig, value) {
+    this.sheetConfig[key] = value;
+  },
+
+  /**
+   * 根据底稿生成辅助账，然后生成辅助账汇总
+   */
+  ganerateCollectionList() {
+    const excel = this.excelInstance;
+    const sheets = {
+      baseSheet: excel.findSheetByCid(this.sheetConfig.collectionBase),
+      coverSheet: excel.findSheetByCid(this.sheetConfig.collectionCover),
+      listSheet: excel.findSheetByCid(this.sheetConfig.collectionList),
+      totalSheet: excel.findSheetByCid(this.sheetConfig.collectionTotal),
+    };
+
+    // 从“底稿”拷贝数据到“辅助账”
+    if (sheets.baseSheet && sheets.listSheet) {
+      const fromSheet = sheets[collectionConfig.list.from];
+      const toSheet = sheets[collectionConfig.list.to];
+
+      const fromRow = collectionConfig.list.fromRow - 1;
+      // 根据“序号”分组
+      const map = excel._getGroupMap(Object.entries<any>(fromSheet.rows._), {
+        headRowNumber: fromRow,
+        groupCol: indexAt(collectionConfig.list.keyCol),
+      });
+      const mapArr = Object.entries<any>(map);
+      const newSheets: any[] = [];
+      mapArr.forEach(([key, rows], groupIndex) => {
+        const outSheet = cloneDeep(toSheet);
+        outSheet.rows.insert(7, rows.length);
+        rows.forEach((row, rowIndex) => {
+          if (rowIndex === 0) {
+            // head
+            collectionConfig.list.head.forEach((m) => {
+              fromTo(row, m);
+            });
+          }
+          // body
+          collectionConfig.list.body.forEach((m) => {
+            fromTo(row, m, rowIndex);
+          });
+        });
+        // push
+        newSheets.push(outSheet.getData());
+
+        function fromTo(row, options, rowIndex = 0) {
+          const fromCol = indexAt(options.fromCol);
+          const fromVal = row?.cells[fromCol]?.text;
+          const toRow = options.toRow - 1 + Number(rowIndex);
+          const toCol = indexAt(options.toCol);
+          // 插入的行是空的，需要提前加入结构
+          if (!outSheet.rows._[toRow]) {
+            outSheet.rows._[toRow] = {
+              cells: {},
+            };
+          }
+          if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
+            if (outSheet.rows._[toRow].cells[toCol]) {
+              outSheet.rows._[toRow].cells[toCol].text = fromVal;
+            } else {
+              outSheet.rows._[toRow].cells[toCol] = { text: fromVal };
+            }
+          }
+        }
+      });
+
+      // newSheets
+      // newSheets.length = 2;
+      excel.addSheets(newSheets);
+    }
+
+    // @ts-ignore
+    excel.reRender();
   },
 });
 

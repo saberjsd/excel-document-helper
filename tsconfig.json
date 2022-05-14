@@ -25,6 +25,7 @@
       "@/*": ["./src/renderer/*"],
       "@components/*": ["./src/renderer/components/*"],
     },
+    "noImplicitAny": false,
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

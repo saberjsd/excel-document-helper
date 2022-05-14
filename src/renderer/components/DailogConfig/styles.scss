@@ -1,0 +1,85 @@
+.dailog_config {
+  // width: 88% !important;
+  // height: 88% !important;
+  // &.full_screen {
+  //   width: 100% !important;
+  //   height: 100% !important;
+  //   max-width: unset;
+  // }
+  // .ant-modal-close{
+  //   .ant-modal-close-x{
+  //     background: #f6f6f6;
+  //     .ant-modal-close-ico{
+  //       font-size: 20px;
+  //     }
+  //   }
+  // }
+  .ant-modal-content {
+    // width: 100%;
+    // height: 100%;
+    // .ant-modal-header{
+    //   // padding: 0;
+    //   // .ant-modal-title{
+    //   //   padding: 0 24px;
+    //   //   height: 56px;
+    //   //   display: flex;
+    //   //   justify-content: space-between;
+    //   //   align-content: center;
+    //   //   .title_left{
+    //   //     display: flex;
+    //   //     align-items: center;
+    //   //   }
+    //   //   .title_right{
+    //   //     // margin-right: 36px;
+    //   //     margin-right: 60px;
+    //   //     display: flex;
+    //   //     align-items: center;
+    //   //     gap: 24px;
+    //   //     // .anticon{
+    //   //     //   display: flex;
+    //   //     //   justify-content: center;
+    //   //     //   align-items: center;
+    //   //     //   width: 56px;
+    //   //     //   height: 56px;
+    //   //     //   border-radius: 4px;
+    //   //     //   &:hover{
+    //   //     //     background: #f1f1f1;
+    //   //     //   }
+    //   //     // }
+    //   //   }
+    //   // }
+    // }
+    // .ant-modal-body {
+    //   height: calc(100% - 60px);
+    //   padding: 16px;
+    // }
+    .ant-modal-footer {
+      .cancel_btn {
+        display: none;
+      }
+      .ok_btn {
+        width: 100px;
+      }
+    }
+  }
+
+  .dailog_config_content{
+    .wrap_line{
+      width: 100%;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      .wrap_line_label{
+        display: inline-block;
+        line-height: 32px;
+        // padding: 0 8px;
+        color: #7e7e7e;
+        width: 100px;
+      }
+      .wrap_line_input{
+        flex-grow: 1;
+      }
+
+    }
+  }
+}

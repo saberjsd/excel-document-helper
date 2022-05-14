@@ -137,3 +137,9 @@ a:hover {
 .ant-select-dropdown{
   z-index: 4000;
 }
+
+// 下拉菜单增加滚动条
+.x-spreadsheet-dropdown-content{
+  max-height: 50vh;
+  overflow-y: auto;
+}

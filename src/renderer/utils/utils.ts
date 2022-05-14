@@ -32,6 +32,39 @@ export const mapCol = [
   'Z',
 ];
 
+
+/** index number 2 letters
+ * @example stringAt(26) ==> 'AA'
+ * @date 2019-10-10
+ * @export
+ * @param {number} index
+ * @returns {string}
+ */
+export function stringAt(index) {
+  let str = '';
+  let cindex = index;
+  while (cindex >= mapCol.length) {
+    cindex /= mapCol.length;
+    cindex -= 1;
+    str += mapCol[parseInt(cindex, 10) % mapCol.length];
+  }
+  const last = index % mapCol.length;
+  str += mapCol[last];
+  return str;
+}
+
+/** translate letter in A1-tag to number
+ * @date 2019-10-10
+ * @export
+ * @param {string} str "AA" in A1-tag "AA1"
+ * @returns {number}
+ */
+export function indexAt(str) {
+  let ret = 0;
+  for(let i = 0; i !== str.length; ++i) ret = 26 * ret + str.charCodeAt(i) - 64;
+  return ret - 1;
+}
+
 /**
  * 选取电脑上的文件
  * @param {string} [accept='.jpg,.jpeg,.png,.svg']
@@ -105,5 +138,8 @@ export const string2RegExp = (str: string) => {
  * @returns
  */
 export const safeString = (str: string) => {
-  return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0,20) + ++sheetIndex;
+  return (
+    (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0, 20) +
+    ++sheetIndex
+  );
 };
