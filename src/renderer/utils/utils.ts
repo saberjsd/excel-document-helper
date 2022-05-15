@@ -60,6 +60,7 @@ export function stringAt(index) {
  * @returns {number}
  */
 export function indexAt(str) {
+  if(!str) return 0
   let ret = 0;
   for(let i = 0; i !== str.length; ++i) ret = 26 * ret + str.charCodeAt(i) - 64;
   return ret - 1;

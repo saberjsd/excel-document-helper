@@ -9,6 +9,9 @@ import moment from 'moment';
 import JsonStorage from './store/JsonStorage';
 import { JSON_PATH } from './constants';
 
+const Numeral = require('numeral');
+window["Numeral"] = Numeral
+
 window["moment"] = moment
 
 const md5 = require('md5');

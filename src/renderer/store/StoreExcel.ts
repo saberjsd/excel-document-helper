@@ -848,7 +848,9 @@ const StoreExcel = observable({
       const newSheets: any[] = [];
       mapArr.forEach(([key, rows], groupIndex) => {
         const outSheet = cloneDeep(toSheet);
-        outSheet.rows.insert(7, rows.length);
+        // 默认有一行，需要插入剩余行
+        outSheet.rows.insert(7, rows.length - 1);
+        outSheet.name = key;
         rows.forEach((row, rowIndex) => {
           if (rowIndex === 0) {
             // head
@@ -860,13 +862,19 @@ const StoreExcel = observable({
           collectionConfig.list.body.forEach((m) => {
             fromTo(row, m, rowIndex);
           });
+          if(rowIndex === rows.length -1){
+            // footer 求和部分
+            collectionConfig.list.footer.forEach((m) => {
+              fromTo(row, m, rowIndex);
+            });
+          }
         });
         // push
         newSheets.push(outSheet.getData());
 
         function fromTo(row, options, rowIndex = 0) {
           const fromCol = indexAt(options.fromCol);
-          const fromVal = row?.cells[fromCol]?.text;
+          let fromVal = row?.cells[fromCol]?.text;
           const toRow = options.toRow - 1 + Number(rowIndex);
           const toCol = indexAt(options.toCol);
           // 插入的行是空的，需要提前加入结构
@@ -875,6 +883,38 @@ const StoreExcel = observable({
               cells: {},
             };
           }
+
+          // 税法规定的归集金额需要计算
+          if (options.diffVal) {
+            fromVal = String(fromVal);
+            const cells = outSheet.rows._[toRow].cells;
+            if (fromVal.indexOf(options.diffVal) > -1) {
+              const sub1 = indexAt(options.sub[0]);
+              const sub2 = indexAt(options.sub[1]);
+              // 这种情况需要求差值
+              fromVal =
+                (Numeral(cells[sub1]?.text).value() || 0) -
+                (Numeral(cells[sub2]?.text).value() || 0);
+            } else {
+              // 求和
+              fromVal = options.sum.reduce((pre, cur) => {
+                const val = cells[indexAt(cur)]?.text;
+                return pre + (Numeral(val).value() || 0);
+              }, 0);
+            }
+          }
+
+          // 求和功能
+          if(options.sumStartRow){
+            let sum = 0;
+            for(let i = options.sumStartRow; i <= toRow + 1; i++){
+              const text = outSheet.rows._[i]?.cells[toCol]?.text;
+              sum += (Numeral(text).value() || 0)
+            }
+            fromVal = sum
+          }
+
+          // 为每列拷贝值
           if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
             if (outSheet.rows._[toRow].cells[toCol]) {
               outSheet.rows._[toRow].cells[toCol].text = fromVal;
