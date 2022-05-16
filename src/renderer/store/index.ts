@@ -210,7 +210,6 @@ export const collectionConfig = {
     head: [
       {
         label: '纳税人识别号（统一社会信用代码）',
-        from: 'coverSheet',
         fromRow: 6,
         fromCol: 'C',
         toCol: 'E',
@@ -218,7 +217,6 @@ export const collectionConfig = {
       },
       {
         label: '纳税人名称',
-        from: 'coverSheet',
         fromRow: 5,
         fromCol: 'C',
         toCol: 'K',
@@ -226,7 +224,6 @@ export const collectionConfig = {
       },
       {
         label: '属期',
-        from: 'coverSheet',
         fromRow: 4,
         fromCol: 'C',
         toCol: 'O',

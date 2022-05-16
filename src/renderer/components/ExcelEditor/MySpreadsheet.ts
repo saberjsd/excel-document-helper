@@ -142,8 +142,24 @@ export default class MySpreadsheet extends Spreadsheet {
    * 导出整个表格
    */
   exportExcel() {
+    const data = this.getData();
+    // 导出时需要保证每个sheet.name 不重复
+    const sheetNames = data.map((m) => m.name);
+    const map = {};
+    data.forEach((m) => {
+      if (sheetNames.includes(m.name)) {
+        if (map[m.name] == undefined) {
+          map[m.name] = 0;
+        } else {
+          map[m.name] += 1;
+        }
+        if (map[m.name] > 0) {
+          m.name += `(${map[m.name]})`;
+        }
+      }
+    });
     // @ts-ignore
-    writeExcel(this.getData());
+    writeExcel(data);
   }
 
   /**

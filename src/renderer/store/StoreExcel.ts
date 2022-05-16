@@ -832,6 +832,8 @@ const StoreExcel = observable({
       listSheet: excel.findSheetByCid(this.sheetConfig.collectionList),
       totalSheet: excel.findSheetByCid(this.sheetConfig.collectionTotal),
     };
+    const newListSheets: any[] = [];
+    const newTotalSheets: any[] = [];
 
     // 从“底稿”拷贝数据到“辅助账”
     if (sheets.baseSheet && sheets.listSheet) {
@@ -845,11 +847,10 @@ const StoreExcel = observable({
         groupCol: indexAt(collectionConfig.list.keyCol),
       });
       const mapArr = Object.entries<any>(map);
-      const newSheets: any[] = [];
       mapArr.forEach(([key, rows], groupIndex) => {
         const outSheet = cloneDeep(toSheet);
         // 默认有一行，需要插入剩余行
-        outSheet.rows.insert(7, rows.length - 1);
+        outSheet.insert('row', rows.length - 1, { sri: 7, sci: 0 });
         outSheet.name = key;
         rows.forEach((row, rowIndex) => {
           if (rowIndex === 0) {
@@ -870,7 +871,7 @@ const StoreExcel = observable({
           }
         });
         // push
-        newSheets.push(outSheet.getData());
+        newListSheets.push(outSheet.getData());
 
         function fromTo(row, options, rowIndex = 0) {
           const fromCol = indexAt(options.fromCol);
@@ -924,114 +925,79 @@ const StoreExcel = observable({
           }
         }
       });
-
-      // newSheets
-      // newSheets.length = 2;
-      excel.addSheets(newSheets);
     }
 
     // 从“辅助账”汇总到“辅助账汇总”
     if (sheets.coverSheet && sheets.listSheet && sheets.totalSheet) {
-      const fromCover = sheets.coverSheet
+      const fromCover = sheets.coverSheet;
       const fromSheet = sheets[collectionConfig.total.from];
       const toSheet = sheets[collectionConfig.total.to];
 
+      // const outSheet = cloneDeep(toSheet);
+      const outSheet = toSheet;
+
       // head
       collectionConfig.total.head.forEach((m) => {
-        // fromTo(row, m);
+        const row = fromCover.rows._[m.fromRow - 1];
+        fromTo(row, m);
       });
 
-      // const fromRow = collectionConfig.list.fromRow - 1;
-      // // 根据“序号”分组
-      // const map = excel._getGroupMap(Object.entries<any>(fromSheet.rows._), {
-      //   headRowNumber: fromRow,
-      //   groupCol: indexAt(collectionConfig.list.keyCol),
-      // });
-      // const mapArr = Object.entries<any>(map);
-      // const newSheets: any[] = [];
-      // mapArr.forEach(([key, rows], groupIndex) => {
-      //   const outSheet = cloneDeep(toSheet);
-      //   // 默认有一行，需要插入剩余行
-      //   outSheet.rows.insert(7, rows.length - 1);
-      //   outSheet.name = key;
-      //   rows.forEach((row, rowIndex) => {
-      //     if (rowIndex === 0) {
-      //       // head
-      //       collectionConfig.list.head.forEach((m) => {
-      //         fromTo(row, m);
-      //       });
-      //     }
-      //     // body
-      //     collectionConfig.list.body.forEach((m) => {
-      //       fromTo(row, m, rowIndex);
-      //     });
-      //     if (rowIndex === rows.length - 1) {
-      //       // footer 求和部分
-      //       collectionConfig.list.footer.forEach((m) => {
-      //         fromTo(row, m, rowIndex);
-      //       });
-      //     }
-      //   });
-      //   // push
-      //   newSheets.push(outSheet.getData());
+      function fromTo(row, options, rowIndex = 0) {
+        const fromCol = indexAt(options.fromCol);
+        let fromVal = row?.cells[fromCol]?.text;
+        const toRow = options.toRow - 1 + Number(rowIndex);
+        const toCol = indexAt(options.toCol);
+        // 插入的行是空的，需要提前加入结构
+        if (!outSheet.rows._[toRow]) {
+          outSheet.rows._[toRow] = {
+            cells: {},
+          };
+        }
 
-      //   function fromTo(row, options, rowIndex = 0) {
-      //     const fromCol = indexAt(options.fromCol);
-      //     let fromVal = row?.cells[fromCol]?.text;
-      //     const toRow = options.toRow - 1 + Number(rowIndex);
-      //     const toCol = indexAt(options.toCol);
-      //     // 插入的行是空的，需要提前加入结构
-      //     if (!outSheet.rows._[toRow]) {
-      //       outSheet.rows._[toRow] = {
-      //         cells: {},
-      //       };
-      //     }
+        // // 税法规定的归集金额需要计算
+        // if (options.diffVal) {
+        //   fromVal = String(fromVal);
+        //   const cells = outSheet.rows._[toRow].cells;
+        //   if (fromVal.indexOf(options.diffVal) > -1) {
+        //     const sub1 = indexAt(options.sub[0]);
+        //     const sub2 = indexAt(options.sub[1]);
+        //     // 这种情况需要求差值
+        //     fromVal =
+        //       (Numeral(cells[sub1]?.text).value() || 0) -
+        //       (Numeral(cells[sub2]?.text).value() || 0);
+        //   } else {
+        //     // 求和
+        //     fromVal = options.sum.reduce((pre, cur) => {
+        //       const val = cells[indexAt(cur)]?.text;
+        //       return pre + (Numeral(val).value() || 0);
+        //     }, 0);
+        //   }
+        // }
 
-      //     // 税法规定的归集金额需要计算
-      //     if (options.diffVal) {
-      //       fromVal = String(fromVal);
-      //       const cells = outSheet.rows._[toRow].cells;
-      //       if (fromVal.indexOf(options.diffVal) > -1) {
-      //         const sub1 = indexAt(options.sub[0]);
-      //         const sub2 = indexAt(options.sub[1]);
-      //         // 这种情况需要求差值
-      //         fromVal =
-      //           (Numeral(cells[sub1]?.text).value() || 0) -
-      //           (Numeral(cells[sub2]?.text).value() || 0);
-      //       } else {
-      //         // 求和
-      //         fromVal = options.sum.reduce((pre, cur) => {
-      //           const val = cells[indexAt(cur)]?.text;
-      //           return pre + (Numeral(val).value() || 0);
-      //         }, 0);
-      //       }
-      //     }
+        // // 求和功能
+        // if (options.sumStartRow) {
+        //   let sum = 0;
+        //   for (let i = options.sumStartRow; i <= toRow + 1; i++) {
+        //     const text = outSheet.rows._[i]?.cells[toCol]?.text;
+        //     sum += Numeral(text).value() || 0;
+        //   }
+        //   fromVal = sum;
+        // }
 
-      //     // 求和功能
-      //     if (options.sumStartRow) {
-      //       let sum = 0;
-      //       for (let i = options.sumStartRow; i <= toRow + 1; i++) {
-      //         const text = outSheet.rows._[i]?.cells[toCol]?.text;
-      //         sum += Numeral(text).value() || 0;
-      //       }
-      //       fromVal = sum;
-      //     }
-
-      //     // 为每列拷贝值
-      //     if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
-      //       if (outSheet.rows._[toRow].cells[toCol]) {
-      //         outSheet.rows._[toRow].cells[toCol].text = fromVal;
-      //       } else {
-      //         outSheet.rows._[toRow].cells[toCol] = { text: fromVal };
-      //       }
-      //     }
-      //   }
-      // });
-
-      // // newSheets
-      // // newSheets.length = 2;
-      // excel.addSheets(newSheets);
+        // 为每列拷贝值
+        if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
+          if (outSheet.rows._[toRow].cells[toCol]) {
+            outSheet.rows._[toRow].cells[toCol].text = fromVal;
+          } else {
+            outSheet.rows._[toRow].cells[toCol] = { text: fromVal };
+          }
+        }
+      }
+      // newTotalSheets.push(outSheet.getData())
     }
+
+    // excel.addSheets(newTotalSheets);
+    excel.addSheets(newListSheets);
 
     // @ts-ignore
     excel.reRender();

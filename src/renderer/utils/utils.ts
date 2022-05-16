@@ -32,7 +32,6 @@ export const mapCol = [
   'Z',
 ];
 
-
 /** index number 2 letters
  * @example stringAt(26) ==> 'AA'
  * @date 2019-10-10
@@ -60,9 +59,10 @@ export function stringAt(index) {
  * @returns {number}
  */
 export function indexAt(str) {
-  if(!str) return 0
+  if (!str) return 0;
   let ret = 0;
-  for(let i = 0; i !== str.length; ++i) ret = 26 * ret + str.charCodeAt(i) - 64;
+  for (let i = 0; i !== str.length; ++i)
+    ret = 26 * ret + str.charCodeAt(i) - 64;
   return ret - 1;
 }
 
@@ -139,8 +139,5 @@ export const string2RegExp = (str: string) => {
  * @returns
  */
 export const safeString = (str: string) => {
-  return (
-    (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0, 20) +
-    ++sheetIndex
-  );
+  return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0, 20);
 };
