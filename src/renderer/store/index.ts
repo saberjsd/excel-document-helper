@@ -233,77 +233,79 @@ export const collectionConfig = {
     body: [
       {
         label: '项目编号',
-        formRow: 7,
+        fromRow: 3,
         fromCol: 'D',
         toCol: 'A',
         toRow: 8,
       },
       {
         label: '项目名称',
-        formRow: 7,
+        fromRow: 3,
         fromCol: 'G',
         toCol: 'B',
         toRow: 8,
       },
       {
         label: '完成情况',
-        formRow: 7,
+        fromRow: 3,
         fromCol: 'I',
         toCol: 'C',
         toRow: 8,
       },
       {
         label: '支持类型',
-        formRow: 7,
+        fromRow: 3,
         fromCol: 'K',
         toCol: 'D',
         toRow: 8,
       },
-      // {
-      //   label: '允许加计扣除金额合计',
-      //   formRow: 3,
-      //   fromCol: 'K',
-      //   toCol: 'D',
-      //   toRow: 8,
-      // },
+      {
+        label: '允许加计扣除金额合计',
+        fromRow: 7,
+        fromCol: 'F',
+        toCol: 'E',
+        toRow: 8,
+      },
       {
         label: '人员人工费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'G',
         toCol: 'F',
         toRow: 8,
       },
       {
         label: '直接投入费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'H',
         toCol: 'G',
         toRow: 8,
       },
       {
         label: '折旧费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'I',
         toCol: 'H',
         toRow: 8,
       },
       {
         label: '无形资产摊销',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'J',
         toCol: 'I',
         toRow: 8,
       },
       {
         label: '新产品设计费等',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'K',
         toCol: 'J',
         toRow: 8,
       },
       {
         label: '前五项 小计',
-        formRow: 8,
+        fromRow: 8,
+        // 计算规则
+        rule: '6',
         // 求和的列
         sum: ['F', 'G', 'H', 'I', 'J'],
         toCol: 'K',
@@ -311,16 +313,17 @@ export const collectionConfig = {
       },
       {
         label: '其他相关费用合计',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'L',
         toCol: 'L',
         toRow: 8,
       },
       {
         label: '经限额调整后的其他相关费用',
-        formRow: 8,
-        // 需要对比计算的列
-        compare: ['L', 'K'],
+        fromRow: 8,
+        // 需要对比计算的列, 第一个直接取
+        directCol: "L",
+        calcCol: "K",
         // 计算规则
         rule: '7.2',
         toCol: 'M',
@@ -328,15 +331,15 @@ export const collectionConfig = {
       },
       {
         label: '委托境内机构或个人进行研发活动所发生的费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'M',
         toCol: 'N',
         toRow: 8,
       },
       {
         label: '允许加计扣除的委托境内机构或个人进行研发活动所发生的费用',
-        formRow: 8,
-        forCol: 'N',
+        fromRow: 8,
+        calcCol: "N",
         // 计算规则
         rule: '8.2',
         toCol: 'O',
@@ -344,14 +347,14 @@ export const collectionConfig = {
       },
       {
         label: '委托境外机构进行研发活动所发生的费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'N',
         toCol: 'P',
         toRow: 8,
       },
       // {
       //   label: '经限额调整后的其他相关费用',
-      //   formRow: 8,
+      //   fromRow: 8,
       //   // 需要对比计算的列
       //   compare: ['L', 'K'],
       //   // 计算规则
@@ -361,7 +364,7 @@ export const collectionConfig = {
       // },
       {
         label: '不允许加计扣除的费用',
-        formRow: 7,
+        fromRow: 7,
         fromCol: 'O',
         toCol: 'R',
         toRow: 8,
@@ -373,7 +376,7 @@ export const collectionConfig = {
         key: '资本化',
         keyCol: 'D',
         fromRow: 8,
-        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
+        sum: ['F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
         toRow: 9,
       },
       {
@@ -381,7 +384,7 @@ export const collectionConfig = {
         key: '费用化',
         keyCol: 'D',
         fromRow: 8,
-        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
+        sum: ['F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
         toRow: 10,
       },
       {

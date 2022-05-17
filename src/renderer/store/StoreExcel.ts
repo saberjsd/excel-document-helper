@@ -833,6 +833,7 @@ const StoreExcel = observable({
       totalSheet: excel.findSheetByCid(this.sheetConfig.collectionTotal),
     };
     const newListSheets: any[] = [];
+    const newListSheetPoxry: any[] = [];
     const newTotalSheets: any[] = [];
 
     // 从“底稿”拷贝数据到“辅助账”
@@ -868,9 +869,13 @@ const StoreExcel = observable({
             collectionConfig.list.footer.forEach((m) => {
               fromTo(row, m, rowIndex);
             });
+            // 记录下求和的行，后面需要从这里提取数据
+            const baseRow = collectionConfig.list.footer[0].toRow;
+            outSheet.totalRowIndex = baseRow - 1 + Number(rowIndex);
           }
         });
         // push
+        newListSheetPoxry.push(outSheet);
         newListSheets.push(outSheet.getData());
 
         function fromTo(row, options, rowIndex = 0) {
@@ -893,15 +898,17 @@ const StoreExcel = observable({
               const sub1 = indexAt(options.sub[0]);
               const sub2 = indexAt(options.sub[1]);
               // 这种情况需要求差值
-              fromVal =
+              const val =
                 (Numeral(cells[sub1]?.text).value() || 0) -
                 (Numeral(cells[sub2]?.text).value() || 0);
+              fromVal = Numeral(val).value().toFixed(2);
             } else {
               // 求和
-              fromVal = options.sum.reduce((pre, cur) => {
+              const sum = options.sum.reduce((pre, cur) => {
                 const val = cells[indexAt(cur)]?.text;
                 return pre + (Numeral(val).value() || 0);
               }, 0);
+              fromVal = Numeral(sum).value().toFixed(2);
             }
           }
 
@@ -912,7 +919,7 @@ const StoreExcel = observable({
               const text = outSheet.rows._[i]?.cells[toCol]?.text;
               sum += Numeral(text).value() || 0;
             }
-            fromVal = sum;
+            fromVal = Numeral(sum).value().toFixed(2);
           }
 
           // 为每列拷贝值
@@ -930,17 +937,70 @@ const StoreExcel = observable({
     // 从“辅助账”汇总到“辅助账汇总”
     if (sheets.coverSheet && sheets.listSheet && sheets.totalSheet) {
       const fromCover = sheets.coverSheet;
-      const fromSheet = sheets[collectionConfig.total.from];
+      // const fromSheet = sheets[collectionConfig.total.from];
       const toSheet = sheets[collectionConfig.total.to];
 
       // const outSheet = cloneDeep(toSheet);
       const outSheet = toSheet;
+      // 默认有一行，需要插入剩余行
+      outSheet.insert('row', newListSheetPoxry.length - 1, { sri: 8, sci: 0 });
 
       // head
       collectionConfig.total.head.forEach((m) => {
         const row = fromCover.rows._[m.fromRow - 1];
         fromTo(row, m);
       });
+
+      // body
+      newListSheetPoxry.forEach((sheet, sheetIndex) => {
+        collectionConfig.total.body.forEach((j, k) => {
+          if (k < 4) {
+            // 前四个数据是固定位置的
+            const row = sheet.rows._[j.fromRow - 1];
+            fromTo(row, j, sheetIndex);
+          } else {
+            const totalRow = sheet.rows._[sheet.totalRowIndex];
+            fromTo(totalRow, j, sheetIndex);
+          }
+        });
+      });
+
+      // 内容行数
+      const bodyRowNumber = newListSheetPoxry.length;
+      // 合计3栏
+      collectionConfig.total.footer.forEach((m) => {
+        const startRow = m.fromRow - 1;
+        if(m.key){
+          m.sum.forEach((col)=>{
+            let sumVal = 0;
+            const toRow = m.toRow - 1 + Number(bodyRowNumber);
+            const toCol = indexAt(col);
+            Object.entries<any>(outSheet.rows._).forEach(([ri, row])=>{
+              // 指定行内取数求和
+              if(Number(ri) >= startRow || Number(ri) <= bodyRowNumber){
+                const val = row?.cells[indexAt(col)]?.text;
+                const numberVal = (Numeral(val).value() || 0);
+                if(String(row?.cells[indexAt(m.keyCol)]?.text || "").indexOf(m.key)) {
+                  sumVal += numberVal
+                } else {
+                  sumVal += numberVal
+                }
+              }
+              // const val = row[startRow]
+            })
+
+            if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
+              if (outSheet.rows._[toRow].cells[toCol]) {
+                outSheet.rows._[toRow].cells[toCol].text = sumVal;
+              } else {
+                outSheet.rows._[toRow].cells[toCol] = { text: sumVal };
+              }
+            }
+          })
+
+        }
+      })
+
 
       function fromTo(row, options, rowIndex = 0) {
         const fromCol = indexAt(options.fromCol);
@@ -983,6 +1043,27 @@ const StoreExcel = observable({
         //   }
         //   fromVal = sum;
         // }
+
+        // 获取相同行
+        const cells = outSheet.rows._[toRow].cells;
+        if (options.rule === '6') {
+          // 同行求和
+          const sum = options.sum.reduce((pre, cur) => {
+            const val = cells[indexAt(cur)]?.text;
+            return pre + (Numeral(val).value() || 0);
+          }, 0);
+          fromVal = Numeral(sum).value().toFixed(2);
+        } else if (options.rule === '7.2') {
+          const val1 = cells[indexAt(options.directCol)]?.text;
+          let val2 = cells[indexAt(options.calcCol)]?.text;
+          val2 = ((Numeral(val2).value() || 0) * 0.1) / 0.9;
+          const sum = Math.min(Numeral(val1).value() || 0, val2);
+          fromVal = Numeral(sum).value().toFixed(2);
+        } else if (options.rule === '8.2') {
+          const val = cells[indexAt(options.calcCol)]?.text;
+          const sum = (Numeral(val).value() || 0) * 0.8;
+          fromVal = Numeral(sum).value().toFixed(2);
+        }
 
         // 为每列拷贝值
         if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
