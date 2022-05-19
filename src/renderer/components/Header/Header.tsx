@@ -8,6 +8,7 @@ import {
   DoubleRightOutlined,
   DoubleLeftOutlined,
   SwitcherOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { Button, Input, message, Select } from 'antd';
 import Search from 'antd/lib/input/Search';
@@ -160,7 +161,7 @@ export default function Header(props: any) {
               icon={<SwitcherOutlined />}
               onClick={addOppositeSubject}
             >
-              生成对方科目
+              对方科目
             </Button>
 
             <Button
@@ -172,7 +173,11 @@ export default function Header(props: any) {
               查看历史
             </Button>
 
-            <Button type="primary" onClick={showCollection}>
+            <Button
+              type="primary"
+              icon={<AuditOutlined />}
+              onClick={showCollection}
+            >
               归集汇总
             </Button>
 

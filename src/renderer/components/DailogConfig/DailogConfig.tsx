@@ -1,4 +1,4 @@
-import { Modal, Select } from 'antd';
+import { message, Modal, Select } from 'antd';
 import clsx from 'clsx';
 import { observer } from 'mobx-react';
 import { ISheetConfig } from 'renderer/constants';
@@ -9,8 +9,13 @@ import './styles.scss';
 export default function DailogConfig(props: any) {
 
   const handleOk = () => {
-    StoreExcel.sheetConfigDailogVisible = false;
-    StoreExcel.ganerateCollectionList();
+
+    if(Object.values(StoreExcel.sheetConfig).every(m=> !!m)){
+      StoreExcel.sheetConfigDailogVisible = false;
+      StoreExcel.ganerateCollectionList();
+    } else {
+      message.error('请先选择正确的配置！');
+    }
   };
   const handleCancel = () => {
     StoreExcel.sheetConfigDailogVisible = false;
