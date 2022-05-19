@@ -259,13 +259,13 @@ export const collectionConfig = {
         toCol: 'D',
         toRow: 8,
       },
-      {
-        label: '允许加计扣除金额合计',
-        fromRow: 7,
-        fromCol: 'F',
-        toCol: 'E',
-        toRow: 8,
-      },
+      // {
+      //   label: '允许加计扣除金额合计',
+      //   fromRow: 7,
+      //   fromCol: 'F',
+      //   toCol: 'E',
+      //   toRow: 8,
+      // },
       {
         label: '人员人工费用',
         fromRow: 7,
@@ -318,17 +318,21 @@ export const collectionConfig = {
         toCol: 'L',
         toRow: 8,
       },
-      {
-        label: '经限额调整后的其他相关费用',
-        fromRow: 8,
-        // 需要对比计算的列, 第一个直接取
-        directCol: "L",
-        calcCol: "K",
-        // 计算规则
-        rule: '7.2',
-        toCol: 'M',
-        toRow: 8,
-      },
+      // {
+      //   label: '经限额调整后的其他相关费用',
+      //   key: '费用化',
+      //   // 排除等于key的条件
+      //   isNotKey: true,
+      //   keyCol: 'D',
+      //   fromRow: 8,
+      //   // 需要对比计算的列, 第一个直接取
+      //   directCol: "L",
+      //   calcCol: "K",
+      //   // 计算规则
+      //   rule: '7.2',
+      //   toCol: 'M',
+      //   toRow: 8,
+      // },
       {
         label: '委托境内机构或个人进行研发活动所发生的费用',
         fromRow: 7,
@@ -390,9 +394,34 @@ export const collectionConfig = {
       {
         label: '金额合计',
         fromRow: 8,
-        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
+        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'L', 'N', 'O', 'P'],
         toRow: 12,
       },
     ],
+    amountTotal: [
+      {
+        label: '经限额调整后的其他相关费用',
+        fromRow: 12,
+        // 需要对比计算的列, 第一个直接取
+        directCol: "L",
+        calcCol: "K",
+        // 计算规则
+        rule: '7.2',
+        isTotal: true,
+        toCol: 'M',
+        toRow: 12,
+      },
+      {
+        label: '经限额调整后的委托境外机构进行研发活动所发生的费用',
+        fromRow: 12,
+        calcCol: "P",
+        sumCol: ["K", "M", "O"],
+        // 计算规则
+        rule: '8.4',
+        isTotal: true,
+        toCol: 'Q',
+        toRow: 12,
+      },
+    ]
   },
 };

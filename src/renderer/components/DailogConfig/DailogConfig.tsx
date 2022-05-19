@@ -57,7 +57,7 @@ export default function DailogConfig(props: any) {
                 style={{ width: '100%' }}
               >
                 {sheetOptions.map((m, n) => (
-                  <Select.Option value={m.cid} key={m.cid}>
+                  <Select.Option value={m.cid} key={m.cid + n}>
                     {m.name}
                   </Select.Option>
                 ))}
@@ -75,7 +75,7 @@ export default function DailogConfig(props: any) {
                 style={{ width: '100%' }}
               >
                 {sheetOptions.map((m, n) => (
-                  <Select.Option value={m.cid} key={m.cid}>
+                  <Select.Option value={m.cid} key={m.cid + n}>
                     {m.name}
                   </Select.Option>
                 ))}
@@ -94,7 +94,7 @@ export default function DailogConfig(props: any) {
                 style={{ width: '100%' }}
               >
                 {sheetOptions.map((m, n) => (
-                  <Select.Option value={m.cid} key={m.cid}>
+                  <Select.Option value={m.cid} key={m.cid + n}>
                     {m.name}
                   </Select.Option>
                 ))}
@@ -112,7 +112,7 @@ export default function DailogConfig(props: any) {
                 style={{ width: '100%' }}
               >
                 {sheetOptions.map((m, n) => (
-                  <Select.Option value={m.cid} key={m.cid}>
+                  <Select.Option value={m.cid} key={m.cid + n}>
                     {m.name}
                   </Select.Option>
                 ))}

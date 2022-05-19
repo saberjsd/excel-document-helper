@@ -966,41 +966,50 @@ const StoreExcel = observable({
       });
 
       // 内容行数
-      const bodyRowNumber = newListSheetPoxry.length;
-      // 合计3栏
+      const bodyRowNumber = Number(newListSheetPoxry.length);
+      // 后面合计3栏能直接求和的部分
       collectionConfig.total.footer.forEach((m) => {
         const startRow = m.fromRow - 1;
-        if(m.key){
-          m.sum.forEach((col)=>{
-            let sumVal = 0;
-            const toRow = m.toRow - 1 + Number(bodyRowNumber);
-            const toCol = indexAt(col);
-            Object.entries<any>(outSheet.rows._).forEach(([ri, row])=>{
-              // 指定行内取数求和
-              if(Number(ri) >= startRow || Number(ri) <= bodyRowNumber){
-                const val = row?.cells[indexAt(col)]?.text;
-                const numberVal = (Numeral(val).value() || 0);
-                if(String(row?.cells[indexAt(m.keyCol)]?.text || "").indexOf(m.key)) {
-                  sumVal += numberVal
-                } else {
-                  sumVal += numberVal
+        m.sum.forEach((col) => {
+          let sumVal = 0;
+          // 因为默认有一行空行，所以需要再减一
+          const toRow = m.toRow - 2 + bodyRowNumber;
+          const toCol = indexAt(col);
+          Object.entries<any>(outSheet.rows._).forEach(([ri, row]) => {
+            // 指定行内取数求和
+            if (Number(ri) >= startRow && Number(ri) <= bodyRowNumber) {
+              const val = row?.cells[indexAt(col)]?.text;
+              const numberVal = Numeral(val).value() || 0;
+              if (m.key) {
+                // 需要判断“资本化”和“费用化”的部分
+                const str = String(row?.cells[indexAt(m.keyCol)]?.text || '');
+                if (str.indexOf(m.key) > -1) {
+                  sumVal += numberVal;
                 }
-              }
-              // const val = row[startRow]
-            })
-
-            if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
-              if (outSheet.rows._[toRow].cells[toCol]) {
-                outSheet.rows._[toRow].cells[toCol].text = sumVal;
               } else {
-                outSheet.rows._[toRow].cells[toCol] = { text: sumVal };
+                // “金额合计”能直接求和的部分
+                sumVal += numberVal;
               }
             }
-          })
+          });
+          const fromVal = Numeral(sumVal).value().toFixed(2);
+          // 写入结果
+          if (outSheet.rows._[toRow] && outSheet.rows._[toRow].cells) {
+            if (outSheet.rows._[toRow].cells[toCol]) {
+              outSheet.rows._[toRow].cells[toCol].text = fromVal;
+            } else {
+              outSheet.rows._[toRow].cells[toCol] = { text: fromVal };
+            }
+          }
+        });
+      });
 
-        }
-      })
-
+      // “合计金额”再次求特殊情况
+      collectionConfig.total.amountTotal.forEach((m) => {
+        const row = outSheet.rows._[m.fromRow - 1 + bodyRowNumber];
+        // 因为默认有一行空行，所以需要减一
+        fromTo(row, m, bodyRowNumber - 1);
+      });
 
       function fromTo(row, options, rowIndex = 0) {
         const fromCol = indexAt(options.fromCol);
@@ -1014,36 +1023,6 @@ const StoreExcel = observable({
           };
         }
 
-        // // 税法规定的归集金额需要计算
-        // if (options.diffVal) {
-        //   fromVal = String(fromVal);
-        //   const cells = outSheet.rows._[toRow].cells;
-        //   if (fromVal.indexOf(options.diffVal) > -1) {
-        //     const sub1 = indexAt(options.sub[0]);
-        //     const sub2 = indexAt(options.sub[1]);
-        //     // 这种情况需要求差值
-        //     fromVal =
-        //       (Numeral(cells[sub1]?.text).value() || 0) -
-        //       (Numeral(cells[sub2]?.text).value() || 0);
-        //   } else {
-        //     // 求和
-        //     fromVal = options.sum.reduce((pre, cur) => {
-        //       const val = cells[indexAt(cur)]?.text;
-        //       return pre + (Numeral(val).value() || 0);
-        //     }, 0);
-        //   }
-        // }
-
-        // // 求和功能
-        // if (options.sumStartRow) {
-        //   let sum = 0;
-        //   for (let i = options.sumStartRow; i <= toRow + 1; i++) {
-        //     const text = outSheet.rows._[i]?.cells[toCol]?.text;
-        //     sum += Numeral(text).value() || 0;
-        //   }
-        //   fromVal = sum;
-        // }
-
         // 获取相同行
         const cells = outSheet.rows._[toRow].cells;
         if (options.rule === '6') {
@@ -1054,15 +1033,32 @@ const StoreExcel = observable({
           }, 0);
           fromVal = Numeral(sum).value().toFixed(2);
         } else if (options.rule === '7.2') {
-          const val1 = cells[indexAt(options.directCol)]?.text;
-          let val2 = cells[indexAt(options.calcCol)]?.text;
-          val2 = ((Numeral(val2).value() || 0) * 0.1) / 0.9;
-          const sum = Math.min(Numeral(val1).value() || 0, val2);
-          fromVal = Numeral(sum).value().toFixed(2);
+          // 是否是合计金额行
+          if (options.isTotal) {
+            const val1 = cells[indexAt(options.directCol)]?.text;
+            let val2 = cells[indexAt(options.calcCol)]?.text;
+            val2 = ((Numeral(val2).value() || 0) * 0.1) / 0.9;
+            const sum = Math.min(Numeral(val1).value() || 0, val2);
+            fromVal = Numeral(sum).value().toFixed(2);
+          }
         } else if (options.rule === '8.2') {
           const val = cells[indexAt(options.calcCol)]?.text;
           const sum = (Numeral(val).value() || 0) * 0.8;
           fromVal = Numeral(sum).value().toFixed(2);
+        } else if (options.rule === '8.4') {
+          // 是否是合计金额行
+          if (options.isTotal) {
+            // 同行求和
+            let val1 = options.sumCol.reduce((pre, cur) => {
+              const val = cells[indexAt(cur)]?.text;
+              return pre + (Numeral(val).value() || 0);
+            }, 0);
+            val1 = (val1 * 2) / 3;
+            let val2 = cells[indexAt(options.calcCol)]?.text;
+            val2 = (Numeral(val2).value() || 0) * 0.8;
+            const sum = Math.min(Numeral(val1).value() || 0, val2);
+            fromVal = Numeral(sum).value().toFixed(2);
+          }
         }
 
         // 为每列拷贝值
