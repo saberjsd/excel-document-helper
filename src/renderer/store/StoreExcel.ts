@@ -894,28 +894,28 @@ const StoreExcel = observable({
           if (options.diffVal) {
             fromVal = String(fromVal);
             const cells = outSheet.rows._[toRow].cells;
-            if (fromVal.indexOf(options.diffVal) > -1) {
-              const sub1 = indexAt(options.sub[0]);
-              const sub2 = indexAt(options.sub[1]);
-              // 这种情况需要求差值
-              const val =
-                (Numeral(cells[sub1]?.text).value() || 0) -
-                (Numeral(cells[sub2]?.text).value() || 0);
-              fromVal = Numeral(val).value().toFixed(2);
-            } else {
-              // 求和
-              const sum = options.sum.reduce((pre, cur) => {
-                const val = cells[indexAt(cur)]?.text;
-                return pre + (Numeral(val).value() || 0);
-              }, 0);
-              fromVal = Numeral(sum).value().toFixed(2);
-            }
+            // if (fromVal.indexOf(options.diffVal) > -1) {
+            //   const sub1 = indexAt(options.sub[0]);
+            //   const sub2 = indexAt(options.sub[1]);
+            //   // 这种情况需要求差值
+            //   const val =
+            //     (Numeral(cells[sub1]?.text).value() || 0) -
+            //     (Numeral(cells[sub2]?.text).value() || 0);
+            //   fromVal = Numeral(val).value().toFixed(2);
+            // } else {
+            // }
+            // 求和
+            const sum = options.sum.reduce((pre, cur) => {
+              const val = cells[indexAt(cur)]?.text;
+              return pre + (Numeral(val).value() || 0);
+            }, 0);
+            fromVal = Numeral(sum).value().toFixed(2);
           }
 
           // 求和功能
           if (options.sumStartRow) {
             let sum = 0;
-            for (let i = options.sumStartRow; i <= toRow + 1; i++) {
+            for (let i = options.sumStartRow - 1; i <= toRow + 1; i++) {
               const text = outSheet.rows._[i]?.cells[toCol]?.text;
               sum += Numeral(text).value() || 0;
             }

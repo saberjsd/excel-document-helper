@@ -113,12 +113,12 @@ export const collectionConfig = {
         toCol: 'N',
         toRow: 7,
       },
-      {
-        label: '不允许加计扣除的费用',
-        fromCol: 'U',
-        toCol: 'O',
-        toRow: 7,
-      },
+      // {
+      //   label: '不允许加计扣除的费用',
+      //   fromCol: 'U',
+      //   toCol: 'O',
+      //   toRow: 7,
+      // },
       {
         label: '税法规定的归集金额',
         fromCol: 'R',
@@ -194,12 +194,12 @@ export const collectionConfig = {
         toCol: 'N',
         toRow: 8,
       },
-      {
-        label: '不允许加计扣除的费用-合计',
-        sumStartRow: 7,
-        toCol: 'O',
-        toRow: 8,
-      },
+      // {
+      //   label: '不允许加计扣除的费用-合计',
+      //   sumStartRow: 7,
+      //   toCol: 'O',
+      //   toRow: 8,
+      // },
     ],
   },
 
@@ -333,13 +333,13 @@ export const collectionConfig = {
         toCol: 'P',
         toRow: 8,
       },
-      {
-        label: '不允许加计扣除的费用',
-        fromRow: 7,
-        fromCol: 'O',
-        toCol: 'R',
-        toRow: 8,
-      },
+      // {
+      //   label: '不允许加计扣除的费用',
+      //   fromRow: 7,
+      //   fromCol: 'O',
+      //   toCol: 'R',
+      //   toRow: 8,
+      // },
     ],
     footer: [
       {
