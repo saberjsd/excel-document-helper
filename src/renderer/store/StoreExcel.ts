@@ -976,7 +976,10 @@ const StoreExcel = observable({
           const toCol = indexAt(col);
           Object.entries<any>(outSheet.rows._).forEach(([ri, row]) => {
             // 指定行内取数求和
-            if (Number(ri) >= startRow && Number(ri) <= bodyRowNumber) {
+            if (
+              Number(ri) >= startRow &&
+              Number(ri) <= startRow + bodyRowNumber
+            ) {
               const val = row?.cells[indexAt(col)]?.text;
               const numberVal = Numeral(val).value() || 0;
               if (m.key) {
@@ -1018,14 +1021,14 @@ const StoreExcel = observable({
           // 需要判断“资本化”和“费用化”的部分
           const str = String(row?.cells[indexAt(m.keyCol)]?.text || '');
           // 这里是排除“费用化”
-          const isNotMatch = m.key && str.indexOf(m.key) === -1;
+          const isMatch = m.key && str.indexOf(m.key) > -1;
           // 指定行内取数求和
           if (
             Number(ri) >= startRow &&
-            Number(ri) <= bodyRowNumber &&
-            isNotMatch
+            Number(ri) <= startRow + bodyRowNumber &&
+            !isMatch
           ) {
-            fromTo(row, m, Number(ri));
+            fromTo(row, m, Number(ri) - startRow);
           }
         });
       });
