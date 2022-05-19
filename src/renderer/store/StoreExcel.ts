@@ -15,6 +15,7 @@ import {
   indexAt,
   safeString,
   string2RegExp,
+  toFixed,
 } from 'renderer/utils/utils';
 import EventBus, { EVENT_CONSTANT } from 'renderer/utils/EventBus';
 import { readExcel } from 'renderer/utils/excelHelper';
@@ -1076,7 +1077,7 @@ const StoreExcel = observable({
               'number'
             );
             const val1 = getFormRow(row, options.fromCol, 'number');
-            fromVal = ((totalVal1 / totalVal2) * val1).toFixed(2);
+            fromVal = toFixed((totalVal1 / totalVal2) * val1, 2);
           }
         } else if (options.rule === '8.2') {
           const val = cells[indexAt(options.calcCol)]?.text;
@@ -1109,7 +1110,7 @@ const StoreExcel = observable({
               'number'
             );
             const val1 = getFormRow(row, options.fromCol, 'number');
-            fromVal = ((totalVal1 / totalVal2) * val1).toFixed(2);
+            fromVal = toFixed((totalVal1 / totalVal2) * val1, 2);
           }
         }
 

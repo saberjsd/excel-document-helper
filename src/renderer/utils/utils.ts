@@ -156,14 +156,22 @@ export const getFormRow = (
   // 兼容实例和数据
   row = row.cells || row;
   const text = row[indexAt(col)]?.text;
-  let out = '';
   if (!text || isNaN(text)) {
-    return out;
+    return type === 'number' ? 0 : '';
   }
   if (type === 'number') {
     const num: number = Numeral(text).value() || 0;
     // out = Numeral(num).value().format('0,0.00');
     return num;
+  } else {
+    return String(text);
   }
-  return out;
+};
+
+export const toFixed = (val, int: number) => {
+  if (!val) {
+    return 0;
+  }
+  val = Numeral(val).value() || 0;
+  return val.toFixed(int);
 };
