@@ -11,6 +11,7 @@ import {
 import {
   getColByLetter,
   getLetterByCol,
+  getFormRow,
   indexAt,
   safeString,
   string2RegExp,
@@ -834,7 +835,6 @@ const StoreExcel = observable({
     };
     const newListSheets: any[] = [];
     const newListSheetPoxry: any[] = [];
-    const newTotalSheets: any[] = [];
 
     // 从“底稿”拷贝数据到“辅助账”
     if (sheets.baseSheet && sheets.listSheet) {
@@ -935,9 +935,8 @@ const StoreExcel = observable({
     }
 
     // 从“辅助账”汇总到“辅助账汇总”
-    if (sheets.coverSheet && sheets.listSheet && sheets.totalSheet) {
+    if (sheets.coverSheet && sheets.totalSheet) {
       const fromCover = sheets.coverSheet;
-      // const fromSheet = sheets[collectionConfig.total.from];
       const toSheet = sheets[collectionConfig.total.to];
 
       // const outSheet = cloneDeep(toSheet);
@@ -1011,6 +1010,26 @@ const StoreExcel = observable({
         fromTo(row, m, bodyRowNumber - 1);
       });
 
+      // 特殊列次单独计算
+      collectionConfig.total.specialList.forEach((m) => {
+        const startRow = m.fromRow - 1;
+
+        Object.entries<any>(outSheet.rows._).forEach(([ri, row]) => {
+          // 需要判断“资本化”和“费用化”的部分
+          const str = String(row?.cells[indexAt(m.keyCol)]?.text || '');
+          // 这里是排除“费用化”
+          const isNotMatch = m.key && str.indexOf(m.key) === -1;
+          // 指定行内取数求和
+          if (
+            Number(ri) >= startRow &&
+            Number(ri) <= bodyRowNumber &&
+            isNotMatch
+          ) {
+            fromTo(row, m, Number(ri));
+          }
+        });
+      });
+
       function fromTo(row, options, rowIndex = 0) {
         const fromCol = indexAt(options.fromCol);
         let fromVal = row?.cells[fromCol]?.text;
@@ -1040,6 +1059,21 @@ const StoreExcel = observable({
             val2 = ((Numeral(val2).value() || 0) * 0.1) / 0.9;
             const sum = Math.min(Numeral(val1).value() || 0, val2);
             fromVal = Numeral(sum).value().toFixed(2);
+          } else {
+            const totalRow =
+              outSheet.rows._[options.fromTotalRow - 1 + bodyRowNumber];
+            const totalVal1 = getFormRow(
+              totalRow,
+              options.fromTotalCol[0],
+              'number'
+            );
+            const totalVal2 = getFormRow(
+              totalRow,
+              options.fromTotalCol[1],
+              'number'
+            );
+            const val1 = getFormRow(row, options.fromCol, 'number');
+            fromVal = ((totalVal1 / totalVal2) * val1).toFixed(2);
           }
         } else if (options.rule === '8.2') {
           const val = cells[indexAt(options.calcCol)]?.text;
@@ -1058,6 +1092,21 @@ const StoreExcel = observable({
             val2 = (Numeral(val2).value() || 0) * 0.8;
             const sum = Math.min(Numeral(val1).value() || 0, val2);
             fromVal = Numeral(sum).value().toFixed(2);
+          } else {
+            const totalRow =
+              outSheet.rows._[options.fromTotalRow - 1 + bodyRowNumber];
+            const totalVal1 = getFormRow(
+              totalRow,
+              options.fromTotalCol[0],
+              'number'
+            );
+            const totalVal2 = getFormRow(
+              totalRow,
+              options.fromTotalCol[1],
+              'number'
+            );
+            const val1 = getFormRow(row, options.fromCol, 'number');
+            fromVal = ((totalVal1 / totalVal2) * val1).toFixed(2);
           }
         }
 
@@ -1070,10 +1119,8 @@ const StoreExcel = observable({
           }
         }
       }
-      // newTotalSheets.push(outSheet.getData())
     }
 
-    // excel.addSheets(newTotalSheets);
     excel.addSheets(newListSheets);
 
     // @ts-ignore

@@ -205,7 +205,6 @@ export const collectionConfig = {
 
   // -----汇总部分------
   total: {
-    from: 'listSheet',
     to: 'totalSheet',
     head: [
       {
@@ -259,13 +258,6 @@ export const collectionConfig = {
         toCol: 'D',
         toRow: 8,
       },
-      // {
-      //   label: '允许加计扣除金额合计',
-      //   fromRow: 7,
-      //   fromCol: 'F',
-      //   toCol: 'E',
-      //   toRow: 8,
-      // },
       {
         label: '人员人工费用',
         fromRow: 7,
@@ -318,21 +310,6 @@ export const collectionConfig = {
         toCol: 'L',
         toRow: 8,
       },
-      // {
-      //   label: '经限额调整后的其他相关费用',
-      //   key: '费用化',
-      //   // 排除等于key的条件
-      //   isNotKey: true,
-      //   keyCol: 'D',
-      //   fromRow: 8,
-      //   // 需要对比计算的列, 第一个直接取
-      //   directCol: "L",
-      //   calcCol: "K",
-      //   // 计算规则
-      //   rule: '7.2',
-      //   toCol: 'M',
-      //   toRow: 8,
-      // },
       {
         label: '委托境内机构或个人进行研发活动所发生的费用',
         fromRow: 7,
@@ -343,7 +320,7 @@ export const collectionConfig = {
       {
         label: '允许加计扣除的委托境内机构或个人进行研发活动所发生的费用',
         fromRow: 8,
-        calcCol: "N",
+        calcCol: 'N',
         // 计算规则
         rule: '8.2',
         toCol: 'O',
@@ -356,16 +333,6 @@ export const collectionConfig = {
         toCol: 'P',
         toRow: 8,
       },
-      // {
-      //   label: '经限额调整后的其他相关费用',
-      //   fromRow: 8,
-      //   // 需要对比计算的列
-      //   compare: ['L', 'K'],
-      //   // 计算规则
-      //   rule: '7.2',
-      //   toCol: 'M',
-      //   toRow: 8,
-      // },
       {
         label: '不允许加计扣除的费用',
         fromRow: 7,
@@ -380,7 +347,7 @@ export const collectionConfig = {
         key: '资本化',
         keyCol: 'D',
         fromRow: 8,
-        sum: ['F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
+        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
         toRow: 9,
       },
       {
@@ -388,13 +355,13 @@ export const collectionConfig = {
         key: '费用化',
         keyCol: 'D',
         fromRow: 8,
-        sum: ['F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
+        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'P', 'R'],
         toRow: 10,
       },
       {
         label: '金额合计',
         fromRow: 8,
-        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'L', 'N', 'O', 'P'],
+        sum: ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'N', 'O', 'P', 'R'],
         toRow: 12,
       },
     ],
@@ -403,8 +370,8 @@ export const collectionConfig = {
         label: '经限额调整后的其他相关费用',
         fromRow: 12,
         // 需要对比计算的列, 第一个直接取
-        directCol: "L",
-        calcCol: "K",
+        directCol: 'L',
+        calcCol: 'K',
         // 计算规则
         rule: '7.2',
         isTotal: true,
@@ -414,14 +381,59 @@ export const collectionConfig = {
       {
         label: '经限额调整后的委托境外机构进行研发活动所发生的费用',
         fromRow: 12,
-        calcCol: "P",
-        sumCol: ["K", "M", "O"],
+        calcCol: 'P',
+        sumCol: ['K', 'M', 'O'],
         // 计算规则
         rule: '8.4',
         isTotal: true,
         toCol: 'Q',
         toRow: 12,
       },
-    ]
+    ],
+    // 特殊规则的列
+    specialList: [
+      {
+        label: '经限额调整后的其他相关费用',
+        // 排除等于key的条件
+        key: '费用化',
+        keyCol: 'D',
+        // 取当前行的数据
+        fromRow: 8,
+        fromCol: 'L',
+        // 取合计行的数据
+        fromTotalRow: 12,
+        fromTotalCol: ['M', 'L'],
+        // 计算规则
+        rule: '7.2',
+        toCol: 'M',
+        toRow: 8,
+      },
+      {
+        label: '经限额调整后的委托境外机构进行研发活动所发生的费用',
+        // 排除等于key的条件
+        key: '费用化',
+        keyCol: 'D',
+        // 取当前行的数据
+        fromRow: 8,
+        fromCol: 'L',
+        // 取合计行的数据
+        fromTotalRow: 12,
+        fromTotalCol: ['Q', 'P'],
+        // 计算规则
+        rule: '7.2',
+        toCol: 'P',
+        toRow: 8,
+      },
+      {
+        label: '允许加计扣除金额合计',
+        fromRow: 8,
+        // 计算规则
+        rule: '6',
+        // 求和的列
+        sum: ['K', 'M', 'O', 'Q'],
+        toCol: 'E',
+        toRow: 8,
+      },
+    ],
   },
 };

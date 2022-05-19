@@ -1,7 +1,6 @@
 import { isEmpty } from 'lodash';
 import moment from 'moment';
-// sheet名自增索引，防止重名
-let sheetIndex = 0;
+const Numeral = require('numeral');
 
 export const mapCol = [
   'A',
@@ -140,4 +139,31 @@ export const string2RegExp = (str: string) => {
  */
 export const safeString = (str: string) => {
   return (str || '').replaceAll(/\\|\/|\?|\*|\[|\]/g, '_').slice(0, 20);
+};
+
+/**
+ * 从行对象中获取指定列的值，并格式化
+ * @param row
+ * @param col
+ * @param type
+ * @returns
+ */
+export const getFormRow = (
+  row,
+  col: string,
+  type: 'string' | 'number' = 'string'
+): any => {
+  // 兼容实例和数据
+  row = row.cells || row;
+  const text = row[indexAt(col)]?.text;
+  let out = '';
+  if (!text || isNaN(text)) {
+    return out;
+  }
+  if (type === 'number') {
+    const num: number = Numeral(text).value() || 0;
+    // out = Numeral(num).value().format('0,0.00');
+    return num;
+  }
+  return out;
 };
