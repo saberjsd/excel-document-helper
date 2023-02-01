@@ -1,9 +1,3 @@
-/*
- * @Author: 肖思汗 
- * @Date: 2021-01-11 20:15:21 
- * @Last Modified by: 肖思汗
- * @Last Modified time: 2021-01-Tu 04:48:07
- */
 
 //@ts-nocheck
 import tools from '@utils/tool';
@@ -180,7 +174,7 @@ export default class FTSpreadsheet extends Spreadsheet {
     this.clipData(rowLength, this.getCol());
     this.recordUndo();
 
-    //如果横向滚动条消失了, sheet就需要滚动到最前面去 
+    //如果横向滚动条消失了, sheet就需要滚动到最前面去
     if (this.sheet.verticalScrollbar.el.computedStyle().display === 'none') {
       this.sheet.data.scrolly(0, () => { });
     }
@@ -199,7 +193,7 @@ export default class FTSpreadsheet extends Spreadsheet {
     this.clipData(this.getRow(), colLength);
     this.recordUndo();
 
-    //如果横向滚动条消失了, sheet就需要滚动到最前面去 
+    //如果横向滚动条消失了, sheet就需要滚动到最前面去
     if (this.sheet.horizontalScrollbar.el.computedStyle().display === 'none') {
       this.sheet.data.scrollx(0, () => { });
     }
@@ -218,7 +212,7 @@ export default class FTSpreadsheet extends Spreadsheet {
     return this;
   }
 
-  downExcel() {
+  downloadExcel() {
 
     import('xlsx').then(XLSX=>{
       function xtos(sdata) {
@@ -241,10 +235,10 @@ export default class FTSpreadsheet extends Spreadsheet {
         });
         return out;
       }
-      
+
       /* build workbook from the grid data */
       var new_wb = xtos([this.getData()]);
-      
+
       /* generate download */
       XLSX.writeFile(new_wb, "fotorTable.xlsx");
     });
@@ -252,7 +246,7 @@ export default class FTSpreadsheet extends Spreadsheet {
 
   async importExcel() {
     import('xlsx').then(async XLSX=>{
-    
+
     let [file] = await tools.selectFile('.xlsx,.xls,.doc') as Array<File>;
 
     if (!file) { return };
@@ -305,7 +299,7 @@ export default class FTSpreadsheet extends Spreadsheet {
     let row = this.getMaxRow();
     let col = this.getMaxCol();
     this.clipData(row, col);
-              
+
     })
   }
 

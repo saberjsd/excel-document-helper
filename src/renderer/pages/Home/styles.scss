@@ -2,33 +2,4 @@
 .home_page{
   height: 100%;
   flex-direction: row;
-  .page_right{
-    flex-grow: 0;
-  }
-  .page_content{
-    margin: 24px 16px 0;
-    background-color: #fff;
-    overflow: auto;
-    .page_content_inner{
-      padding: 24px;
-      min-height: 360px;
-    }
-  }
-}
-
-#components-layout-demo-responsive .logo {
-  height: 32px;
-  margin: 16px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.site-layout-sub-header-background {
-  background: #2b2c2f;
-  button{
-    margin-left: 16px;
-  }
-}
-
-.site-layout-background {
-  background: #fff;
 }

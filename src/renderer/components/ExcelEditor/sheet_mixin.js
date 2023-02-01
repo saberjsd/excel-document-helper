@@ -1,9 +1,3 @@
-/*
- * @Author: 肖思汗 
- * @Date: 2021-01-27 10:42:56 
- * @Last Modified by: 肖思汗
- * @Last Modified time: 2021-01-27 13:55:49
- */
 
 import Sheet from 'x-data-spreadsheet/src/component/sheet.js';
 

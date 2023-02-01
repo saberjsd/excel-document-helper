@@ -160,6 +160,8 @@ const configuration: webpack.Configuration = {
     hot: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
+      // add `public` support
+      directory: path.join(webpackPaths.appPath),
       publicPath: '/',
     },
     historyApiFallback: {

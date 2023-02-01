@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const validChannels = ['ipc-example', 'SET_JSON_STORAGE', 'GET_JSON_STORAGE'];
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
@@ -6,18 +7,19 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.send('ipc-example', 'ping');
     },
     on(channel, func) {
-      const validChannels = ['ipc-example'];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
         ipcRenderer.on(channel, (event, ...args) => func(...args));
       }
     },
     once(channel, func) {
-      const validChannels = ['ipc-example'];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
         ipcRenderer.once(channel, (event, ...args) => func(...args));
       }
+    },
+    emit(channel, ...args) {
+      ipcRenderer.send(channel, ...args);
     },
   },
 });

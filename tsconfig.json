@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
     "target": "es2021",
     "module": "commonjs",
     "lib": ["dom", "esnext"],
@@ -24,6 +25,7 @@
       "@/*": ["./src/renderer/*"],
       "@components/*": ["./src/renderer/components/*"],
     },
+    "noImplicitAny": false,
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

@@ -1,0 +1,35 @@
+.excel_compare_page {
+}
+.header_search {
+  width: 268px;
+}
+
+.filter_wrap {
+  .filter_wrap_line {
+    width: 100%;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+
+    .btn_gap,
+    .btn_label {
+      display: inline-block;
+      line-height: 32px;
+      padding: 0 8px;
+      color: #7e7e7e;
+    }
+    .btn_label {
+      padding-left: 0;
+    }
+  }
+  .filter_select_key {
+    // width: calc(100% - 78px);
+    flex-grow: 1;
+  }
+}
+
+.filter_card {
+  margin-bottom: 24px;
+  box-shadow: 0 1px 2px -2px #00000029, 0 3px 6px #0000001f,
+    0 5px 12px 2px #00000017;
+}
